@@ -25,7 +25,7 @@ const applyPageStyles = (page: HTMLElement) => {
     page.style.height = '100%';
 }
 
-export const loginPage = (backgroundImg: string, text: string = getTranslation('sign-in-msg-general')): HTMLElement => {
+export const loginPage = (backgroundImg: string, handleUserLogin: any, text: string = getTranslation('sign-in-msg-general')): HTMLElement => {
     const result = document.createElement('login-page');
     applyPageStyles(result);
 
