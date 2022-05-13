@@ -1,10 +1,6 @@
 import { getTranslation } from './i18n';
-
-const backendUrl: string = window.location.search.includes('cypress=true')
 //@ts-ignore
-  ? process.env.CYPRESS_BACKEND_URL ?? ''
-//@ts-ignore
-  : process.env.BACKEND_URL ?? '';
+const backendUrl: string = process.env.BACKEND_URL;
 
 //@ts-ignore
 const secondaryBackendUrl = process.env.STAGING_BACKEND_URL ?? '';

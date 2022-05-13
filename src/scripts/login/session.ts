@@ -1,7 +1,9 @@
 import { backendGetPromise, microsoftAuthUrl } from '../api-client';
 import * as msal from '@azure/msal-browser';
+import { validateThirdPartyCookies } from './utils/cookies';
+import { authSignIn } from './auth';
 
-const setBackendToken = (token: string): void => {
+export const setBackendToken = (token: string): void => {
   // @ts-ignore
   window.store.backendToken = token;
   if (token) {
@@ -9,7 +11,7 @@ const setBackendToken = (token: string): void => {
   }
 }
 
-const onTokenAcquired = (token: string, onUserLogin: any) => {
+export const onTokenAcquired = (token: string, onUserLogin: any) => {
   setBackendToken(token);
   // setSuperToken();
   onUserLogin();
@@ -21,7 +23,7 @@ const enableSignInLayout = () => {
   document.body.style.pointerEvents = 'none';
 }
 
-const disableSignInLayout = () => {
+export const disableSignInLayout = () => {
   document.body.style.cursor = 'default';
   document.body.style.opacity = '1';
   document.body.style.pointerEvents = 'auto';
@@ -49,4 +51,18 @@ export const onMicrosoftSignIn = async (onUserLogin: any) => {
     reportError(err);
     disableSignInLayout();
   }
+}
+
+const onCookieError = () => {
+  disableSignInLayout();
+  // warning('cookie-error'); TODO
+
+  return;
+}
+
+export const onGoogleSignIn = (onUserLogin: any) => {
+  validateThirdPartyCookies(() => {
+    enableSignInLayout();
+    authSignIn(onUserLogin);
+  }, onCookieError);
 }

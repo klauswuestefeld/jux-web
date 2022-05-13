@@ -1,4 +1,4 @@
-import { onMicrosoftSignIn } from './session';
+import { onGoogleSignIn, onMicrosoftSignIn } from './session';
 import { loginButton } from './login-button';
 import { getTranslation } from '../i18n';
 
@@ -42,7 +42,7 @@ export const loginPage = (backgroundImg: string, onUserLogin: any, text: string 
     const msg = document.createElement('sign-in-msg');
     msg.textContent = text;
 
-    const google = loginButton('Google', () => console.log('login with Google'));
+    const google = loginButton('Google', () => onGoogleSignIn(onUserLogin));
     const microsoft = loginButton('Microsoft', () => onMicrosoftSignIn(onUserLogin));
     // @ts-ignore
     const linkedin = loginButton('LinkedIn', () => console.log('login with Linkedin'));
