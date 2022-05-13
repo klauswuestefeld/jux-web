@@ -1,4 +1,5 @@
-import { loginButton } from '../components/login-button';
+import { onMicrosoftSignIn } from './session';
+import { loginButton } from './login-button';
 import { getTranslation } from '../i18n';
 
 const applyContainerStyles = (container: HTMLElement) => {
@@ -25,7 +26,7 @@ const applyPageStyles = (page: HTMLElement) => {
     page.style.height = '100%';
 }
 
-export const loginPage = (backgroundImg: string, handleUserLogin: any, text: string = getTranslation('sign-in-msg-general')): HTMLElement => {
+export const loginPage = (backgroundImg: string, onUserLogin: any, text: string = getTranslation('sign-in-msg-general')): HTMLElement => {
     const result = document.createElement('login-page');
     applyPageStyles(result);
 
@@ -41,10 +42,11 @@ export const loginPage = (backgroundImg: string, handleUserLogin: any, text: str
     const msg = document.createElement('sign-in-msg');
     msg.textContent = text;
 
-    const google = loginButton('Google', () => { });
-    const microsoft = loginButton('Microsoft', () => { });
-    const linkedin = loginButton('LinkedIn', () => { });
-    const email = loginButton('Email', () => { }, 33);
+    const google = loginButton('Google', () => console.log('login with Google'));
+    const microsoft = loginButton('Microsoft', () => onMicrosoftSignIn(onUserLogin));
+    // @ts-ignore
+    const linkedin = loginButton('LinkedIn', () => console.log('login with Linkedin'));
+    const email = loginButton('Email', () => console.log('login with Email'), 33);
 
     result.style.backgroundImage = `url(${backgroundImg})`;
 

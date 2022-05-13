@@ -2,12 +2,13 @@
   "name": "jux-web",
   "version": "0.0.1",
   "description": "",
-  "main": "src/scripts/pages/login-page.ts",
+  "main": "src/scripts/login/login-page.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "roddeh-i18n": "1.2.0"
+    "roddeh-i18n": "1.2.0",
+    "@azure/msal-browser": "2.21.0"
   },
   "repository": {
     "type": "git",

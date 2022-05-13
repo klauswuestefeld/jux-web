@@ -9,6 +9,7 @@
       "allowJs": false,
       "declaration": false,
       "strict": true,
+      "moduleResolution": "node",
       "noImplicitAny": true /* Raise error on expressions and declarations with an implied 'any' type. */,
       "strictNullChecks": true /* Enable strict null checks. */,
       "strictFunctionTypes": true /* Enable strict checking of function types. */,
@@ -26,7 +27,8 @@
           "ES6",
           "DOM",
           "DOM.Iterable",
-          "es2017"
+          "es2017",
+          "es2018"
       ]
   },
   "exclude": [

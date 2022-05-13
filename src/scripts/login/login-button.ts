@@ -1,4 +1,4 @@
-import { THRESHOLD_WIDTH } from '../utils/constants';
+import { THRESHOLD_WIDTH } from './utils/constants';
 import { getTranslation } from '../i18n';
 
 const icons = {
