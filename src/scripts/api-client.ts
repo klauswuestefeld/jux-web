@@ -129,6 +129,10 @@ export const backendRequest = (
   req.send(postContent);
 }
 
+export const backendPost = (endpoint: string, postContent: any, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
+  backendRequest('POST', apiUrl + endpoint, postContent, onJsonResponse, onHelpMessage);
+}
+
 export const backendGet = (endpoint: string, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
   let api = apiUrl + endpoint;
   if (endpoint.includes(googleAuthUrl) || endpoint.includes(microsoftAuthUrl)) {
