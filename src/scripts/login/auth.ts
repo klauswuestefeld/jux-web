@@ -17,7 +17,7 @@ const highLevelUser = (gUser: any) => {
 
 const onUserChanged = async (googleUser: any, onUserLogin: any) => {
   document.documentElement.classList.remove('progress');
-  document.querySelector('percy-body')?.classList.remove('disabled');
+  document.body.classList.remove('disabled');
 
   if (googleUser) {
     // mixpanelIdentify(googleUser); TODO

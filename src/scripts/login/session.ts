@@ -1,4 +1,4 @@
-import { backendGetPromise, microsoftAuthUrl } from '../api-client';
+import { backendGetPromise, microsoftAuthUrl, requestMagicLink } from '../api-client';
 import * as msal from '@azure/msal-browser';
 import { validateThirdPartyCookies } from './utils/cookies';
 import { authSignIn } from './auth';
@@ -60,9 +60,32 @@ const onCookieError = () => {
   return;
 }
 
+// TODO: import gapi library
 export const onGoogleSignIn = (onUserLogin: any) => {
   validateThirdPartyCookies(() => {
     enableSignInLayout();
     authSignIn(onUserLogin);
   }, onCookieError);
+}
+
+export const handleMagicLinkRequest = (token: string | null, email: string = '') => {
+  if (!email) {
+    const mailMagic = document.querySelector('#mail-magic') as HTMLInputElement;
+    email = mailMagic.value;
+  }
+
+  const sandbox = window.location.hostname === 'localhost';
+  const payload = { email, token, sandbox };
+
+  requestMagicLink(payload, (_res: any) => {
+    // displayPage(Page.MAGIC_LOGIN);
+
+    const magicLinkEmail = document.querySelector('#magic-link-email');
+    if (!magicLinkEmail) {
+      // logError('#magic-link-email não foi encontrado', 'generic-help-msg');
+
+      return;
+    }
+    magicLinkEmail.textContent = email;
+  });
 }

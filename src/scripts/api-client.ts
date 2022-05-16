@@ -1,4 +1,5 @@
 import { getTranslation } from './i18n';
+import { extractTokenFromWindowLocation } from './login/utils/token';
 //@ts-ignore
 const backendUrl: string = process.env.BACKEND_URL;
 
@@ -9,6 +10,7 @@ let backendUrlToTry = backendUrl;
 const apiUrl = backendUrl + 'api/';
 export const googleAuthUrl = backendUrl + 'auth-google?google-id-token=';
 export const microsoftAuthUrl = backendUrl + 'auth-microsoft?access-token=';
+const magicAuthReqUrl = backendUrl + 'magic-link-request?email=';
 let timeout: any;
 const maxRetries = 20;
 let retries = 0;
@@ -25,7 +27,7 @@ const applySpinnerStyle = (spinner: HTMLElement) => {
 
 const renderOverlay = (): void => {
   const overlay = document.createElement('reconnect-overlay');
-  const spinner = document.createElement('percy-spinner');
+  const spinner = document.createElement('loading-spinner');
   spinner.className = 'reconnect-spinner';
   applySpinnerStyle(spinner);
   document.body.append(overlay, spinner);
@@ -137,3 +139,34 @@ export const backendGet = (endpoint: string, onJsonResponse: (response: any) => 
 
 export const backendGetPromise = (endpoint: string) => new Promise((resolve, reject) =>
   backendGet(endpoint, resolve, reject));
+
+export const requestMagicLink = (data: any, onJsonResponse: (response: any) => any): void => {
+  backendRequest(
+    'GET',
+    magicAuthReqUrl + encodeURIComponent(data.email) + '&destination=' + extractTokenFromWindowLocation('destination') + '&token=' + data.token,
+    undefined,
+    onJsonResponse,
+    () => { }
+  );
+}
+
+export const getMXData = async (domainName: string): Promise<any> => {
+  const records = await fetch
+    (
+      `https://dns.google.com/resolve?name=${domainName}&type=MX`,
+      {
+        method: 'GET',
+        mode: 'cors'
+      }
+    );
+  const recordsJson = await records.json();
+  const answer = recordsJson.Answer;
+
+  if (!answer) {
+    return null;
+  }
+
+  const data = Array.from(answer).map((a: any) => a.data);
+
+  return data;
+};

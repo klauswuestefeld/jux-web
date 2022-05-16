@@ -1,6 +1,7 @@
 import { onGoogleSignIn, onMicrosoftSignIn } from './session';
 import { loginButton } from './login-button';
 import { getTranslation } from '../i18n';
+import { magicLinkModal } from './magic-link-modal';
 
 const applyContainerStyles = (container: HTMLElement) => {
     container.style.backgroundColor = '#ffffffdd';
@@ -26,6 +27,10 @@ const applyPageStyles = (page: HTMLElement) => {
     page.style.height = '100%';
 }
 
+const onMagicLinkRequest = (page: HTMLElement, onUserLogin: any): void => {
+    page.appendChild(magicLinkModal(onUserLogin));
+}
+
 export const loginPage = (backgroundImg: string, onUserLogin: any, text: string = getTranslation('sign-in-msg-general')): HTMLElement => {
     const result = document.createElement('login-page');
     applyPageStyles(result);
@@ -46,7 +51,7 @@ export const loginPage = (backgroundImg: string, onUserLogin: any, text: string 
     const microsoft = loginButton('Microsoft', () => onMicrosoftSignIn(onUserLogin));
     // @ts-ignore
     const linkedin = loginButton('LinkedIn', () => console.log('login with Linkedin'));
-    const email = loginButton('Email', () => console.log('login with Email'), 33);
+    const email = loginButton('Email', () => onMagicLinkRequest(result, onUserLogin), 33);
 
     result.style.backgroundImage = `url(${backgroundImg})`;
 
