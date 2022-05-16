@@ -12,7 +12,7 @@ export const contactField = (
 
   const label = document.createElement('label');
   label.textContent = getTranslation(elId + '-label');
-  label.setAttribute('for', elId);
+  label.htmlFor = elId;
 
   const el = document.createElement(tag);
   el.id = elId;
