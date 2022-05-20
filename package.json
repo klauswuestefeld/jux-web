@@ -2,7 +2,7 @@
   "name": "jux-web",
   "version": "0.0.1",
   "description": "",
-  "main": "dist/main.js",
+  "main": "dist/main.esm.js",
   "types": "dist/main.d.ts",
   "files": [
     "dist",
@@ -13,8 +13,8 @@
     "build": "rollup -c"
   },
   "dependencies": {
-    "roddeh-i18n": "1.2.0",
-    "@azure/msal-browser": "2.21.0"
+    "@azure/msal-browser": "2.21.0",
+    "roddeh-i18n": "1.2.1"
   },
   "repository": {
     "type": "git",

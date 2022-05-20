@@ -1,5 +1,4 @@
-// @ts-ignore
-import * as i18n from 'roddeh-i18n';
+import i18n from 'roddeh-i18n';
 import { getBrowserLanguage, replaceTextNodes } from './jux/language';
 
 const currentYear = new Date().getFullYear();
@@ -653,17 +652,18 @@ const portugueseTranslations = {
   "select-appraiser": "Escolha o(a) avaliador(a)",
 };
 
-export const translateTexts = (element: HTMLElement = document.body): void => {
+const translations = () => {
   const lang = localStorage.getItem('language') || getBrowserLanguage();
-  const translations = lang === 'pt'
-    ? portugueseTranslations
-    : englishTranslations;
 
-  i18n.translator.add({ values: translations });
-
-  document.title = getTranslation('title');
-  document.documentElement.lang = getBrowserLanguage();
-  replaceTextNodes(element, translations);
+  return lang === 'pt' ? portugueseTranslations : englishTranslations;
 }
 
+i18n.translator.add({ values: translations() });
+
 export const getTranslation = (k: string): string => i18n(k);
+
+export const translateTexts = (element: HTMLElement = document.body): void => {
+  document.title = getTranslation('title');
+  document.documentElement.lang = getBrowserLanguage();
+  replaceTextNodes(element, translations());
+}
