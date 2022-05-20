@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
-      "target": "es2017",
-      "outDir": "public/js/",
-      "sourceMap": false,
+      "target": "es5",
+      "outDir": "dist",
+      "sourceMap": true,
       "forceConsistentCasingInFileNames": true,
       "watch": false,
-      "rootDir": "src/scripts",
       "allowJs": false,
-      "declaration": false,
+      "declaration": true,
+      "module": "esnext",
       "strict": true,
       "moduleResolution": "node",
       "noImplicitAny": true /* Raise error on expressions and declarations with an implied 'any' type. */,
@@ -22,19 +22,10 @@
       "esModuleInterop": true,
       "allowSyntheticDefaultImports": true,
       "experimentalDecorators": true,
-      "lib": [
-          "ES5",
-          "ES6",
-          "DOM",
-          "DOM.Iterable",
-          "es2017",
-          "es2018"
-      ]
+      "lib": ["es2015", "DOM"]
   },
-  "exclude": [
-      "playground.ts",
-      "node_modules/*",
-      "public/*",
-      "src/scripts/vendor/*",
+  "include": [
+      "src/scripts/*"
   ],
+  "exclude": [ "node_modules" ],
 }

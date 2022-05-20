@@ -1,5 +1,5 @@
 // @ts-ignore
-import i18n from 'roddeh-i18n';
+import * as i18n from 'roddeh-i18n';
 import { getBrowserLanguage, replaceTextNodes } from './jux/language';
 
 const currentYear = new Date().getFullYear();

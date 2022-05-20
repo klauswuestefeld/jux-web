@@ -31,7 +31,7 @@ export const disableSignInLayout = () => {
 
 export const onMicrosoftSignIn = async (onUserLogin: any) => {
   // @ts-ignore
-  const msalConfig = { auth: { clientId: process.env.MICROSOFT_CLIENT_ID } };
+  const msalConfig = { auth: { clientId: process.env.MICROSOFT_CLIENT_ID } } as msal.Configuration;
   const msalInstance = new msal.PublicClientApplication(msalConfig);
   const loginRequest = { scopes: ['user.read'] };
   enableSignInLayout();
