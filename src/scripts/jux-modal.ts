@@ -1,4 +1,4 @@
-import { getTranslation } from './i18n';
+import { getTranslation } from './jux/language';
 
 const onKeyDown = (
   ev: KeyboardEvent,

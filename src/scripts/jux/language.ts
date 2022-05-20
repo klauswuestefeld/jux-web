@@ -1,6 +1,6 @@
 declare const navigator: any;
 
-export const getBrowserLanguage = () => {
+const getBrowserLanguage = () => {
   const result = (navigator.languages && navigator.languages.length)
     ? navigator.languages[0]
     : navigator.userLanguage || navigator.language || navigator.browserLanguage || 'en';
@@ -8,14 +8,19 @@ export const getBrowserLanguage = () => {
   return result.substring(0, 2);
 }
 
-export const replaceTextNodes = (node: HTMLElement, translations: any) => {
-  Array.from(node.children).forEach((child) => {
-    const key = child.id ? child.id : child.tagName?.toLowerCase();
+const OVERRIDE_KEY = 'jux.language.override';
+let translations = {};
 
-    if (translations[key]) {
-      child.innerHTML = translations[key];
-    }
+export const chosenLanguage = localStorage.getItem(OVERRIDE_KEY) || getBrowserLanguage();
+export const reloadWithLanguageOverride = (lang: string) => {
+  localStorage.setItem(OVERRIDE_KEY, lang)
+  location.reload();
+};
+// @ts-ignore
+export const getTranslation = (k: string): string => translations[k];
 
-    replaceTextNodes(child as HTMLElement, translations);
-  });
+export const initLanguage = (translations_: any) => {
+  translations = translations_[chosenLanguage];
+  document.title = getTranslation('title');
+  document.documentElement.lang = chosenLanguage;
 }

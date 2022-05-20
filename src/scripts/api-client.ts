@@ -1,4 +1,4 @@
-import { getTranslation } from './i18n';
+import { getTranslation } from './jux/language';
 import { extractTokenFromWindowLocation } from './login/utils/token';
 //@ts-ignore
 const backendUrl: string = process.env.BACKEND_URL;

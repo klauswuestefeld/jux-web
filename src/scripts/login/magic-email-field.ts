@@ -1,6 +1,6 @@
 import { getMXData } from '../api-client';
 import { googleCaptcha } from '../captcha/google-captcha';
-import { getTranslation } from '../i18n';
+import { getTranslation } from '../jux/language';
 import { handleMagicLinkRequest } from './session';
 import { socialLoginModal } from './social-login';
 import { isValidEmail } from './utils/string';

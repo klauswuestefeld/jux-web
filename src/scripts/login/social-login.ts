@@ -1,4 +1,4 @@
-import { getTranslation } from '../i18n';
+import { getTranslation } from '../jux/language';
 import { juxModal } from '../jux-modal';
 import { loginButton } from './login-button';
 import { handleMagicLinkRequest, onGoogleSignIn, onMicrosoftSignIn } from './session';

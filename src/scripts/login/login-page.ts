@@ -1,6 +1,6 @@
 import { onGoogleSignIn, onMicrosoftSignIn } from './session';
 import { loginButton } from './login-button';
-import { getTranslation } from '../i18n';
+import { getTranslation } from '../jux/language';
 import { magicLinkModal } from './magic-link-modal';
 
 const applyContainerStyles = (container: HTMLElement) => {

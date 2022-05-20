@@ -1,5 +1,5 @@
 import { contactUsModal } from '../contact-us/contact-us-modal';
-import { getTranslation } from '../i18n';
+import { getTranslation } from '../jux/language';
 
 export const magicLinkRequestedPage = (backgroundImg: string): HTMLElement => {
   const result = document.createElement('magic-link-requested-page');

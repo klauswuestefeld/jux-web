@@ -1,4 +1,4 @@
-import { getTranslation } from '../i18n';
+import { getTranslation } from '../jux/language';
 
 export const contactField = (
   tag: string = 'input',

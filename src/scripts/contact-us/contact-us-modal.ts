@@ -1,6 +1,6 @@
 import { backendGet, backendPost } from '../api-client';
 import { googleCaptcha } from '../captcha/google-captcha';
-import { getTranslation, translateTexts } from '../i18n';
+import { getTranslation } from '../jux/language';
 import { juxModal } from '../jux-modal';
 import { contactField } from './contact-field';
 
@@ -74,7 +74,6 @@ export const contactUsModal = (subject: string): HTMLElement => {
     () => result.remove()
   );
   modal.id = 'contact-us-modal';
-  translateTexts(modal);
 
   document.body.appendChild(modal);
   modal.querySelector('modal-wrapper')?.setAttribute('style', 'max-width: 680px; width: 100%; overflow-y: auto;');
