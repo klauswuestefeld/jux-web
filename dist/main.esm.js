@@ -67,7 +67,7 @@ var reloadWithLanguageOverride = function (lang) {
     location.reload();
 };
 // @ts-ignore
-var getTranslation = function (k) { return translations[k]; };
+var getTranslation = function (k) { return translations[k] || k; };
 var initLanguage = function (translations_) {
     translations = translations_[chosenLanguage];
     document.title = getTranslation('title');

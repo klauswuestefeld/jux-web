@@ -17,7 +17,7 @@ export const reloadWithLanguageOverride = (lang: string) => {
   location.reload();
 };
 // @ts-ignore
-export const getTranslation = (k: string): string => translations[k];
+export const getTranslation = (k: string): string => translations[k] || k;
 
 export const initLanguage = (translations_: any) => {
   translations = translations_[chosenLanguage];
