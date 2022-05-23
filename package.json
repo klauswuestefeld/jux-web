@@ -13,8 +13,7 @@
     "build": "rollup -c"
   },
   "dependencies": {
-    "@azure/msal-browser": "2.21.0",
-    "roddeh-i18n": "1.2.1"
+    "@azure/msal-browser": "2.21.0"
   },
   "repository": {
     "type": "git",
