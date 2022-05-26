@@ -8,6 +8,7 @@ export default [
       format: 'esm',
     },
     plugins: [typescript()],
+    external: ['@azure/msal-browser'],
   },
   {
     input: './src/scripts/main.ts',
@@ -16,5 +17,6 @@ export default [
       format: 'cjs',
     },
     plugins: [typescript()],
+    external: ['@azure/msal-browser'],
   },
 ]
