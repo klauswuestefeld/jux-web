@@ -1,1 +1,1 @@
-export declare const loginButton: (type: string, fn: any, height?: number) => HTMLElement;
+export declare const loginButton: (type: string, fn: any) => HTMLElement;

@@ -51,7 +51,7 @@ export const loginPage = (backgroundImg: string, onUserLogin: any, text: string 
     const microsoft = loginButton('Microsoft', () => onMicrosoftSignIn(onUserLogin));
     // @ts-ignore
     const linkedin = loginButton('LinkedIn', () => console.log('login with Linkedin'));
-    const email = loginButton('Email', () => onMagicLinkRequest(result, onUserLogin), 33);
+    const email = loginButton('Email', () => onMagicLinkRequest(result, onUserLogin));
 
     result.style.backgroundImage = `url(${backgroundImg})`;
 
