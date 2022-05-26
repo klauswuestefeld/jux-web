@@ -1,5 +1,6 @@
 import { backendGetPromise, googleAuthUrl } from '../api-client';
-import { disableSignInLayout, onTokenAcquired, setBackendToken } from './session';
+import { disableSignInLayout } from './utils/layout-changes';
+import { onTokenAcquired, setBackendToken } from './session';
 
 declare let gapi: any;
 let authStatus: string;
@@ -47,7 +48,7 @@ const onUserChanged = async (googleUser: any, onUserLogin: any) => {
 }
 
 const onGoogleUserChanged = (gUser: any, onUserLogin: any) => {
-  onUserChanged(gUser.isSignedIn()  ? highLevelUser(gUser) : null, onUserLogin);
+  onUserChanged(gUser.isSignedIn() ? highLevelUser(gUser) : null, onUserLogin);
 }
 
 const initGapiClient = (callbackFn: any, onUserLogin: any) => {

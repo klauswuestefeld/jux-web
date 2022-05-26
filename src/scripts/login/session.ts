@@ -2,6 +2,7 @@ import { backendGetPromise, microsoftAuthUrl, requestMagicLink } from '../api-cl
 import * as msal from '@azure/msal-browser';
 import { validateThirdPartyCookies } from './utils/cookies';
 import { authSignIn } from './auth';
+import { enableSignInLayout, disableSignInLayout } from './utils/layout-changes';
 
 export const setBackendToken = (token: string): void => {
   // @ts-ignore
@@ -17,20 +18,7 @@ export const onTokenAcquired = (token: string, onUserLogin: any) => {
   onUserLogin();
 }
 
-const enableSignInLayout = () => {
-  document.body.style.cursor = 'progress';
-  document.body.style.opacity = '0.5';
-  document.body.style.pointerEvents = 'none';
-}
-
-export const disableSignInLayout = () => {
-  document.body.style.cursor = 'default';
-  document.body.style.opacity = '1';
-  document.body.style.pointerEvents = 'auto';
-}
-
 export const onMicrosoftSignIn = async (onUserLogin: any) => {
-  // @ts-ignore
   const msalConfig = { auth: { clientId: process.env.MICROSOFT_CLIENT_ID } } as msal.Configuration;
   const msalInstance = new msal.PublicClientApplication(msalConfig);
   const loginRequest = { scopes: ['user.read'] };

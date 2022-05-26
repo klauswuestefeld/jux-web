@@ -295,6 +295,17 @@ var validateThirdPartyCookies = function (onEnabled, onDisabled) {
     cookieTest();
 };
 
+var enableSignInLayout = function () {
+    document.body.style.cursor = 'progress';
+    document.body.style.opacity = '0.5';
+    document.body.style.pointerEvents = 'none';
+};
+var disableSignInLayout = function () {
+    document.body.style.cursor = 'default';
+    document.body.style.opacity = '1';
+    document.body.style.pointerEvents = 'auto';
+};
+
 var authStatus;
 var authError;
 var highLevelUser = function (gUser) {
@@ -430,16 +441,6 @@ var onTokenAcquired = function (token, onUserLogin) {
     setBackendToken(token);
     // setSuperToken();
     onUserLogin();
-};
-var enableSignInLayout = function () {
-    document.body.style.cursor = 'progress';
-    document.body.style.opacity = '0.5';
-    document.body.style.pointerEvents = 'none';
-};
-var disableSignInLayout = function () {
-    document.body.style.cursor = 'default';
-    document.body.style.opacity = '1';
-    document.body.style.pointerEvents = 'auto';
 };
 var onMicrosoftSignIn = function (onUserLogin) { return __awaiter(void 0, void 0, void 0, function () {
     var msalConfig, msalInstance, loginRequest, loginResponse, accessToken, err_1;
@@ -898,5 +899,6 @@ var loginPage = function (backgroundImg, onUserLogin, text) {
 exports.chosenLanguage = chosenLanguage;
 exports.getTranslation = getTranslation;
 exports.initLanguage = initLanguage;
+exports.loginButton = loginButton;
 exports.loginPage = loginPage;
 exports.reloadWithLanguageOverride = reloadWithLanguageOverride;
