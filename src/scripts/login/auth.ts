@@ -27,6 +27,7 @@ const onUserChanged = async (googleUser: any, onUserLogin: any) => {
       await backendGetPromise(googleAuthUrl + googleUser.googletoken)
         .then(res => {
           const { token } = res as any;
+          // @ts-ignore
           window.store.currentUser = res;
           onTokenAcquired(token, onUserLogin);
         })

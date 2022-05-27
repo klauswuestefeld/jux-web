@@ -1,9 +1,13 @@
-// TODO: find a way to import it
+// TODO: find a better way to import external scripts
+const script = document.createElement('script');
+script.type = 'text/javascript';
+script.src = 'https://www.google.com/recaptcha/api.js';
+document.head.appendChild(script);
+
 declare const grecaptcha: any;
 
 export const googleCaptcha = (): HTMLElement => {
   const result = document.createElement('google-captcha');
-  // @ts-ignore
   window.submitCaptcha = (token: string) => result.setAttribute('token', token);
 
   result.className = 'g-recaptcha';

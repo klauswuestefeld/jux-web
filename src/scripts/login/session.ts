@@ -5,6 +5,7 @@ import { authSignIn } from './auth';
 import { enableSignInLayout, disableSignInLayout } from './utils/layout-changes';
 
 export const setBackendToken = (token: string): void => {
+  // @ts-ignore
   window.store.backendToken = token;
   if (token) {
     localStorage.setItem('token', token);
@@ -28,6 +29,7 @@ export const onMicrosoftSignIn = async (onUserLogin: any) => {
     await backendGetPromise(microsoftAuthUrl + accessToken)
       .then((res: any) => {
         const { token } = res;
+        // @ts-ignore
         window.store.currentUser = res;
         onTokenAcquired(token, onUserLogin);
       })

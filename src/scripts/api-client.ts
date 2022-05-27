@@ -59,6 +59,7 @@ export const backendRequest = (
   const req = new XMLHttpRequest();
   req.open(requestType, url, true);
 
+  // @ts-ignore
   const backendToken = window.store.backendToken;
 
   if (backendToken) {
