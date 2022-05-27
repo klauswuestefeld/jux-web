@@ -272,12 +272,12 @@ var validateThirdPartyCookies = function (onEnabled, onDisabled) {
 };
 
 var enableSignInLayout = function () {
-    document.body.style.cursor = 'progress';
+    document.documentElement.style.cursor = 'progress';
     document.body.style.opacity = '0.5';
     document.body.style.pointerEvents = 'none';
 };
 var disableSignInLayout = function () {
-    document.body.style.cursor = 'default';
+    document.documentElement.style.cursor = 'default';
     document.body.style.opacity = '1';
     document.body.style.pointerEvents = 'auto';
 };
@@ -865,7 +865,6 @@ var loginPage = function (backgroundImg, onUserLogin, text) {
     msg.textContent = text;
     var google = loginButton('Google', function () { return onGoogleSignIn(onUserLogin); });
     var microsoft = loginButton('Microsoft', function () { return onMicrosoftSignIn(onUserLogin); });
-    // @ts-ignore
     var linkedin = loginButton('LinkedIn', function () { return console.log('login with Linkedin'); });
     var email = loginButton('Email', function () { return onMagicLinkRequest(result, onUserLogin); });
     result.style.backgroundImage = "url(".concat(backgroundImg, ")");

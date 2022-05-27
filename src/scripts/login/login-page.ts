@@ -49,7 +49,6 @@ export const loginPage = (backgroundImg: string, onUserLogin: any, text: string 
 
     const google = loginButton('Google', () => onGoogleSignIn(onUserLogin));
     const microsoft = loginButton('Microsoft', () => onMicrosoftSignIn(onUserLogin));
-    // @ts-ignore
     const linkedin = loginButton('LinkedIn', () => console.log('login with Linkedin'));
     const email = loginButton('Email', () => onMagicLinkRequest(result, onUserLogin));
 
