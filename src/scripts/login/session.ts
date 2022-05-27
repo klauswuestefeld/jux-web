@@ -3,6 +3,7 @@ import * as msal from '@azure/msal-browser';
 import { validateThirdPartyCookies } from './utils/cookies';
 import { authSignIn } from './auth';
 import { enableSignInLayout, disableSignInLayout } from './utils/layout-changes';
+import { magicLinkRequestedPage } from './magic-link-requested-page';
 
 export const setBackendToken = (token: string): void => {
   // @ts-ignore
@@ -48,7 +49,6 @@ const onCookieError = () => {
   return;
 }
 
-// TODO: import gapi library
 export const onGoogleSignIn = (onUserLogin: any) => {
   validateThirdPartyCookies(() => {
     enableSignInLayout();
@@ -56,7 +56,7 @@ export const onGoogleSignIn = (onUserLogin: any) => {
   }, onCookieError);
 }
 
-export const handleMagicLinkRequest = (token: string | null, email: string = '') => {
+export const handleMagicLinkRequest = (token: string | null, onReturn: any, email: string = '') => {
   if (!email) {
     const mailMagic = document.querySelector('#mail-magic') as HTMLInputElement;
     email = mailMagic.value;
@@ -66,7 +66,7 @@ export const handleMagicLinkRequest = (token: string | null, email: string = '')
   const payload = { email, token, sandbox };
 
   requestMagicLink(payload, (_res: any) => {
-    // displayPage(Page.MAGIC_LOGIN);
+    document.body.appendChild(magicLinkRequestedPage('', onReturn));
 
     const magicLinkEmail = document.querySelector('#magic-link-email');
     if (!magicLinkEmail) {

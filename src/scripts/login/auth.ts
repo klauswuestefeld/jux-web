@@ -2,6 +2,12 @@ import { backendGetPromise, googleAuthUrl } from '../api-client';
 import { disableSignInLayout } from './utils/layout-changes';
 import { onTokenAcquired, setBackendToken } from './session';
 
+// TODO: find a better way to import external scripts
+const script = document.createElement('script');
+script.type = 'text/javascript';
+script.src = 'https://apis.google.com/js/api.js';
+document.head.appendChild(script);
+
 declare let gapi: any;
 let authStatus: string;
 let authError: any;
@@ -33,6 +39,7 @@ const onUserChanged = async (googleUser: any, onUserLogin: any) => {
         })
         .catch((error) => { throw Error(error) });
     } catch (error) {
+      console.error(error);
       // logError(error); TODO
       // checkMixpanel(() => mixpanel.track('Login Error', { 'Login Type': 'Google', 'Error': error })); TODO
 
@@ -65,6 +72,7 @@ const initGapiClient = (callbackFn: any, onUserLogin: any) => {
 
 const onAuthError = (error: any) => {
   authError = error;
+  console.error(error);
   // logError(error, authError); // TODO
 }
 
@@ -97,6 +105,7 @@ const authAlert = (error: any) => {
 
 const onSignInError = (error: any) => {
   disableSignInLayout();
+  console.error(error);
   // logError(error); TODO
 
   if (error && error.error === 'popup_closed_by_user') {
@@ -110,6 +119,7 @@ const onSignInError = (error: any) => {
 
 const getAuth = () => {
   if (typeof gapi === 'undefined') {
+    console.error('gapi is undefined');
     // logError('gapi is undefined'); TODO
 
     return null;

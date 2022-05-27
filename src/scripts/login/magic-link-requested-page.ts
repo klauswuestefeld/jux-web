@@ -1,7 +1,7 @@
 import { contactUsModal } from '../contact-us/contact-us-modal';
 import { getTranslation } from '../jux/language';
 
-export const magicLinkRequestedPage = (backgroundImg: string): HTMLElement => {
+export const magicLinkRequestedPage = (backgroundImg: string, onReturn: any): HTMLElement => {
   const result = document.createElement('magic-link-requested-page');
 
   const section = document.createElement('section');
@@ -26,7 +26,8 @@ export const magicLinkRequestedPage = (backgroundImg: string): HTMLElement => {
   const returnLink = document.createElement('a');
   returnLink.textContent = getTranslation('return-link');
   returnLink.onclick = () => {
-    // displayPage(Page.LOGIN);
+    result.remove();
+    onReturn();
   };
 
   section.append(magicLinkSent, magicLinkEmail, magicLinkHowTo, btn, returnLink);

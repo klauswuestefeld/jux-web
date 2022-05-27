@@ -233,6 +233,7 @@ var backendRequest = function (requestType, url, postContent, onJsonResponse, on
     clearInterval(timeout);
     var req = new XMLHttpRequest();
     req.open(requestType, url, true);
+    // @ts-ignore
     var backendToken = window.store.backendToken;
     if (backendToken) {
         req.setRequestHeader('auth', backendToken);
@@ -284,6 +285,9 @@ var backendRequest = function (requestType, url, postContent, onJsonResponse, on
     };
     req.timeout = 25000;
     req.send(postContent);
+};
+var backendPost = function (endpoint, postContent, onJsonResponse, onHelpMessage) {
+    backendRequest('POST', apiUrl + endpoint, postContent, onJsonResponse, onHelpMessage);
 };
 var backendGet = function (endpoint, onJsonResponse, onHelpMessage) {
     var api = apiUrl + endpoint;
@@ -370,6 +374,11 @@ var disableSignInLayout = function () {
     document.body.style.pointerEvents = 'auto';
 };
 
+// TODO: find a better way to import external scripts
+var script$1 = document.createElement('script');
+script$1.type = 'text/javascript';
+script$1.src = 'https://apis.google.com/js/api.js';
+document.head.appendChild(script$1);
 var authStatus;
 var authError;
 var highLevelUser = function (gUser) {
@@ -382,6 +391,7 @@ var highLevelUser = function (gUser) {
     };
 };
 var onUserChanged = function (googleUser, onUserLogin) { return __awaiter(void 0, void 0, void 0, function () {
+    var error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -394,6 +404,7 @@ var onUserChanged = function (googleUser, onUserLogin) { return __awaiter(void 0
                 return [4 /*yield*/, backendGetPromise(googleAuthUrl + googleUser.googletoken)
                         .then(function (res) {
                         var token = res.token;
+                        // @ts-ignore
                         window.store.currentUser = res;
                         onTokenAcquired(token, onUserLogin);
                     })
@@ -402,7 +413,8 @@ var onUserChanged = function (googleUser, onUserLogin) { return __awaiter(void 0
                 _a.sent();
                 return [3 /*break*/, 4];
             case 3:
-                _a.sent();
+                error_1 = _a.sent();
+                console.error(error_1);
                 // logError(error); TODO
                 // checkMixpanel(() => mixpanel.track('Login Error', { 'Login Type': 'Google', 'Error': error })); TODO
                 return [2 /*return*/];
@@ -429,6 +441,7 @@ var initGapiClient = function (callbackFn, onUserLogin) {
 };
 var onAuthError = function (error) {
     authError = error;
+    console.error(error);
     // logError(error, authError); // TODO
 };
 var initGapi = function (callbackFn, onUserLogin) {
@@ -455,6 +468,7 @@ var authAlert = function (error) {
 };
 var onSignInError = function (error) {
     disableSignInLayout();
+    console.error(error);
     // logError(error); TODO
     if (error && error.error === 'popup_closed_by_user') {
         onUserChanged(null, function () { });
@@ -464,6 +478,7 @@ var onSignInError = function (error) {
 };
 var getAuth = function () {
     if (typeof gapi === 'undefined') {
+        console.error('gapi is undefined');
         // logError('gapi is undefined'); TODO
         return null;
     }
@@ -493,82 +508,20 @@ var authSignIn = function (onUserLogin) {
     }
 };
 
-var setBackendToken = function (token) {
-    window.store.backendToken = token;
-    if (token) {
-        localStorage.setItem('token', token);
-    }
-};
-var onTokenAcquired = function (token, onUserLogin) {
-    setBackendToken(token);
-    // setSuperToken();
-    onUserLogin();
-};
-var onMicrosoftSignIn = function (onUserLogin) { return __awaiter(void 0, void 0, void 0, function () {
-    var msalConfig, msalInstance, loginRequest, loginResponse, accessToken, err_1;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                msalConfig = { auth: { clientId: process.env.MICROSOFT_CLIENT_ID } };
-                msalInstance = new msal__namespace.PublicClientApplication(msalConfig);
-                loginRequest = { scopes: ['user.read'] };
-                enableSignInLayout();
-                _a.label = 1;
-            case 1:
-                _a.trys.push([1, 4, , 5]);
-                return [4 /*yield*/, msalInstance.loginPopup(loginRequest)];
-            case 2:
-                loginResponse = _a.sent();
-                accessToken = loginResponse.accessToken;
-                return [4 /*yield*/, backendGetPromise(microsoftAuthUrl + accessToken)
-                        .then(function (res) {
-                        var token = res.token;
-                        window.store.currentUser = res;
-                        onTokenAcquired(token, onUserLogin);
-                    })
-                        .catch(console.error)
-                        .finally(function () { return disableSignInLayout(); })];
-            case 3:
-                _a.sent();
-                return [3 /*break*/, 5];
-            case 4:
-                err_1 = _a.sent();
-                reportError(err_1);
-                disableSignInLayout();
-                return [3 /*break*/, 5];
-            case 5: return [2 /*return*/];
-        }
-    });
-}); };
-var onCookieError = function () {
-    disableSignInLayout();
-    // warning('cookie-error'); TODO
-    return;
-};
-// TODO: import gapi library
-var onGoogleSignIn = function (onUserLogin) {
-    validateThirdPartyCookies(function () {
-        enableSignInLayout();
-        authSignIn(onUserLogin);
-    }, onCookieError);
-};
-var handleMagicLinkRequest = function (token, email) {
-    if (email === void 0) { email = ''; }
-    if (!email) {
-        var mailMagic = document.querySelector('#mail-magic');
-        email = mailMagic.value;
-    }
-    var sandbox = window.location.hostname === 'localhost';
-    var payload = { email: email, token: token, sandbox: sandbox };
-    requestMagicLink(payload, function (_res) {
-        // displayPage(Page.MAGIC_LOGIN);
-        var magicLinkEmail = document.querySelector('#magic-link-email');
-        if (!magicLinkEmail) {
-            // logError('#magic-link-email não foi encontrado', 'generic-help-msg');
-            return;
-        }
-        magicLinkEmail.textContent = email;
-    });
+// TODO: find a better way to import external scripts
+var script = document.createElement('script');
+script.type = 'text/javascript';
+script.src = 'https://www.google.com/recaptcha/api.js';
+document.head.appendChild(script);
+var googleCaptcha = function () {
+    var result = document.createElement('google-captcha');
+    window.submitCaptcha = function (token) { return result.setAttribute('token', token); };
+    result.className = 'g-recaptcha';
+    // @ts-ignore
+    result.setAttribute('data-sitekey', process.env.GOOGLE_CAPTCHA_KEY);
+    result.setAttribute('data-callback', 'submitCaptcha');
+    grecaptcha.render(result);
+    return result;
 };
 
 var onKeyDown = function (ev, el, persitent, onClose) {
@@ -709,19 +662,203 @@ var juxModal = function (title, btns, content, persistent, _busy, body, okTxt, c
     return result;
 };
 
-var googleCaptcha = function () {
-    var result = document.createElement('google-captcha');
-    // @ts-ignore
-    window.submitCaptcha = function (token) { return result.setAttribute('token', token); };
-    result.className = 'g-recaptcha';
-    // @ts-ignore
-    result.setAttribute('data-sitekey', process.env.GOOGLE_CAPTCHA_KEY);
-    result.setAttribute('data-callback', 'submitCaptcha');
-    grecaptcha.render(result);
+var contactField = function (tag, elType, elName, required, value) {
+    if (tag === void 0) { tag = 'input'; }
+    if (required === void 0) { required = true; }
+    var result = document.createElement('contact-field');
+    var elId = 'contact-' + elName;
+    var label = document.createElement('label');
+    label.textContent = getTranslation(elId + '-label');
+    label.htmlFor = elId;
+    var el = document.createElement(tag);
+    el.id = elId;
+    el.setAttribute('name', elName);
+    el.setAttribute('placeholder', getTranslation(elId + '-placeholder'));
+    if (tag === 'input') {
+        el.setAttribute('type', elType);
+    }
+    if (required) {
+        el.setAttribute('required', 'true');
+    }
+    if (value) {
+        el.setAttribute('value', value);
+    }
+    result.append(label, el);
     return result;
 };
 
-var socialLoginModal = function (userEmail, mailExchanger, token, onUserLogin) {
+var getNestedElValue = function (el, nestedTag) {
+    var nestedEl = el.querySelector(nestedTag);
+    return nestedEl.value;
+};
+var sendInquiry = function (name, email, msg, whatsapp, subject, token) {
+    var inquiryPayload = {
+        subject: "[".concat(subject.charAt(0).toUpperCase()).concat(subject.slice(1), "] ").concat(getNestedElValue(name, 'input')),
+        body: "<strong>Name</strong>: ".concat(getNestedElValue(name, 'input'), "<br><br>\n<strong>E-mail</strong>: ").concat(getNestedElValue(email, 'input'), "<br><br>\n<strong>Whatsapp</strong>: ").concat(getNestedElValue(whatsapp, 'input'), "<br><br>\n<strong>Message</strong>: ").concat(getNestedElValue(msg, 'textarea')),
+        token: token,
+    };
+    backendPost('contact-us', JSON.stringify(inquiryPayload), function (_res) {
+        var _a;
+        // success(getTranslation('form-success'), Length.long);
+        (_a = document.querySelector('#contact-us-modal')) === null || _a === void 0 ? void 0 : _a.remove();
+    }, function () { } // TODO: change it to be an error handling fn provided by the client
+    );
+    // checkMixpanel(() => mixpanel.track("Sent Contact Inquiry", {}));
+};
+var contactUsModal = function (subject) {
+    var _a, _b, _c, _d, _e;
+    var result = document.createElement('contact-us-modal');
+    // @ts-ignore
+    var currentName = window.store.currentUser ? window.store.currentUser.name : '';
+    // @ts-ignore
+    var currentEmail = window.store.currentUser ? window.store.currentUser.email : (_a = document.querySelector('#magic-link-email')) === null || _a === void 0 ? void 0 : _a.textContent;
+    var modalBody = document.createElement('modal-body');
+    var form = document.createElement('form');
+    form.id = 'contact-form';
+    var nameField = contactField('input', 'text', 'name', true, currentName);
+    var emailField = contactField('input', 'email', 'email', true, currentEmail);
+    var messageField = contactField('textarea', 'text', 'message', true);
+    var whatsappField = contactField('input', 'tel', 'whatsapp', false);
+    var btn = document.createElement('button');
+    btn.textContent = getTranslation('contact-submit');
+    btn.className = 'primary-button';
+    form.append(nameField, emailField, whatsappField, messageField, btn);
+    modalBody.appendChild(form);
+    var modal = juxModal(getTranslation('contact-page'), [], '', false, false, modalBody, '', '', function () { return result.remove(); });
+    modal.id = 'contact-us-modal';
+    document.body.appendChild(modal);
+    (_b = modal.querySelector('modal-wrapper')) === null || _b === void 0 ? void 0 : _b.setAttribute('style', 'max-width: 680px; width: 100%; overflow-y: auto;');
+    var captcha = googleCaptcha();
+    if (subject !== 'email-not-sent') {
+        // @ts-ignore
+        var admin = ((_d = (_c = window.store) === null || _c === void 0 ? void 0 : _c.selectedTeam) === null || _d === void 0 ? void 0 : _d.admin) || window.store.currentUser.email;
+        backendGet("credits-balance-for?admin=".concat(admin), function (res) {
+            var balance = res;
+            if (balance <= 0) {
+                form.insertBefore(captcha, btn);
+            }
+        }, function () { } // TODO: change it to be an error handling fn provided by the client
+        );
+    }
+    else {
+        form.insertBefore(captcha, btn);
+    }
+    (_e = nameField.querySelector('input')) === null || _e === void 0 ? void 0 : _e.select();
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        sendInquiry(nameField, emailField, messageField, whatsappField, subject, captcha.getAttribute('token'));
+    });
+    return result;
+};
+
+var magicLinkRequestedPage = function (backgroundImg, onReturn) {
+    var result = document.createElement('magic-link-requested-page');
+    var section = document.createElement('section');
+    var magicLinkSent = document.createElement('p');
+    magicLinkSent.id = 'magic-link-sent';
+    magicLinkSent.textContent = getTranslation(magicLinkSent.id);
+    var magicLinkEmail = document.createElement('p');
+    magicLinkEmail.id = 'magic-link-email';
+    magicLinkEmail.setAttribute('class', 'strong');
+    var magicLinkHowTo = document.createElement('p');
+    magicLinkHowTo.id = 'magic-link-how-to';
+    magicLinkHowTo.innerHTML = getTranslation(magicLinkHowTo.id);
+    var btn = document.createElement('button');
+    btn.id = 'email-not-received-btn';
+    btn.addEventListener('click', function () { return document.body.appendChild(contactUsModal('email-not-sent')); });
+    btn.textContent = getTranslation('magic-link-let-us-know');
+    var returnLink = document.createElement('a');
+    returnLink.textContent = getTranslation('return-link');
+    returnLink.onclick = function () {
+        result.remove();
+        onReturn();
+    };
+    section.append(magicLinkSent, magicLinkEmail, magicLinkHowTo, btn, returnLink);
+    result.style.backgroundImage = "url(".concat(backgroundImg, ")");
+    result.appendChild(section);
+    return result;
+};
+
+var setBackendToken = function (token) {
+    // @ts-ignore
+    window.store.backendToken = token;
+    if (token) {
+        localStorage.setItem('token', token);
+    }
+};
+var onTokenAcquired = function (token, onUserLogin) {
+    setBackendToken(token);
+    // setSuperToken();
+    onUserLogin();
+};
+var onMicrosoftSignIn = function (onUserLogin) { return __awaiter(void 0, void 0, void 0, function () {
+    var msalConfig, msalInstance, loginRequest, loginResponse, accessToken, err_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                msalConfig = { auth: { clientId: process.env.MICROSOFT_CLIENT_ID } };
+                msalInstance = new msal__namespace.PublicClientApplication(msalConfig);
+                loginRequest = { scopes: ['user.read'] };
+                enableSignInLayout();
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 4, , 5]);
+                return [4 /*yield*/, msalInstance.loginPopup(loginRequest)];
+            case 2:
+                loginResponse = _a.sent();
+                accessToken = loginResponse.accessToken;
+                return [4 /*yield*/, backendGetPromise(microsoftAuthUrl + accessToken)
+                        .then(function (res) {
+                        var token = res.token;
+                        // @ts-ignore
+                        window.store.currentUser = res;
+                        onTokenAcquired(token, onUserLogin);
+                    })
+                        .catch(console.error)
+                        .finally(function () { return disableSignInLayout(); })];
+            case 3:
+                _a.sent();
+                return [3 /*break*/, 5];
+            case 4:
+                err_1 = _a.sent();
+                reportError(err_1);
+                disableSignInLayout();
+                return [3 /*break*/, 5];
+            case 5: return [2 /*return*/];
+        }
+    });
+}); };
+var onCookieError = function () {
+    disableSignInLayout();
+    // warning('cookie-error'); TODO
+    return;
+};
+var onGoogleSignIn = function (onUserLogin) {
+    validateThirdPartyCookies(function () {
+        enableSignInLayout();
+        authSignIn(onUserLogin);
+    }, onCookieError);
+};
+var handleMagicLinkRequest = function (token, onReturn, email) {
+    if (email === void 0) { email = ''; }
+    if (!email) {
+        var mailMagic = document.querySelector('#mail-magic');
+        email = mailMagic.value;
+    }
+    var sandbox = window.location.hostname === 'localhost';
+    var payload = { email: email, token: token, sandbox: sandbox };
+    requestMagicLink(payload, function (_res) {
+        document.body.appendChild(magicLinkRequestedPage('', onReturn));
+        var magicLinkEmail = document.querySelector('#magic-link-email');
+        if (!magicLinkEmail) {
+            // logError('#magic-link-email não foi encontrado', 'generic-help-msg');
+            return;
+        }
+        magicLinkEmail.textContent = email;
+    });
+};
+
+var socialLoginModal = function (userEmail, mailExchanger, token, onUserLogin, onReturn) {
     var _a;
     var result = document.createElement('social-login-modal');
     var email = document.createElement('p');
@@ -735,7 +872,7 @@ var socialLoginModal = function (userEmail, mailExchanger, token, onUserLogin) {
     var proceedMagicLinkRequest = document.createElement('a');
     proceedMagicLinkRequest.textContent = getTranslation('proceed-magic-link-request');
     proceedMagicLinkRequest.addEventListener('click', function () {
-        handleMagicLinkRequest(token, userEmail);
+        handleMagicLinkRequest(token, onReturn, userEmail);
         result.remove();
     });
     body.append(email, msg, socialLoginBtn, proceedMagicLinkRequest);
@@ -751,10 +888,10 @@ var isValidEmail = function (email) {
     return re.test(email);
 };
 
-var recommendSocialLogin = function (userEmail, mailExchanger, token, onUserLogin) {
+var recommendSocialLogin = function (userEmail, mailExchanger, token, onUserLogin, onReturn) {
     var _a;
     (_a = document.querySelector('magic-link-modal')) === null || _a === void 0 ? void 0 : _a.remove();
-    document.body.appendChild(socialLoginModal(userEmail, mailExchanger, token, onUserLogin));
+    document.body.appendChild(socialLoginModal(userEmail, mailExchanger, token, onUserLogin, onReturn));
 };
 var hasProvider = function (data, provider) {
     return data.some(function (entry) { return entry.includes(provider); });
@@ -779,7 +916,7 @@ var getMailExchanger = function (domainName) { return __awaiter(void 0, void 0, 
         }
     });
 }); };
-var onMagicLinkRequest$1 = function (token, input, onUserLogin) { return __awaiter(void 0, void 0, void 0, function () {
+var onMagicLinkRequest$1 = function (token, input, onUserLogin, onReturn) { return __awaiter(void 0, void 0, void 0, function () {
     var email, domain, mailExchanger, supportedMailExchanger;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -796,17 +933,17 @@ var onMagicLinkRequest$1 = function (token, input, onUserLogin) { return __await
                 mailExchanger = _a.sent();
                 supportedMailExchanger = mailExchanger !== null;
                 if (supportedMailExchanger) {
-                    recommendSocialLogin(email, mailExchanger, token, onUserLogin);
+                    recommendSocialLogin(email, mailExchanger, token, onUserLogin, onReturn);
                     return [2 /*return*/];
                 }
                 _a.label = 2;
             case 2:
-                handleMagicLinkRequest(token);
+                handleMagicLinkRequest(token, onReturn);
                 return [2 /*return*/];
         }
     });
 }); };
-var magicEmailField = function (onUserLogin) {
+var magicEmailField = function (onUserLogin, onReturn) {
     var result = document.createElement('magic-email-field');
     var captcha = googleCaptcha();
     var input = document.createElement('input');
@@ -816,25 +953,25 @@ var magicEmailField = function (onUserLogin) {
     input.placeholder = 'e-mail';
     input.addEventListener('keydown', function (ev) {
         if (ev.key === 'Enter') {
-            onMagicLinkRequest$1(captcha.getAttribute('token'), input, onUserLogin);
+            onMagicLinkRequest$1(captcha.getAttribute('token'), input, onUserLogin, onReturn);
         }
     });
     var btn = document.createElement('button');
     btn.id = 'send-magic';
     btn.setAttribute('class', 'primary-button');
-    btn.addEventListener('click', function (_ev) { return onMagicLinkRequest$1(captcha.getAttribute('token'), input, onUserLogin); });
+    btn.addEventListener('click', function (_ev) { return onMagicLinkRequest$1(captcha.getAttribute('token'), input, onUserLogin, onReturn); });
     btn.textContent = getTranslation('send-magic');
     result.append(input, captcha, btn);
     return result;
 };
 
-var magicLinkModal = function (onUserLogin) {
+var magicLinkModal = function (onUserLogin, onReturn) {
     var _a;
     var result = document.createElement('magic-link-modal');
     var subtitle = document.createElement('magic-link-request-subtitle');
     subtitle.textContent = getTranslation('magic-link-request-subtitle');
     var body = document.createElement('magic-link-request-body');
-    body.append(subtitle, magicEmailField(onUserLogin));
+    body.append(subtitle, magicEmailField(onUserLogin, onReturn));
     var modal = juxModal(getTranslation('magic-link-request-title'), [], '', false, false, body, '', '', function () { return result.remove(); });
     modal.setAttribute('data-cy', 'magic-link-modal');
     result.appendChild(modal);
@@ -864,8 +1001,9 @@ var applyPageStyles = function (page) {
     page.style.display = 'block';
     page.style.height = '100%';
 };
-var onMagicLinkRequest = function (page, onUserLogin) {
-    page.appendChild(magicLinkModal(onUserLogin));
+var onMagicLinkRequest = function (loginPage, onUserLogin) {
+    var onReturn = function () { return document.appendChild(loginPage); };
+    loginPage.appendChild(magicLinkModal(onUserLogin, onReturn));
 };
 var loginPage = function (backgroundImg, onUserLogin, text) {
     if (text === void 0) { text = getTranslation('sign-in-msg-general'); }

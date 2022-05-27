@@ -27,8 +27,9 @@ const applyPageStyles = (page: HTMLElement) => {
     page.style.height = '100%';
 }
 
-const onMagicLinkRequest = (page: HTMLElement, onUserLogin: any): void => {
-    page.appendChild(magicLinkModal(onUserLogin));
+const onMagicLinkRequest = (loginPage: HTMLElement, onUserLogin: any): void => {
+    const onReturn = () => document.appendChild(loginPage);
+    loginPage.appendChild(magicLinkModal(onUserLogin, onReturn));
 }
 
 export const loginPage = (backgroundImg: string, onUserLogin: any, text: string = getTranslation('sign-in-msg-general')): HTMLElement => {

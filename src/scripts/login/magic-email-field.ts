@@ -5,9 +5,9 @@ import { handleMagicLinkRequest } from './session';
 import { socialLoginModal } from './social-login';
 import { isValidEmail } from './utils/string';
 
-const recommendSocialLogin = (userEmail: string, mailExchanger: string, token: any, onUserLogin: any) => {
+const recommendSocialLogin = (userEmail: string, mailExchanger: string, token: any, onUserLogin: any, onReturn: any) => {
   document.querySelector('magic-link-modal')?.remove();
-  document.body.appendChild(socialLoginModal(userEmail, mailExchanger, token, onUserLogin));
+  document.body.appendChild(socialLoginModal(userEmail, mailExchanger, token, onUserLogin, onReturn));
 }
 
 const hasProvider = (data: any, provider: string) => {
@@ -32,7 +32,7 @@ const getMailExchanger = async (domainName: string): Promise<any> => {
   return null;
 }
 
-const onMagicLinkRequest = async (token: any, input: HTMLInputElement, onUserLogin: any) => {
+const onMagicLinkRequest = async (token: any, input: HTMLInputElement, onUserLogin: any, onReturn: any) => {
   const email = input.value;
 
   if (!email.includes('-test@') && !token) {
@@ -47,16 +47,16 @@ const onMagicLinkRequest = async (token: any, input: HTMLInputElement, onUserLog
     const supportedMailExchanger = mailExchanger !== null;
 
     if (supportedMailExchanger) {
-      recommendSocialLogin(email, mailExchanger, token, onUserLogin);
+      recommendSocialLogin(email, mailExchanger, token, onUserLogin, onReturn);
 
       return;
     }
   }
 
-  handleMagicLinkRequest(token);
+  handleMagicLinkRequest(token, onReturn);
 }
 
-export const magicEmailField = (onUserLogin: any): HTMLElement => {
+export const magicEmailField = (onUserLogin: any, onReturn: any): HTMLElement => {
   const result = document.createElement('magic-email-field');
 
   const captcha = googleCaptcha();
@@ -69,14 +69,14 @@ export const magicEmailField = (onUserLogin: any): HTMLElement => {
 
   input.addEventListener('keydown', (ev) => {
     if (ev.key === 'Enter') {
-      onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin);
+      onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn);
     }
   });
 
   const btn = document.createElement('button');
   btn.id = 'send-magic';
   btn.setAttribute('class', 'primary-button');
-  btn.addEventListener('click', (_ev) => onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin));
+  btn.addEventListener('click', (_ev) => onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn));
   btn.textContent = getTranslation('send-magic');
 
   result.append(input, captcha, btn);
