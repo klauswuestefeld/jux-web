@@ -208,7 +208,6 @@ var backendRequest = function (requestType, url, postContent, onJsonResponse, on
     }
     clearInterval(timeout);
     var req = new XMLHttpRequest();
-    console.log('url', url);
     req.open(requestType, url, true);
     // @ts-ignore
     var backendToken = window.store.backendToken;
@@ -719,9 +718,7 @@ var socialLoginModal = function (userEmail, mailExchanger, token, onUserLogin) {
         handleMagicLinkRequest(token, userEmail);
         result.remove();
     });
-    body.append(email, msg, 
-    // percySpacer({ vertical: 12 }),
-    socialLoginBtn, proceedMagicLinkRequest);
+    body.append(email, msg, socialLoginBtn, proceedMagicLinkRequest);
     var modal = juxModal(getTranslation("using-".concat(mailExchanger.toLowerCase(), "-email")), [], '', false, false, body, '', '', function () { return result.remove(); });
     modal.setAttribute('data-cy', 'social-login-modal');
     result.appendChild(modal);
@@ -817,9 +814,7 @@ var magicLinkModal = function (onUserLogin) {
     var subtitle = document.createElement('magic-link-request-subtitle');
     subtitle.textContent = getTranslation('magic-link-request-subtitle');
     var body = document.createElement('magic-link-request-body');
-    body.append(subtitle, 
-    // percySpacer({ vertical: 12 }),
-    magicEmailField(onUserLogin));
+    body.append(subtitle, magicEmailField(onUserLogin));
     var modal = juxModal(getTranslation('magic-link-request-title'), [], '', false, false, body, '', '', function () { return result.remove(); });
     modal.setAttribute('data-cy', 'magic-link-modal');
     result.appendChild(modal);

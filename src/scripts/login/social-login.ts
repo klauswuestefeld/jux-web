@@ -27,7 +27,6 @@ export const socialLoginModal = (userEmail: string, mailExchanger: string, token
   body.append(
     email,
     msg,
-    // percySpacer({ vertical: 12 }),
     socialLoginBtn,
     proceedMagicLinkRequest
   );

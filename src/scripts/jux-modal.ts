@@ -119,7 +119,6 @@ export const juxModal = (
     h3.textContent = title;
     header.appendChild(h3);
   } else {
-    // header.appendChild(percySpacer({ vertical: 21.28 }));
   }
   // END header
 

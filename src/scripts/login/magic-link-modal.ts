@@ -11,7 +11,6 @@ export const magicLinkModal = (onUserLogin: any): HTMLElement => {
   const body = document.createElement('magic-link-request-body');
   body.append(
     subtitle,
-    // percySpacer({ vertical: 12 }),
     magicEmailField(onUserLogin)
   );
 
