@@ -6,6 +6,7 @@ export const magicLinkModal = (onUserLogin: any, onReturn: any): HTMLElement => 
   const result = document.createElement('magic-link-modal');
 
   const subtitle = document.createElement('magic-link-request-subtitle');
+  subtitle.style.fontSize = '14px';
   subtitle.textContent = getTranslation('magic-link-request-subtitle');
 
   const body = document.createElement('magic-link-request-body');
@@ -28,7 +29,9 @@ export const magicLinkModal = (onUserLogin: any, onReturn: any): HTMLElement => 
   modal.setAttribute('data-cy', 'magic-link-modal');
 
   result.appendChild(modal);
-  modal.querySelector('modal-wrapper')?.setAttribute('style', 'max-width: 360px; width: 100%;');
+  const wrapper = modal.querySelector('modal-wrapper') as HTMLElement;
+  wrapper.style.maxWidth = '360px';
+  wrapper.style.width = '100%';
 
   return result;
 }

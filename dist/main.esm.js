@@ -500,6 +500,13 @@ var googleCaptcha = function () {
     return result;
 };
 
+var juxWhite = '#FFF';
+var juxDarkGrey = '#282828';
+var juxDimmedDarkGrey = '#28282822';
+var juxDimmedBlack = '#00000088';
+var juxLightGreen = '#20B03D';
+var juxMediumGreen = '#0D631E';
+
 var onKeyDown = function (ev, el, persitent, onClose) {
     if (ev.key === 'Escape') {
         if (persitent) {
@@ -563,6 +570,55 @@ var attachEventHandlers = function (el, persitent, onClose) {
 //   onClose?: any,
 //   titleStyle?: string,
 // }
+var applyWrapperStyle = function (wrapper) {
+    wrapper.style.alignItems = 'center';
+    wrapper.style.backgroundColor = juxWhite;
+    wrapper.style.borderRadius = '.3125rem';
+    wrapper.style.boxShadow = "0 0 1.33rem ".concat(juxDimmedBlack);
+    wrapper.style.boxSizing = 'content-box';
+    wrapper.style.display = 'flex';
+    wrapper.style.flexDirection = 'column';
+    wrapper.style.justifyContent = 'flex-start';
+    wrapper.style.margin = '0';
+    wrapper.style.maxHeight = '88%';
+    wrapper.style.maxWidth = '40%';
+    wrapper.style.minWidth = '20%';
+    wrapper.style.padding = '1.33rem';
+    wrapper.style.position = 'relative';
+};
+var applyModalStyle = function (modal) {
+    modal.style.alignItems = 'center';
+    modal.style.backgroundColor = juxDimmedBlack;
+    modal.style.display = 'flex';
+    modal.style.height = '100vh';
+    modal.style.justifyContent = 'center';
+    modal.style.left = '0';
+    modal.style.overflow = 'hidden';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.width = '100%';
+    modal.style.zIndex = '9999';
+};
+var applyHeaderStyle = function (header) {
+    header.style.alignItems = 'center';
+    header.style.color = juxMediumGreen;
+    header.style.flexDirection = 'row';
+    header.style.fontSize = '16px';
+    header.style.fontWeight = '700';
+    header.style.justifyContent = 'space-between';
+    header.style.margin = '0';
+    header.style.display = 'flex';
+    header.style.position = 'relative';
+    header.style.width = '100%';
+};
+var applyJuxModalContentStyle = function (el) {
+    el.style.display = 'flex';
+    el.style.position = 'relative';
+    el.style.width = '100%';
+    el.style.flexFlow = 'column';
+    el.style.marginTop = '1.33rem';
+    el.style.rowGap = '8px';
+};
 var juxModal = function (title, btns, content, persistent, _busy, body, okTxt, cancelTxt, onClose, titleStyle) {
     if (btns === void 0) { btns = ['ok', 'cancel']; }
     if (content === void 0) { content = ''; }
@@ -570,7 +626,9 @@ var juxModal = function (title, btns, content, persistent, _busy, body, okTxt, c
     if (okTxt === void 0) { okTxt = getTranslation('alert-ok-btn-txt'); }
     if (cancelTxt === void 0) { cancelTxt = getTranslation('alert-cancel-btn-txt'); }
     var result = document.createElement('jux-modal');
+    applyModalStyle(result);
     var wrapper = document.createElement('modal-wrapper');
+    applyWrapperStyle(wrapper);
     // START close
     var closeBtn = document.createElement('button');
     if (!persistent) {
@@ -580,6 +638,7 @@ var juxModal = function (title, btns, content, persistent, _busy, body, okTxt, c
     // END close
     // START header
     var header = document.createElement('modal-header');
+    applyHeaderStyle(header);
     if (title) {
         if (titleStyle) {
             header.classList.add(titleStyle);
@@ -591,6 +650,7 @@ var juxModal = function (title, btns, content, persistent, _busy, body, okTxt, c
     // END header
     // START content
     var modalContent = document.createElement('jux-modal-content');
+    applyJuxModalContentStyle(modalContent);
     if (content) {
         modalContent.innerHTML = content;
     }
@@ -835,7 +895,6 @@ var handleMagicLinkRequest = function (token, onReturn, email) {
 };
 
 var socialLoginModal = function (userEmail, mailExchanger, token, onUserLogin, onReturn) {
-    var _a;
     var result = document.createElement('social-login-modal');
     var email = document.createElement('p');
     email.textContent = "\"".concat(userEmail, "\"");
@@ -855,7 +914,9 @@ var socialLoginModal = function (userEmail, mailExchanger, token, onUserLogin, o
     var modal = juxModal(getTranslation("using-".concat(mailExchanger.toLowerCase(), "-email")), [], '', false, false, body, '', '', function () { return result.remove(); });
     modal.setAttribute('data-cy', 'social-login-modal');
     result.appendChild(modal);
-    (_a = modal.querySelector('modal-wrapper')) === null || _a === void 0 ? void 0 : _a.setAttribute('style', 'max-width: 360px; width: 100%;');
+    var wrapper = modal.querySelector('modal-wrapper');
+    wrapper.style.maxWidth = '360px';
+    wrapper.style.width = '100%';
     return result;
 };
 
@@ -919,22 +980,59 @@ var onMagicLinkRequest$1 = function (token, input, onUserLogin, onReturn) { retu
         }
     });
 }); };
+var applyMagicEmailFieldStyle = function (el) {
+    el.style.display = 'flex';
+    el.style.flexFlow = 'column';
+    el.style.marginTop = '8px';
+    el.style.rowGap = '8px';
+    el.style.width = '100%';
+};
+var applyInputStyle = function (input) {
+    input.style.border = "1px solid ".concat(juxDarkGrey);
+    input.style.maxWidth = '390px';
+    input.style.padding = '10px';
+    input.style.width = '100%';
+    input.style.backgroundColor = juxWhite;
+    input.style.borderRadius = '8px';
+    input.style.boxShadow = "inset 0 2px 3px ".concat(juxDimmedDarkGrey);
+    input.style.height = '40px';
+    input.style.whiteSpace = 'pre-line';
+    input.style.boxSizing = 'border-box';
+};
+var applyBtnStyle = function (btn) {
+    btn.style.alignSelf = 'flex-end';
+    btn.style.backgroundColor = juxLightGreen;
+    btn.style.border = "2px solid ".concat(juxLightGreen);
+    btn.style.borderRadius = '8px';
+    btn.style.color = juxWhite;
+    btn.style.cursor = 'pointer';
+    btn.style.display = 'inline-block';
+    btn.style.fontWeight = '700';
+    btn.style.height = '40px';
+    btn.style.lineHeight = '1';
+    btn.style.marginLeft = '10px';
+    btn.style.padding = '10px 16px';
+    btn.style.position = 'relative';
+};
 var magicEmailField = function (onUserLogin, onReturn) {
     var result = document.createElement('magic-email-field');
+    applyMagicEmailFieldStyle(result);
     var captcha = googleCaptcha();
     var input = document.createElement('input');
     input.id = 'mail-magic';
     input.type = 'text';
-    input.setAttribute('class', 'textfield');
+    input.className = 'textfield';
     input.placeholder = 'e-mail';
+    applyInputStyle(input);
     input.addEventListener('keydown', function (ev) {
         if (ev.key === 'Enter') {
             onMagicLinkRequest$1(captcha.getAttribute('token'), input, onUserLogin, onReturn);
         }
     });
     var btn = document.createElement('button');
+    applyBtnStyle(btn);
     btn.id = 'send-magic';
-    btn.setAttribute('class', 'primary-button');
+    btn.className = 'primary-button';
     btn.addEventListener('click', function (_ev) { return onMagicLinkRequest$1(captcha.getAttribute('token'), input, onUserLogin, onReturn); });
     btn.textContent = getTranslation('send-magic');
     result.append(input, captcha, btn);
@@ -942,16 +1040,18 @@ var magicEmailField = function (onUserLogin, onReturn) {
 };
 
 var magicLinkModal = function (onUserLogin, onReturn) {
-    var _a;
     var result = document.createElement('magic-link-modal');
     var subtitle = document.createElement('magic-link-request-subtitle');
+    subtitle.style.fontSize = '14px';
     subtitle.textContent = getTranslation('magic-link-request-subtitle');
     var body = document.createElement('magic-link-request-body');
     body.append(subtitle, magicEmailField(onUserLogin, onReturn));
     var modal = juxModal(getTranslation('magic-link-request-title'), [], '', false, false, body, '', '', function () { return result.remove(); });
     modal.setAttribute('data-cy', 'magic-link-modal');
     result.appendChild(modal);
-    (_a = modal.querySelector('modal-wrapper')) === null || _a === void 0 ? void 0 : _a.setAttribute('style', 'max-width: 360px; width: 100%;');
+    var wrapper = modal.querySelector('modal-wrapper');
+    wrapper.style.maxWidth = '360px';
+    wrapper.style.width = '100%';
     return result;
 };
 

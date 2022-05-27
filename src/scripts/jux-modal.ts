@@ -1,4 +1,5 @@
 import { getTranslation } from './jux/language';
+import { juxDimmedBlack, juxMediumGreen, juxWhite } from './style-constants';
 
 const onKeyDown = (
   ev: KeyboardEvent,
@@ -86,6 +87,59 @@ const attachEventHandlers = (
 //   titleStyle?: string,
 // }
 
+const applyWrapperStyle = (wrapper: HTMLElement) => {
+  wrapper.style.alignItems = 'center';
+  wrapper.style.backgroundColor = juxWhite;
+  wrapper.style.borderRadius = '.3125rem';
+  wrapper.style.boxShadow = `0 0 1.33rem ${juxDimmedBlack}`;
+  wrapper.style.boxSizing = 'content-box';
+  wrapper.style.display = 'flex';
+  wrapper.style.flexDirection = 'column';
+  wrapper.style.justifyContent = 'flex-start';
+  wrapper.style.margin = '0';
+  wrapper.style.maxHeight = '88%';
+  wrapper.style.maxWidth = '40%';
+  wrapper.style.minWidth = '20%';
+  wrapper.style.padding = '1.33rem';
+  wrapper.style.position = 'relative';
+}
+
+const applyModalStyle = (modal: HTMLElement) => {
+  modal.style.alignItems = 'center';
+  modal.style.backgroundColor = juxDimmedBlack;
+  modal.style.display = 'flex';
+  modal.style.height = '100vh';
+  modal.style.justifyContent = 'center';
+  modal.style.left = '0';
+  modal.style.overflow = 'hidden';
+  modal.style.position = 'fixed';
+  modal.style.top = '0';
+  modal.style.width = '100%';
+  modal.style.zIndex = '9999';
+}
+
+const applyHeaderStyle = (header: HTMLElement) => {
+  header.style.alignItems = 'center';
+  header.style.color = juxMediumGreen;
+  header.style.flexDirection = 'row';
+  header.style.fontSize = '16px';
+  header.style.fontWeight = '700';
+  header.style.justifyContent = 'space-between';
+  header.style.margin = '0';
+  header.style.display = 'flex';
+  header.style.position = 'relative';
+  header.style.width = '100%';
+}
+
+const applyJuxModalContentStyle = (el: HTMLElement) => {
+  el.style.display = 'flex';
+  el.style.position = 'relative';
+  el.style.width = '100%';
+  el.style.flexFlow = 'column';
+  el.style.marginTop = '1.33rem';
+  el.style.rowGap = '8px';
+}
+
 export const juxModal = (
   title: string,
   btns: string[] = ['ok', 'cancel'],
@@ -99,7 +153,10 @@ export const juxModal = (
   titleStyle?: string,
 ): HTMLElement => {
   const result = document.createElement('jux-modal');
+  applyModalStyle(result);
+
   const wrapper = document.createElement('modal-wrapper');
+  applyWrapperStyle(wrapper);
 
   // START close
   const closeBtn = document.createElement('button');
@@ -111,6 +168,7 @@ export const juxModal = (
 
   // START header
   const header = document.createElement('modal-header');
+  applyHeaderStyle(header);
   if (title) {
     if (titleStyle) {
       header.classList.add(titleStyle);
@@ -124,6 +182,7 @@ export const juxModal = (
 
   // START content
   const modalContent = document.createElement('jux-modal-content');
+  applyJuxModalContentStyle(modalContent);
 
   if (content) {
     modalContent.innerHTML = content;

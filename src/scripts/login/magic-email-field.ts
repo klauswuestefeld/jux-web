@@ -1,6 +1,7 @@
 import { getMXData } from '../api-client';
 import { googleCaptcha } from '../captcha/google-captcha';
 import { getTranslation } from '../jux/language';
+import { juxDarkGrey, juxDimmedDarkGrey, juxLightGreen, juxWhite } from '../style-constants';
 import { handleMagicLinkRequest } from './session';
 import { socialLoginModal } from './social-login';
 import { isValidEmail } from './utils/string';
@@ -56,16 +57,55 @@ const onMagicLinkRequest = async (token: any, input: HTMLInputElement, onUserLog
   handleMagicLinkRequest(token, onReturn);
 }
 
+const applyMagicEmailFieldStyle = (el: HTMLElement) => {
+  el.style.display = 'flex';
+  el.style.flexFlow = 'column';
+  el.style.marginTop = '8px';
+  el.style.rowGap = '8px';
+  el.style.width = '100%';
+}
+
+const applyInputStyle = (input: HTMLInputElement) => {
+  input.style.border = `1px solid ${juxDarkGrey}`;
+  input.style.maxWidth = '390px';
+  input.style.padding = '10px';
+  input.style.width = '100%';
+  input.style.backgroundColor = juxWhite;
+  input.style.borderRadius = '8px';
+  input.style.boxShadow = `inset 0 2px 3px ${juxDimmedDarkGrey}`;
+  input.style.height = '40px';
+  input.style.whiteSpace = 'pre-line';
+  input.style.boxSizing = 'border-box';
+}
+
+const applyBtnStyle = (btn: HTMLButtonElement) => {
+  btn.style.alignSelf = 'flex-end';
+  btn.style.backgroundColor = juxLightGreen;
+  btn.style.border = `2px solid ${juxLightGreen}`;
+  btn.style.borderRadius = '8px';
+  btn.style.color = juxWhite;
+  btn.style.cursor = 'pointer';
+  btn.style.display = 'inline-block';
+  btn.style.fontWeight = '700';
+  btn.style.height = '40px';
+  btn.style.lineHeight = '1';
+  btn.style.marginLeft = '10px';
+  btn.style.padding = '10px 16px';
+  btn.style.position = 'relative';
+}
+
 export const magicEmailField = (onUserLogin: any, onReturn: any): HTMLElement => {
   const result = document.createElement('magic-email-field');
+  applyMagicEmailFieldStyle(result);
 
   const captcha = googleCaptcha();
 
   const input = document.createElement('input');
   input.id = 'mail-magic';
   input.type = 'text';
-  input.setAttribute('class', 'textfield');
+  input.className = 'textfield';
   input.placeholder = 'e-mail';
+  applyInputStyle(input);
 
   input.addEventListener('keydown', (ev) => {
     if (ev.key === 'Enter') {
@@ -74,8 +114,9 @@ export const magicEmailField = (onUserLogin: any, onReturn: any): HTMLElement =>
   });
 
   const btn = document.createElement('button');
+  applyBtnStyle(btn);
   btn.id = 'send-magic';
-  btn.setAttribute('class', 'primary-button');
+  btn.className = 'primary-button';
   btn.addEventListener('click', (_ev) => onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn));
   btn.textContent = getTranslation('send-magic');
 

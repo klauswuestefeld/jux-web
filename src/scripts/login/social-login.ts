@@ -45,7 +45,10 @@ export const socialLoginModal = (userEmail: string, mailExchanger: string, token
   modal.setAttribute('data-cy', 'social-login-modal');
 
   result.appendChild(modal);
-  modal.querySelector('modal-wrapper')?.setAttribute('style', 'max-width: 360px; width: 100%;');
+
+  const wrapper = modal.querySelector('modal-wrapper') as HTMLElement;
+  wrapper.style.maxWidth = '360px';
+  wrapper.style.width = '100%';
 
   return result;
 }
