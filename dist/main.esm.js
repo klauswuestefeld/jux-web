@@ -209,7 +209,6 @@ var backendRequest = function (requestType, url, postContent, onJsonResponse, on
     clearInterval(timeout);
     var req = new XMLHttpRequest();
     req.open(requestType, url, true);
-    // @ts-ignore
     var backendToken = window.store.backendToken;
     if (backendToken) {
         req.setRequestHeader('auth', backendToken);
@@ -371,7 +370,6 @@ var onUserChanged = function (googleUser, onUserLogin) { return __awaiter(void 0
                 return [4 /*yield*/, backendGetPromise(googleAuthUrl + googleUser.googletoken)
                         .then(function (res) {
                         var token = res.token;
-                        // @ts-ignore
                         window.store.currentUser = res;
                         onTokenAcquired(token, onUserLogin);
                     })
@@ -472,7 +470,6 @@ var authSignIn = function (onUserLogin) {
 };
 
 var setBackendToken = function (token) {
-    // @ts-ignore
     window.store.backendToken = token;
     if (token) {
         localStorage.setItem('token', token);
@@ -502,7 +499,6 @@ var onMicrosoftSignIn = function (onUserLogin) { return __awaiter(void 0, void 0
                 return [4 /*yield*/, backendGetPromise(microsoftAuthUrl + accessToken)
                         .then(function (res) {
                         var token = res.token;
-                        // @ts-ignore
                         window.store.currentUser = res;
                         onTokenAcquired(token, onUserLogin);
                     })
