@@ -533,6 +533,7 @@ var applyComponentStyle = function (component) {
     component.style.padding = '0 12px';
     component.style.whiteSpace = 'nowrap';
     component.style.width = '276px';
+    component.style.boxSizing = 'content-box';
 };
 var applyLabelStyle = function (label) {
     label.style.display = 'inline-block';
@@ -554,6 +555,7 @@ var loginButton = function (type, fn) {
     icon.style.height = '28px';
     icon.style.padding = '6px';
     icon.style.marginLeft = '4px';
+    icon.style.boxSizing = 'content-box';
     icon.className = 'ico';
     // @ts-ignore
     icon.innerHTML = icons[loweredCasedType];
@@ -568,7 +570,7 @@ var loginButton = function (type, fn) {
     });
     result.addEventListener('mouseleave', function () {
         result.style.cursor = 'auto';
-        result.style.boxShadow = 'none';
+        result.style.boxShadow = '1px 1px 1px grey';
     });
     return result;
 };
