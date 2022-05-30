@@ -62,8 +62,7 @@ export const handleMagicLinkRequest = (token: string | null, onReturn: any, emai
     email = mailMagic.value;
   }
 
-  const sandbox = window.location.hostname === 'localhost';
-  const payload = { email, token, sandbox };
+  const payload = { email, token };
 
   requestMagicLink(payload, (_res: any) => {
     document.body.appendChild(magicLinkRequestedPage('', onReturn));

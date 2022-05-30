@@ -881,8 +881,7 @@ var handleMagicLinkRequest = function (token, onReturn, email) {
         var mailMagic = document.querySelector('#mail-magic');
         email = mailMagic.value;
     }
-    var sandbox = window.location.hostname === 'localhost';
-    var payload = { email: email, token: token, sandbox: sandbox };
+    var payload = { email: email, token: token };
     requestMagicLink(payload, function (_res) {
         document.body.appendChild(magicLinkRequestedPage('', onReturn));
         var magicLinkEmail = document.querySelector('#magic-link-email');
