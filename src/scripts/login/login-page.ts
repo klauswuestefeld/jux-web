@@ -27,7 +27,7 @@ const applyPageStyles = (page: HTMLElement) => {
     page.style.height = '100%';
 }
 
-const onMagicLinkRequest = (loginPage: HTMLElement, onUserLogin: any): void => {
+const onEmailLoginRequest = (loginPage: HTMLElement, onUserLogin: any): void => {
     const onReturn = () => document.appendChild(loginPage);
     loginPage.appendChild(magicLinkModal(onUserLogin, onReturn));
 }
@@ -51,7 +51,7 @@ export const loginPage = (backgroundImg: string, onUserLogin: any, text: string 
     const google = loginButton('Google', () => onGoogleSignIn(onUserLogin));
     const microsoft = loginButton('Microsoft', () => onMicrosoftSignIn(onUserLogin));
     const linkedin = loginButton('LinkedIn', () => console.log('login with Linkedin'));
-    const email = loginButton('Email', () => onMagicLinkRequest(result, onUserLogin));
+    const email = loginButton('Email', () => onEmailLoginRequest(result, onUserLogin));
 
     result.style.backgroundImage = `url(${backgroundImg})`;
 

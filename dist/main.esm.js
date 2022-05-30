@@ -887,6 +887,8 @@ var handleMagicLinkRequest = function (token, onReturn, email) {
         document.body.appendChild(magicLinkRequestedPage('', onReturn));
         var magicLinkEmail = document.querySelector('#magic-link-email');
         if (!magicLinkEmail) {
+            console.error('#magic-link-email não foi encontrado');
+            // TODO: error reporting
             // logError('#magic-link-email não foi encontrado', 'generic-help-msg');
             return;
         }
@@ -1103,4 +1105,4 @@ var loginPage = function (backgroundImg, onUserLogin, text) {
     return result;
 };
 
-export { chosenLanguage, getTranslation, initLanguage, loginButton, loginPage, onMicrosoftSignIn, reloadWithLanguageOverride };
+export { chosenLanguage, getTranslation, initLanguage, loginButton, loginPage, onMicrosoftSignIn, reloadWithLanguageOverride, requestMagicLink };

@@ -70,6 +70,8 @@ export const handleMagicLinkRequest = (token: string | null, onReturn: any, emai
 
     const magicLinkEmail = document.querySelector('#magic-link-email');
     if (!magicLinkEmail) {
+      console.error('#magic-link-email não foi encontrado');
+      // TODO: error reporting
       // logError('#magic-link-email não foi encontrado', 'generic-help-msg');
 
       return;

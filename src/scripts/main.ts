@@ -2,6 +2,7 @@ export { chosenLanguage, reloadWithLanguageOverride, initLanguage, getTranslatio
 export { loginButton } from './login/login-button';
 export { loginPage } from './login/login-page';
 export { onMicrosoftSignIn } from './login/session';
+export { requestMagicLink } from './api-client';
 
 declare global {
   interface Window {

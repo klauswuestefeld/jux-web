@@ -911,6 +911,8 @@ var handleMagicLinkRequest = function (token, onReturn, email) {
         document.body.appendChild(magicLinkRequestedPage('', onReturn));
         var magicLinkEmail = document.querySelector('#magic-link-email');
         if (!magicLinkEmail) {
+            console.error('#magic-link-email não foi encontrado');
+            // TODO: error reporting
             // logError('#magic-link-email não foi encontrado', 'generic-help-msg');
             return;
         }
@@ -1134,3 +1136,4 @@ exports.loginButton = loginButton;
 exports.loginPage = loginPage;
 exports.onMicrosoftSignIn = onMicrosoftSignIn;
 exports.reloadWithLanguageOverride = reloadWithLanguageOverride;
+exports.requestMagicLink = requestMagicLink;
