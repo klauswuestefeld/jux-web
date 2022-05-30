@@ -32,7 +32,7 @@ const onEmailLoginRequest = (loginPage: HTMLElement, onUserLogin: any): void => 
     loginPage.appendChild(magicLinkModal(onUserLogin, onReturn));
 }
 
-export const loginPage = (backgroundImg: string, onUserLogin: any, text: string = getTranslation('sign-in-msg-general')): HTMLElement => {
+export const loginPage = (backgroundImg: string, onUserLogin: any): HTMLElement => {
     const result = document.createElement('login-page');
     applyPageStyles(result);
 
@@ -46,7 +46,7 @@ export const loginPage = (backgroundImg: string, onUserLogin: any, text: string 
     explanation.textContent = getTranslation('sign-in-explanation');
 
     const msg = document.createElement('sign-in-msg');
-    msg.textContent = text;
+    msg.textContent = getTranslation('sign-in-msg-general');
 
     const google = loginButton('Google', () => onGoogleSignIn(onUserLogin));
     const microsoft = loginButton('Microsoft', () => onMicrosoftSignIn(onUserLogin));

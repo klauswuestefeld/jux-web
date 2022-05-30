@@ -1,1 +1,1 @@
-export declare const loginPage: (backgroundImg: string, onUserLogin: any, text?: string) => HTMLElement;
+export declare const loginPage: (backgroundImg: string, onUserLogin: any) => HTMLElement;

@@ -955,7 +955,7 @@ var getMailExchanger = function (domainName) { return __awaiter(void 0, void 0, 
         }
     });
 }); };
-var onMagicLinkRequest$1 = function (token, input, onUserLogin, onReturn) { return __awaiter(void 0, void 0, void 0, function () {
+var onMagicLinkRequest = function (token, input, onUserLogin, onReturn) { return __awaiter(void 0, void 0, void 0, function () {
     var email, domain, mailExchanger, supportedMailExchanger;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -1028,14 +1028,14 @@ var magicEmailField = function (onUserLogin, onReturn) {
     applyInputStyle(input);
     input.addEventListener('keydown', function (ev) {
         if (ev.key === 'Enter') {
-            onMagicLinkRequest$1(captcha.getAttribute('token'), input, onUserLogin, onReturn);
+            onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn);
         }
     });
     var btn = document.createElement('button');
     applyBtnStyle(btn);
     btn.id = 'send-magic';
     btn.className = 'primary-button';
-    btn.addEventListener('click', function (_ev) { return onMagicLinkRequest$1(captcha.getAttribute('token'), input, onUserLogin, onReturn); });
+    btn.addEventListener('click', function (_ev) { return onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn); });
     btn.textContent = getTranslation('send-magic');
     result.append(input, captcha, btn);
     return result;
@@ -1079,12 +1079,11 @@ var applyPageStyles = function (page) {
     page.style.display = 'block';
     page.style.height = '100%';
 };
-var onMagicLinkRequest = function (loginPage, onUserLogin) {
+var onEmailLoginRequest = function (loginPage, onUserLogin) {
     var onReturn = function () { return document.appendChild(loginPage); };
     loginPage.appendChild(magicLinkModal(onUserLogin, onReturn));
 };
-var loginPage = function (backgroundImg, onUserLogin, text) {
-    if (text === void 0) { text = getTranslation('sign-in-msg-general'); }
+var loginPage = function (backgroundImg, onUserLogin) {
     var result = document.createElement('login-page');
     applyPageStyles(result);
     var section = document.createElement('section');
@@ -1094,11 +1093,11 @@ var loginPage = function (backgroundImg, onUserLogin, text) {
     var explanation = document.createElement('sign-in-explanation');
     explanation.textContent = getTranslation('sign-in-explanation');
     var msg = document.createElement('sign-in-msg');
-    msg.textContent = text;
+    msg.textContent = getTranslation('sign-in-msg-general');
     var google = loginButton('Google', function () { return onGoogleSignIn(onUserLogin); });
     var microsoft = loginButton('Microsoft', function () { return onMicrosoftSignIn(onUserLogin); });
     var linkedin = loginButton('LinkedIn', function () { return console.log('login with Linkedin'); });
-    var email = loginButton('Email', function () { return onMagicLinkRequest(result, onUserLogin); });
+    var email = loginButton('Email', function () { return onEmailLoginRequest(result, onUserLogin); });
     result.style.backgroundImage = "url(".concat(backgroundImg, ")");
     section.append(salutation, explanation, msg, google, microsoft, linkedin, email);
     result.appendChild(section);
