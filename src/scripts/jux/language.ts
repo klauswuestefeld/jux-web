@@ -19,8 +19,8 @@ export const reloadWithLanguageOverride = (lang: string) => {
 // @ts-ignore
 export const getTranslation = (k: string): string => translations[k] || k;
 
-export const initLanguage = (translations_: any) => {
-  translations = translations_[chosenLanguage];
+export const initLanguage = (translations_: any, defaultLanguage: string = 'en') => {
+  translations = translations_[chosenLanguage] || translations_[defaultLanguage];
   document.title = getTranslation('title');
-  document.documentElement.lang = chosenLanguage;
+  document.documentElement.lang = translations_[chosenLanguage] ? chosenLanguage : defaultLanguage;
 }
