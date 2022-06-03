@@ -39,10 +39,11 @@ var reloadWithLanguageOverride = function (lang) {
 };
 // @ts-ignore
 var getTranslation = function (k) { return translations[k] || k; };
-var initLanguage = function (translations_) {
-    translations = translations_[chosenLanguage];
+var initLanguage = function (translations_, defaultLanguage) {
+    if (defaultLanguage === void 0) { defaultLanguage = 'en'; }
+    translations = translations_[chosenLanguage] || translations_[defaultLanguage];
     document.title = getTranslation('title');
-    document.documentElement.lang = chosenLanguage;
+    document.documentElement.lang = translations_[chosenLanguage] ? chosenLanguage : defaultLanguage;
 };
 
 var THRESHOLD_WIDTH = 640;
