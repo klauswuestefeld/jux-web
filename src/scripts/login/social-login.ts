@@ -3,7 +3,7 @@ import { juxModal } from '../jux-modal';
 import { loginButton } from './login-button';
 import { handleMagicLinkRequest, onGoogleSignIn, onMicrosoftSignIn } from './session';
 
-export const socialLoginModal = (userEmail: string, mailExchanger: string, token: any, onUserLogin: any, onReturn: any): HTMLElement => {
+export const socialLoginModal = (userEmail: string, mailExchanger: string, token: any, onUserLogin: any, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, closeMagicLinkModal: any): HTMLElement => {
   const result = document.createElement('social-login-modal');
 
   const email = document.createElement('p');
@@ -20,7 +20,8 @@ export const socialLoginModal = (userEmail: string, mailExchanger: string, token
   const proceedMagicLinkRequest = document.createElement('a');
   proceedMagicLinkRequest.textContent = getTranslation('proceed-magic-link-request');
   proceedMagicLinkRequest.addEventListener('click', () => {
-    handleMagicLinkRequest(token, onReturn, userEmail);
+    handleMagicLinkRequest(token, onReturn, backgroundImage, currentPage, clientBody, userEmail);
+    closeMagicLinkModal();
     result.remove();
   });
 

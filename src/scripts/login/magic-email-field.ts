@@ -6,9 +6,9 @@ import { handleMagicLinkRequest } from './session';
 import { socialLoginModal } from './social-login';
 import { isValidEmail } from './utils/string';
 
-const recommendSocialLogin = (userEmail: string, mailExchanger: string, token: any, onUserLogin: any, onReturn: any) => {
+const recommendSocialLogin = (userEmail: string, mailExchanger: string, token: any, onUserLogin: any, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, closeMagicLinkModal: any) => {
   document.querySelector('magic-link-modal')?.remove();
-  document.body.appendChild(socialLoginModal(userEmail, mailExchanger, token, onUserLogin, onReturn));
+  document.body.appendChild(socialLoginModal(userEmail, mailExchanger, token, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal));
 }
 
 const hasProvider = (data: any, provider: string) => {
@@ -33,9 +33,10 @@ const getMailExchanger = async (domainName: string): Promise<any> => {
   return null;
 }
 
-const onMagicLinkRequest = async (token: any, input: HTMLInputElement, onUserLogin: any, onReturn: any) => {
+const onMagicLinkRequest = async (token: any, input: HTMLInputElement, onUserLogin: any, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, closeMagicLinkModal: any) => {
   const email = input.value;
   if (!email.includes('-test@') && !token) {
+    console.error('invalid-captcha-response');
     // logError('invalid-captcha-response');
 
     return;
@@ -47,13 +48,14 @@ const onMagicLinkRequest = async (token: any, input: HTMLInputElement, onUserLog
     const supportedMailExchanger = mailExchanger !== null;
 
     if (supportedMailExchanger) {
-      recommendSocialLogin(email, mailExchanger, token, onUserLogin, onReturn);
+      recommendSocialLogin(email, mailExchanger, token, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal);
 
       return;
     }
   }
 
-  handleMagicLinkRequest(token, onReturn);
+  handleMagicLinkRequest(token, onReturn, backgroundImage, currentPage, clientBody);
+  closeMagicLinkModal();
 }
 
 const applyMagicEmailFieldStyle = (el: HTMLElement) => {
@@ -93,7 +95,7 @@ const applyBtnStyle = (btn: HTMLButtonElement) => {
   btn.style.position = 'relative';
 }
 
-export const magicEmailField = (onUserLogin: any, onReturn: any): HTMLElement => {
+export const magicEmailField = (onUserLogin: any, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, closeMagicLinkModal: any): HTMLElement => {
   const result = document.createElement('magic-email-field');
   applyMagicEmailFieldStyle(result);
 
@@ -108,7 +110,7 @@ export const magicEmailField = (onUserLogin: any, onReturn: any): HTMLElement =>
 
   input.addEventListener('keydown', (ev) => {
     if (ev.key === 'Enter') {
-      onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn);
+      onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal);
     }
   });
 
@@ -116,7 +118,7 @@ export const magicEmailField = (onUserLogin: any, onReturn: any): HTMLElement =>
   applyBtnStyle(btn);
   btn.id = 'send-magic';
   btn.className = 'primary-button';
-  btn.addEventListener('click', (_ev) => onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn));
+  btn.addEventListener('click', (_ev) => onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal));
   btn.textContent = getTranslation('send-magic');
 
   result.append(input, captcha, btn);

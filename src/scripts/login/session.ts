@@ -56,7 +56,7 @@ export const onGoogleSignIn = (onUserLogin: any) => {
   }, onCookieError);
 }
 
-export const handleMagicLinkRequest = (token: string | null, onReturn: any, email: string = '') => {
+export const handleMagicLinkRequest = (token: string | null, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, email: string = '') => {
   if (!email) {
     const mailMagic = document.querySelector('#mail-magic') as HTMLInputElement;
     email = mailMagic.value;
@@ -65,16 +65,10 @@ export const handleMagicLinkRequest = (token: string | null, onReturn: any, emai
   const payload = { email, token };
 
   requestMagicLink(payload, (_res: any) => {
-    document.body.appendChild(magicLinkRequestedPage('', onReturn));
+    currentPage.remove();
+    clientBody.appendChild(magicLinkRequestedPage(backgroundImage, onReturn));
 
-    const magicLinkEmail = document.querySelector('#magic-link-email');
-    if (!magicLinkEmail) {
-      console.error('#magic-link-email não foi encontrado');
-      // TODO: error reporting
-      // logError('#magic-link-email não foi encontrado', 'generic-help-msg');
-
-      return;
-    }
+    const magicLinkEmail = document.querySelector('#magic-link-email') as HTMLElement;
     magicLinkEmail.textContent = email;
   });
 }

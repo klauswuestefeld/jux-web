@@ -2,7 +2,7 @@ import { getTranslation } from '../jux/language';
 import { juxModal } from '../jux-modal';
 import { magicEmailField } from './magic-email-field';
 
-export const magicLinkModal = (onUserLogin: any, onReturn: any): HTMLElement => {
+export const magicLinkModal = (onUserLogin: any, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement): HTMLElement => {
   const result = document.createElement('magic-link-modal');
 
   const subtitle = document.createElement('magic-link-request-subtitle');
@@ -12,7 +12,14 @@ export const magicLinkModal = (onUserLogin: any, onReturn: any): HTMLElement => 
   const body = document.createElement('magic-link-request-body');
   body.append(
     subtitle,
-    magicEmailField(onUserLogin, onReturn)
+    magicEmailField(
+      onUserLogin,
+      onReturn,
+      backgroundImage,
+      currentPage,
+      clientBody,
+      () => result.remove()
+    )
   );
 
   const modal = juxModal(

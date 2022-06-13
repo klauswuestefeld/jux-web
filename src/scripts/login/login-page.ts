@@ -27,9 +27,10 @@ const applyPageStyles = (page: HTMLElement) => {
     page.style.height = '100%';
 }
 
-const onEmailLoginRequest = (loginPage: HTMLElement, onUserLogin: any): void => {
+const onEmailLoginRequest = (loginPage: HTMLElement, onUserLogin: any, backgroundImage: string): void => {
     const onReturn = () => document.appendChild(loginPage);
-    loginPage.appendChild(magicLinkModal(onUserLogin, onReturn));
+    const body = document.body;
+    loginPage.appendChild(magicLinkModal(onUserLogin, onReturn, backgroundImage, loginPage, body));
 }
 
 export const loginPage = (backgroundImg: string, onUserLogin: any): HTMLElement => {
@@ -51,7 +52,7 @@ export const loginPage = (backgroundImg: string, onUserLogin: any): HTMLElement 
     const google = loginButton('Google', () => onGoogleSignIn(onUserLogin));
     const microsoft = loginButton('Microsoft', () => onMicrosoftSignIn(onUserLogin));
     const linkedin = loginButton('LinkedIn', () => console.log('login with Linkedin'));
-    const email = loginButton('Email', () => onEmailLoginRequest(result, onUserLogin));
+    const email = loginButton('Email', () => onEmailLoginRequest(result, onUserLogin, backgroundImg));
 
     result.style.backgroundImage = `url(${backgroundImg})`;
 
