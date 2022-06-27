@@ -33,7 +33,7 @@ const getMailExchanger = async (domainName: string): Promise<any> => {
   return null;
 }
 
-const onMagicLinkRequest = async (token: any, input: HTMLInputElement, onUserLogin: any, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, closeMagicLinkModal: any) => {
+export const onMagicLinkRequest = async (token: any, input: HTMLInputElement, onUserLogin: any, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, closeMagicLinkModal: any) => {
   const email = input.value;
   if (!email.includes('-test@') && !token) {
     console.error('invalid-captcha-response');

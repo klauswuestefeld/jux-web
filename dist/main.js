@@ -812,9 +812,26 @@ var contactUsModal = function (subject) {
     return result;
 };
 
+var applyContainerStyles$1 = function (container) {
+    container.style.backgroundColor = '#ffffffdd';
+    container.style.borderRadius = '16px';
+    container.style.inset = '50% 50% 50% 0';
+    container.style.position = 'relative';
+    container.style.transform = 'translateY(-50%)';
+    container.style.width = '620px';
+    container.style.alignItems = 'center';
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.fontSize = '16px';
+    container.style.height = '100%';
+    container.style.justifyContent = 'center';
+    container.style.margin = '0 auto';
+    container.style.paddingTop = '0';
+};
 var magicLinkRequestedPage = function (backgroundImg, onReturn) {
     var result = document.createElement('magic-link-requested-page');
     var section = document.createElement('section');
+    applyContainerStyles$1(section);
     var magicLinkSent = document.createElement('p');
     magicLinkSent.id = 'magic-link-sent';
     magicLinkSent.textContent = getTranslation(magicLinkSent.id);
@@ -835,7 +852,7 @@ var magicLinkRequestedPage = function (backgroundImg, onReturn) {
         onReturn();
     };
     section.append(magicLinkSent, magicLinkEmail, magicLinkHowTo, btn, returnLink);
-    result.style.backgroundImage = "url(".concat(backgroundImg, ")");
+    result.style.backgroundImage = backgroundImg;
     result.appendChild(section);
     return result;
 };
@@ -1133,6 +1150,7 @@ exports.handleMagicLinkRequest = handleMagicLinkRequest;
 exports.initLanguage = initLanguage;
 exports.loginButton = loginButton;
 exports.loginPage = loginPage;
+exports.onMagicLinkRequest = onMagicLinkRequest;
 exports.onMicrosoftSignIn = onMicrosoftSignIn;
 exports.reloadWithLanguageOverride = reloadWithLanguageOverride;
 exports.requestMagicLink = requestMagicLink;
