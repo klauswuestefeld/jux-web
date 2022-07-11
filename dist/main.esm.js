@@ -1120,4 +1120,4 @@ var loginPage = function (backgroundImg, onUserLogin) {
     return result;
 };
 
-export { chosenLanguage, getTranslation, handleMagicLinkRequest, initLanguage, loginButton, loginPage, onMagicLinkRequest, onMicrosoftSignIn, reloadWithLanguageOverride, requestMagicLink };
+export { chosenLanguage, getTranslation, handleMagicLinkRequest, initLanguage, loginButton, loginPage, magicLinkModal, onMicrosoftSignIn, reloadWithLanguageOverride, requestMagicLink };

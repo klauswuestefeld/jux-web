@@ -3,7 +3,7 @@ export { loginButton } from './login/login-button';
 export { loginPage } from './login/login-page';
 export { handleMagicLinkRequest, onMicrosoftSignIn } from './login/session';
 export { requestMagicLink } from './api-client';
-export { onMagicLinkRequest } from './login/magic-email-field';
+export { magicLinkModal } from './login/magic-link-modal';
 declare global {
     interface Window {
         submitCaptcha: any;
