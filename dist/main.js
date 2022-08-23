@@ -812,6 +812,15 @@ var contactUsModal = function (subject) {
     return result;
 };
 
+var applyPageStyles$1 = function (page, backgroundImg) {
+    page.style.backgroundImage = "url(".concat(backgroundImg, ")");
+    page.style.display = 'block';
+    page.style.width = '100%';
+    page.style.height = '100%';
+    page.style.backgroundPosition = '50%';
+    page.style.backgroundSize = 'cover';
+    page.style.display = 'block';
+};
 var applyContainerStyles$1 = function (container) {
     container.style.backgroundColor = '#ffffffdd';
     container.style.borderRadius = '16px';
@@ -828,6 +837,19 @@ var applyContainerStyles$1 = function (container) {
     container.style.margin = '0 auto';
     container.style.paddingTop = '0';
 };
+var applyBtnStyles = function (btn) {
+    btn.style.cursor = 'pointer';
+    btn.style.textDecoration = 'underline';
+    btn.style.border = 'none';
+    btn.style.backgroundColor = '';
+    btn.style.background = 'none';
+    btn.style.boxSizing = 'border-box';
+    btn.style.margin = '0';
+    btn.style.outline = 'none';
+    btn.style.padding = '0';
+    btn.style.whiteSpace = 'normal';
+    btn.style.font = 'inherit';
+};
 var magicLinkRequestedPage = function (backgroundImg, onReturn) {
     var result = document.createElement('magic-link-requested-page');
     var section = document.createElement('section');
@@ -835,24 +857,33 @@ var magicLinkRequestedPage = function (backgroundImg, onReturn) {
     var magicLinkSent = document.createElement('p');
     magicLinkSent.id = 'magic-link-sent';
     magicLinkSent.textContent = getTranslation(magicLinkSent.id);
+    magicLinkSent.style.marginBottom = '10px';
     var magicLinkEmail = document.createElement('p');
     magicLinkEmail.id = 'magic-link-email';
-    magicLinkEmail.setAttribute('class', 'strong');
+    magicLinkEmail.style.fontWeight = '700';
+    magicLinkEmail.style.marginBottom = '10px';
     var magicLinkHowTo = document.createElement('p');
     magicLinkHowTo.id = 'magic-link-how-to';
     magicLinkHowTo.innerHTML = getTranslation(magicLinkHowTo.id);
+    magicLinkHowTo.style.padding = '0 30px';
+    magicLinkHowTo.style.textAlign = 'center';
     var btn = document.createElement('button');
     btn.id = 'email-not-received-btn';
     btn.addEventListener('click', function () { return document.body.appendChild(contactUsModal('email-not-sent')); });
     btn.textContent = getTranslation('magic-link-let-us-know');
+    applyBtnStyles(btn);
     var returnLink = document.createElement('a');
     returnLink.textContent = getTranslation('return-link');
     returnLink.onclick = function () {
         result.remove();
         onReturn();
     };
+    returnLink.style.marginTop = '32px';
+    returnLink.style.cursor = 'pointer';
+    returnLink.style.fontWeight = '700';
+    returnLink.style.textDecoration = 'underline';
     section.append(magicLinkSent, magicLinkEmail, magicLinkHowTo, btn, returnLink);
-    result.style.backgroundImage = backgroundImg;
+    applyPageStyles$1(result, backgroundImg);
     result.appendChild(section);
     return result;
 };
