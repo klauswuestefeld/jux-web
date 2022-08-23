@@ -28,8 +28,8 @@ const applyPageStyles = (page: HTMLElement) => {
 }
 
 const onEmailLoginRequest = (loginPage: HTMLElement, onUserLogin: any, backgroundImage: string): void => {
-    const onReturn = () => document.appendChild(loginPage);
     const body = document.body;
+    const onReturn = () => body.appendChild(loginPage);
     loginPage.appendChild(magicLinkModal(onUserLogin, onReturn, backgroundImage, loginPage, body));
 }
 

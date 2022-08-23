@@ -1150,8 +1150,8 @@ var applyPageStyles = function (page) {
     page.style.height = '100%';
 };
 var onEmailLoginRequest = function (loginPage, onUserLogin, backgroundImage) {
-    var onReturn = function () { return document.appendChild(loginPage); };
     var body = document.body;
+    var onReturn = function () { return body.appendChild(loginPage); };
     loginPage.appendChild(magicLinkModal(onUserLogin, onReturn, backgroundImage, loginPage, body));
 };
 var loginPage = function (backgroundImg, onUserLogin) {
