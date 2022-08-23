@@ -10,6 +10,7 @@ let backendUrlToTry = backendUrl;
 const apiUrl = backendUrl + 'api/';
 export const googleAuthUrl = backendUrl + 'auth-google?google-id-token=';
 export const microsoftAuthUrl = backendUrl + 'auth-microsoft?access-token=';
+const magicAuthUrl = backendUrl + 'auth-magic?token=';
 const magicAuthReqUrl = backendUrl + 'magic-link-request?email=';
 let timeout: any;
 const maxRetries = 20;
@@ -152,6 +153,10 @@ export const requestMagicLink = (data: any, onJsonResponse: (response: any) => a
     onJsonResponse,
     () => { }
   );
+}
+
+export const openMagicLink = (magicToken: string, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
+  backendRequest('GET', magicAuthUrl + magicToken, undefined, onJsonResponse, onHelpMessage);
 }
 
 export const getMXData = async (domainName: string): Promise<any> => {

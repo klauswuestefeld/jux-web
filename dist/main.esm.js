@@ -172,6 +172,7 @@ var backendUrlToTry = backendUrl;
 var apiUrl = backendUrl + 'api/';
 var googleAuthUrl = backendUrl + 'auth-google?google-id-token=';
 var microsoftAuthUrl = backendUrl + 'auth-microsoft?access-token=';
+var magicAuthUrl = backendUrl + 'auth-magic?token=';
 var magicAuthReqUrl = backendUrl + 'magic-link-request?email=';
 var timeout;
 var maxRetries = 20;
@@ -278,6 +279,9 @@ var backendGetPromise = function (endpoint) { return new Promise(function (resol
 }); };
 var requestMagicLink = function (data, onJsonResponse) {
     backendRequest('GET', magicAuthReqUrl + encodeURIComponent(data.email) + '&destination=' + extractTokenFromWindowLocation('destination') + '&token=' + data.token, undefined, onJsonResponse, function () { });
+};
+var openMagicLink = function (magicToken, onJsonResponse, onHelpMessage) {
+    backendRequest('GET', magicAuthUrl + magicToken, undefined, onJsonResponse, onHelpMessage);
 };
 var getMXData = function (domainName) { return __awaiter(void 0, void 0, void 0, function () {
     var records, recordsJson, answer, data;
@@ -871,10 +875,72 @@ var setBackendToken = function (token) {
         localStorage.setItem('token', token);
     }
 };
+var getBackendToken = function () {
+    var _a;
+    var token = (_a = localStorage.getItem('token')) !== null && _a !== void 0 ? _a : '';
+    // @ts-ignore
+    window.store.backendToken = token;
+    return token;
+};
 var onTokenAcquired = function (token, onUserLogin) {
     setBackendToken(token);
     // setSuperToken();
     onUserLogin();
+};
+var clearSession = function () {
+    // onUserChanged(null);
+    localStorage.clear();
+    // @ts-ignore
+    window.store = {};
+};
+var onAuthenticationFailure = function (msg) {
+    localStorage.removeItem('token');
+    // displayPage(Page.LOGIN);
+    alert(getTranslation(msg));
+};
+var onAuthentication = function (onUserLogin, user, type) {
+    if ((user.token && getBackendToken()) && getBackendToken() !== user.token) {
+        clearSession();
+    }
+    // @ts-ignore
+    window.store.currentUser = user;
+    if (type === 'Token Authentication') {
+        user.token = localStorage.getItem('token');
+    }
+    onTokenAcquired(user.token, onUserLogin);
+    // mixpanelIdentify(user);
+    // checkMixpanel(() => mixpanel.track('Login', { 'Login Type': type }));
+};
+var displayPage = function (clientApp, page) {
+    Array.from(clientApp.children).forEach(function (el) { return el.remove(); });
+    clientApp.appendChild(page);
+};
+var initSession = function (clientApp, onUserLogin, backgroundImage) {
+    // if (startNewDemo()) {
+    //   initDemo(setBackendToken, onAuthentication);
+    //   return;
+    // }
+    var magicToken = extractTokenFromWindowLocation('magic-link');
+    if (magicToken) {
+        openMagicLink(magicToken, function (res) { return onAuthentication(onUserLogin, res, 'Magic Link'); }, function () { return onAuthenticationFailure('unable-magic-login'); });
+        return;
+    }
+    if (getBackendToken()) {
+        backendGet('profile', function (res) { return onAuthentication(onUserLogin, res, 'Token Authentication'); }, function (_err) { return onAuthenticationFailure('login-failed'); });
+        return;
+    }
+    displayPage(clientApp, loginPage(backgroundImage, onUserLogin));
+    // const linkedinToken = extractTokenFromWindowLocation('code', '\&state=9893849343');
+    // if (linkedinToken) {
+    //   openLinkedinSession(
+    //     linkedinToken,
+    //     (res) => onAuthentication(res, 'Linkedin Authentication'),
+    //     () => onAuthenticationFailure('unable-linkedin-login')
+    //   );
+    //   return;
+    // }
+    // validateThirdPartyCookies(initGapi, () => displayPage(Page.LOGIN));
+    // checkMixpanel(() => mixpanel.track('View Login Page'));
 };
 var onMicrosoftSignIn = function (onUserLogin) { return __awaiter(void 0, void 0, void 0, function () {
     var msalConfig, msalInstance, loginRequest, loginResponse, accessToken, err_1;
@@ -1151,4 +1217,4 @@ var loginPage = function (backgroundImg, onUserLogin) {
     return result;
 };
 
-export { chosenLanguage, getTranslation, handleMagicLinkRequest, initLanguage, loginButton, loginPage, magicLinkModal, onMicrosoftSignIn, reloadWithLanguageOverride, requestMagicLink };
+export { chosenLanguage, getTranslation, handleMagicLinkRequest, initLanguage, initSession, loginButton, loginPage, magicLinkModal, onMicrosoftSignIn, reloadWithLanguageOverride, requestMagicLink };
