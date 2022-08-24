@@ -915,7 +915,7 @@ var displayPage = function (clientApp, page) {
     Array.from(clientApp.children).forEach(function (el) { return el.remove(); });
     clientApp.appendChild(page);
 };
-var initSession = function (clientApp, onUserLogin, backgroundImage) {
+var initSession = function (clientApp, supportedLoginTypes, onUserLogin, backgroundImage) {
     // if (startNewDemo()) {
     //   initDemo(setBackendToken, onAuthentication);
     //   return;
@@ -929,7 +929,7 @@ var initSession = function (clientApp, onUserLogin, backgroundImage) {
         backendGet('profile', function (res) { return onAuthentication(onUserLogin, res, 'Token Authentication'); }, function (_err) { return onAuthenticationFailure('login-failed'); });
         return;
     }
-    displayPage(clientApp, loginPage(backgroundImage, onUserLogin));
+    displayPage(clientApp, loginPage(backgroundImage, onUserLogin, supportedLoginTypes));
     // const linkedinToken = extractTokenFromWindowLocation('code', '\&state=9893849343');
     // if (linkedinToken) {
     //   openLinkedinSession(
@@ -1065,7 +1065,7 @@ var getMailExchanger = function (domainName) { return __awaiter(void 0, void 0, 
         }
     });
 }); };
-var onMagicLinkRequest = function (token, input, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal) { return __awaiter(void 0, void 0, void 0, function () {
+var onMagicLinkRequest = function (token, input, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal, loginTypes) { return __awaiter(void 0, void 0, void 0, function () {
     var email, domain, mailExchanger, supportedMailExchanger;
     return __generator(this, function (_a) {
         switch (_a.label) {
@@ -1082,7 +1082,7 @@ var onMagicLinkRequest = function (token, input, onUserLogin, onReturn, backgrou
             case 1:
                 mailExchanger = _a.sent();
                 supportedMailExchanger = mailExchanger !== null;
-                if (supportedMailExchanger) {
+                if (supportedMailExchanger && loginTypes.includes(mailExchanger)) {
                     recommendSocialLogin(email, mailExchanger, token, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal);
                     return [2 /*return*/];
                 }
@@ -1128,7 +1128,7 @@ var applyBtnStyle = function (btn) {
     btn.style.padding = '10px 16px';
     btn.style.position = 'relative';
 };
-var magicEmailField = function (onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal) {
+var magicEmailField = function (onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal, loginTypes) {
     var result = document.createElement('magic-email-field');
     applyMagicEmailFieldStyle(result);
     var captcha = googleCaptcha();
@@ -1140,26 +1140,26 @@ var magicEmailField = function (onUserLogin, onReturn, backgroundImage, currentP
     applyInputStyle(input);
     input.addEventListener('keydown', function (ev) {
         if (ev.key === 'Enter') {
-            onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal);
+            onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal, loginTypes);
         }
     });
     var btn = document.createElement('button');
     applyBtnStyle(btn);
     btn.id = 'send-magic';
     btn.className = 'primary-button';
-    btn.addEventListener('click', function (_ev) { return onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal); });
+    btn.addEventListener('click', function (_ev) { return onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal, loginTypes); });
     btn.textContent = getTranslation('send-magic');
     result.append(input, captcha, btn);
     return result;
 };
 
-var magicLinkModal = function (onUserLogin, onReturn, backgroundImage, currentPage, clientBody) {
+var magicLinkModal = function (onUserLogin, onReturn, backgroundImage, currentPage, clientBody, loginTypes) {
     var result = document.createElement('magic-link-modal');
     var subtitle = document.createElement('magic-link-request-subtitle');
     subtitle.style.fontSize = '14px';
     subtitle.textContent = getTranslation('magic-link-request-subtitle');
     var body = document.createElement('magic-link-request-body');
-    body.append(subtitle, magicEmailField(onUserLogin, onReturn, backgroundImage, currentPage, clientBody, function () { return result.remove(); }));
+    body.append(subtitle, magicEmailField(onUserLogin, onReturn, backgroundImage, currentPage, clientBody, function () { return result.remove(); }, loginTypes));
     var modal = juxModal(getTranslation('magic-link-request-title'), [], '', false, false, body, '', '', function () { return result.remove(); });
     modal.setAttribute('data-cy', 'magic-link-modal');
     result.appendChild(modal);
@@ -1191,12 +1191,26 @@ var applyPageStyles = function (page) {
     page.style.display = 'block';
     page.style.height = '100%';
 };
-var onEmailLoginRequest = function (loginPage, onUserLogin, backgroundImage) {
+var onEmailLoginRequest = function (loginPage, onUserLogin, backgroundImage, loginTypes) {
     var body = document.body;
     var onReturn = function () { return body.appendChild(loginPage); };
-    loginPage.appendChild(magicLinkModal(onUserLogin, onReturn, backgroundImage, loginPage, body));
+    loginPage.appendChild(magicLinkModal(onUserLogin, onReturn, backgroundImage, loginPage, body, loginTypes));
 };
-var loginPage = function (backgroundImg, onUserLogin) {
+var appendLoginTypes = function (loginPage, section, onUserLogin, loginTypes, backgroundImg) {
+    if (loginTypes.includes('Google')) {
+        section.appendChild(loginButton('Google', function () { return onGoogleSignIn(onUserLogin); }));
+    }
+    if (loginTypes.includes('Microsoft')) {
+        section.appendChild(loginButton('Microsoft', function () { return onMicrosoftSignIn(onUserLogin); }));
+    }
+    if (loginTypes.includes('Linkedin')) {
+        section.appendChild(loginButton('LinkedIn', function () { return console.log('login with Linkedin'); }));
+    }
+    if (loginTypes.includes('Email')) {
+        section.appendChild(loginButton('Email', function () { return onEmailLoginRequest(loginPage, onUserLogin, backgroundImg, loginTypes); }));
+    }
+};
+var loginPage = function (backgroundImg, onUserLogin, loginTypes) {
     var result = document.createElement('login-page');
     applyPageStyles(result);
     var section = document.createElement('section');
@@ -1207,12 +1221,9 @@ var loginPage = function (backgroundImg, onUserLogin) {
     explanation.textContent = getTranslation('sign-in-explanation');
     var msg = document.createElement('sign-in-msg');
     msg.textContent = getTranslation('sign-in-msg-general');
-    var google = loginButton('Google', function () { return onGoogleSignIn(onUserLogin); });
-    var microsoft = loginButton('Microsoft', function () { return onMicrosoftSignIn(onUserLogin); });
-    var linkedin = loginButton('LinkedIn', function () { return console.log('login with Linkedin'); });
-    var email = loginButton('Email', function () { return onEmailLoginRequest(result, onUserLogin, backgroundImg); });
     result.style.backgroundImage = "url(".concat(backgroundImg, ")");
-    section.append(salutation, explanation, msg, google, microsoft, linkedin, email);
+    section.append(salutation, explanation, msg);
+    appendLoginTypes(result, section, onUserLogin, loginTypes, backgroundImg);
     result.appendChild(section);
     return result;
 };

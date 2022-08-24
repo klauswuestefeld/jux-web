@@ -27,13 +27,28 @@ const applyPageStyles = (page: HTMLElement) => {
     page.style.height = '100%';
 }
 
-const onEmailLoginRequest = (loginPage: HTMLElement, onUserLogin: any, backgroundImage: string): void => {
+const onEmailLoginRequest = (loginPage: HTMLElement, onUserLogin: any, backgroundImage: string, loginTypes: string[]): void => {
     const body = document.body;
     const onReturn = () => body.appendChild(loginPage);
-    loginPage.appendChild(magicLinkModal(onUserLogin, onReturn, backgroundImage, loginPage, body));
+    loginPage.appendChild(magicLinkModal(onUserLogin, onReturn, backgroundImage, loginPage, body, loginTypes));
 }
 
-export const loginPage = (backgroundImg: string, onUserLogin: any): HTMLElement => {
+const appendLoginTypes = (loginPage: HTMLElement, section: HTMLElement, onUserLogin: any, loginTypes: string[], backgroundImg: string) => {
+    if (loginTypes.includes('Google')) {
+        section.appendChild(loginButton('Google', () => onGoogleSignIn(onUserLogin)));
+    }
+    if (loginTypes.includes('Microsoft')) {
+        section.appendChild(loginButton('Microsoft', () => onMicrosoftSignIn(onUserLogin)));
+    }
+    if (loginTypes.includes('Linkedin')) {
+        section.appendChild(loginButton('LinkedIn', () => console.log('login with Linkedin')));
+    }
+    if (loginTypes.includes('Email')) {
+        section.appendChild(loginButton('Email', () => onEmailLoginRequest(loginPage, onUserLogin, backgroundImg, loginTypes)));
+    }
+}
+
+export const loginPage = (backgroundImg: string, onUserLogin: any, loginTypes: string[]): HTMLElement => {
     const result = document.createElement('login-page');
     applyPageStyles(result);
 
@@ -49,14 +64,11 @@ export const loginPage = (backgroundImg: string, onUserLogin: any): HTMLElement 
     const msg = document.createElement('sign-in-msg');
     msg.textContent = getTranslation('sign-in-msg-general');
 
-    const google = loginButton('Google', () => onGoogleSignIn(onUserLogin));
-    const microsoft = loginButton('Microsoft', () => onMicrosoftSignIn(onUserLogin));
-    const linkedin = loginButton('LinkedIn', () => console.log('login with Linkedin'));
-    const email = loginButton('Email', () => onEmailLoginRequest(result, onUserLogin, backgroundImg));
-
     result.style.backgroundImage = `url(${backgroundImg})`;
+    section.append(salutation, explanation, msg);
 
-    section.append(salutation, explanation, msg, google, microsoft, linkedin, email);
+    appendLoginTypes(result, section, onUserLogin, loginTypes, backgroundImg);
+
     result.appendChild(section);
 
     return result;

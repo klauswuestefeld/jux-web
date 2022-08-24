@@ -65,7 +65,7 @@ const displayPage = (clientApp: HTMLElement, page: HTMLElement) => {
   clientApp.appendChild(page);
 }
 
-export const initSession = (clientApp: HTMLElement, onUserLogin: any, backgroundImage: string) => {
+export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[], onUserLogin: any, backgroundImage: string) => {
   // if (startNewDemo()) {
   //   initDemo(setBackendToken, onAuthentication);
 
@@ -92,7 +92,7 @@ export const initSession = (clientApp: HTMLElement, onUserLogin: any, background
     return;
   };
 
-  displayPage(clientApp, loginPage(backgroundImage, onUserLogin));
+  displayPage(clientApp, loginPage(backgroundImage, onUserLogin, supportedLoginTypes));
 
   // const linkedinToken = extractTokenFromWindowLocation('code', '\&state=9893849343');
   // if (linkedinToken) {

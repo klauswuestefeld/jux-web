@@ -33,7 +33,7 @@ const getMailExchanger = async (domainName: string): Promise<any> => {
   return null;
 }
 
-export const onMagicLinkRequest = async (token: any, input: HTMLInputElement, onUserLogin: any, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, closeMagicLinkModal: any) => {
+export const onMagicLinkRequest = async (token: any, input: HTMLInputElement, onUserLogin: any, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, closeMagicLinkModal: any, loginTypes: string[]) => {
   const email = input.value;
   if (!email.includes('-test@') && !token) {
     console.error('invalid-captcha-response');
@@ -47,7 +47,7 @@ export const onMagicLinkRequest = async (token: any, input: HTMLInputElement, on
     const mailExchanger = await getMailExchanger(domain);
     const supportedMailExchanger = mailExchanger !== null;
 
-    if (supportedMailExchanger) {
+    if (supportedMailExchanger && loginTypes.includes(mailExchanger)) {
       recommendSocialLogin(email, mailExchanger, token, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal);
 
       return;
@@ -95,7 +95,7 @@ const applyBtnStyle = (btn: HTMLButtonElement) => {
   btn.style.position = 'relative';
 }
 
-export const magicEmailField = (onUserLogin: any, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, closeMagicLinkModal: any): HTMLElement => {
+export const magicEmailField = (onUserLogin: any, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, closeMagicLinkModal: any, loginTypes: string[]): HTMLElement => {
   const result = document.createElement('magic-email-field');
   applyMagicEmailFieldStyle(result);
 
@@ -110,7 +110,7 @@ export const magicEmailField = (onUserLogin: any, onReturn: any, backgroundImage
 
   input.addEventListener('keydown', (ev) => {
     if (ev.key === 'Enter') {
-      onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal);
+      onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal, loginTypes);
     }
   });
 
@@ -118,7 +118,7 @@ export const magicEmailField = (onUserLogin: any, onReturn: any, backgroundImage
   applyBtnStyle(btn);
   btn.id = 'send-magic';
   btn.className = 'primary-button';
-  btn.addEventListener('click', (_ev) => onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal));
+  btn.addEventListener('click', (_ev) => onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal, loginTypes));
   btn.textContent = getTranslation('send-magic');
 
   result.append(input, captcha, btn);

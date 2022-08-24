@@ -1,2 +1,2 @@
-export declare const onMagicLinkRequest: (token: any, input: HTMLInputElement, onUserLogin: any, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, closeMagicLinkModal: any) => Promise<void>;
-export declare const magicEmailField: (onUserLogin: any, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, closeMagicLinkModal: any) => HTMLElement;
+export declare const onMagicLinkRequest: (token: any, input: HTMLInputElement, onUserLogin: any, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, closeMagicLinkModal: any, loginTypes: string[]) => Promise<void>;
+export declare const magicEmailField: (onUserLogin: any, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, closeMagicLinkModal: any, loginTypes: string[]) => HTMLElement;
