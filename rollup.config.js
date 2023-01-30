@@ -1,4 +1,5 @@
 import typescript from 'rollup-plugin-typescript2';
+import commonjs from 'rollup-plugin-commonjs';
 
 export default [
   {
@@ -30,7 +31,10 @@ export default [
         '@azure/msal-browser': 'msal',
       },
     },
-    plugins: [typescript()],
+    plugins: [
+      commonjs(),
+      typescript()
+    ],
     external: ['@azure/msal-browser'],
   },
 ]
