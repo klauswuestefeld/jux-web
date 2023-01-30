@@ -32,7 +32,7 @@ export default [
       },
     },
     plugins: [
-      commonjs(),
+      commonjs({ include: 'node_modules/**', }),
       typescript()
     ],
     external: ['@azure/msal-browser'],
