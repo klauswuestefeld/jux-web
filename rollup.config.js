@@ -19,4 +19,18 @@ export default [
     plugins: [typescript()],
     external: ['@azure/msal-browser'],
   },
+  {
+    input: './src/scripts/main.ts',
+    output: {
+      file: './dist/jux-web.js',
+      format: 'iife',
+      name: 'juxWeb',
+      exports: 'named',
+      globals: {
+        '@azure/msal-browser': 'msal',
+      },
+    },
+    plugins: [typescript()],
+    external: ['@azure/msal-browser'],
+  },
 ]
