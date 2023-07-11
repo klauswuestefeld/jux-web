@@ -1,4 +1,4 @@
-import { backendGetPromise, googleAuthUrl } from '../api-client';
+import { backendGetPromise, getGoogleAuthUrl } from '../api-client';
 import { disableSignInLayout } from './utils/layout-changes';
 import { onTokenAcquired, setBackendToken } from './session';
 
@@ -30,7 +30,7 @@ const onUserChanged = async (googleUser: any, onUserLogin: any) => {
     // mixpanelIdentify(googleUser); TODO
 
     try {
-      await backendGetPromise(googleAuthUrl + googleUser.googletoken)
+      await backendGetPromise(getGoogleAuthUrl() + googleUser.googletoken)
         .then(res => {
           const { token } = res as any;
           // @ts-ignore

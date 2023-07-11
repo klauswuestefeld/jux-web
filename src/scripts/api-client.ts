@@ -1,22 +1,21 @@
 import { getTranslation } from './jux/language';
 import { extractTokenFromWindowLocation } from './login/utils/token';
 
-const kebabCasedProvider = localStorage.getItem('provider')?.replace(/\./g, '-') || '';
+const kebabCaseProvider = (): string => localStorage.getItem('provider')?.replace(/\./g, '-') || '';
 //@ts-ignore
-const dynamicBackendUrl: string | boolean = 
-  process.env.DYNAMIC_BACKEND_URL ? process.env.DYNAMIC_BACKEND_URL.replace('%provider', kebabCasedProvider) : false; 
+const getDynamicBackendUrl = (): string | boolean => process.env.DYNAMIC_BACKEND_URL ? process.env.DYNAMIC_BACKEND_URL.replace('%provider', kebabCaseProvider()) : false; 
 //@ts-ignore
-const backendUrl: string = dynamicBackendUrl || process.env.BACKEND_URL;
+const getBackendUrl = (): string => getDynamicBackendUrl() || process.env.BACKEND_URL;
 
 //@ts-ignore
-const secondaryBackendUrl = process.env.STAGING_BACKEND_URL || backendUrl;
-let backendUrlToTry = backendUrl;
+const getSecondaryBackendUrl = (): string => process.env.STAGING_BACKEND_URL || getBackendUrl();
+let getBackendUrlToTry = (): string => getBackendUrl();
 
-const apiUrl = backendUrl + 'api/';
-export const googleAuthUrl = backendUrl + 'auth-google?google-id-token=';
-export const microsoftAuthUrl = backendUrl + 'auth-microsoft?access-token=';
-const magicAuthUrl = backendUrl + 'auth-magic?token=';
-const magicAuthReqUrl = backendUrl + 'magic-link-request?email=';
+const getApiUrl = (): string => getBackendUrl() + 'api/';
+export const getGoogleAuthUrl = (): string => getBackendUrl() + 'auth-google?google-id-token=';
+export const getMicrosoftAuthUrl = (): string => getBackendUrl() + 'auth-microsoft?access-token=';
+const getMagicAuthUrl = (): string => getBackendUrl() + 'auth-magic?token=';
+const getMagicAuthReqUrl = (): string => getBackendUrl() + 'magic-link-request?email=';
 let timeout: any;
 const maxRetries = 20;
 let retries = 0;
@@ -55,10 +54,10 @@ export const backendRequest = (
   onJsonResponse: (response: any) => any,
   onHelpMessage: (message: string) => any
 ): void => {
-  if (url.includes(backendUrl)) {
-    url = url.replace(backendUrl, backendUrlToTry);
-  } else if (url.includes(secondaryBackendUrl)) {
-    url = url.replace(secondaryBackendUrl, backendUrlToTry);
+  if (url.includes(getBackendUrl())) {
+    url = url.replace(getBackendUrl(), getBackendUrlToTry());
+  } else if (url.includes(getSecondaryBackendUrl())) {
+    url = url.replace(getSecondaryBackendUrl(), getBackendUrlToTry());
   }
 
   clearInterval(timeout);
@@ -95,13 +94,13 @@ export const backendRequest = (
         renderOverlay();
       }
 
-      const backupBackendUrl = backendUrlToTry === backendUrl
-        ? secondaryBackendUrl
-        : backendUrl;
+      const backupBackendUrl = getBackendUrlToTry() === getBackendUrl()
+        ? getSecondaryBackendUrl()
+        : getBackendUrl();
 
-      url = url.replace(backendUrlToTry, backupBackendUrl);
+      url = url.replace(getBackendUrlToTry(), backupBackendUrl);
 
-      backendUrlToTry = backupBackendUrl;
+      getBackendUrlToTry = () => backupBackendUrl;
 
       timeout = setTimeout(() => {
         backendRequest(
@@ -136,12 +135,12 @@ export const backendRequest = (
 }
 
 export const backendPost = (endpoint: string, postContent: any, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
-  backendRequest('POST', apiUrl + endpoint, postContent, onJsonResponse, onHelpMessage);
+  backendRequest('POST', getApiUrl() + endpoint, postContent, onJsonResponse, onHelpMessage);
 }
 
 export const backendGet = (endpoint: string, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
-  let api = apiUrl + endpoint;
-  if (endpoint.includes(googleAuthUrl) || endpoint.includes(microsoftAuthUrl)) {
+  let api = getApiUrl() + endpoint;
+  if (endpoint.includes(getGoogleAuthUrl()) || endpoint.includes(getMicrosoftAuthUrl())) {
     api = endpoint;
   }
   backendRequest('GET', api, undefined, onJsonResponse, onHelpMessage);
@@ -153,7 +152,7 @@ export const backendGetPromise = (endpoint: string) => new Promise((resolve, rej
 export const requestMagicLink = (data: any, onJsonResponse: (response: any) => any): void => {
   backendRequest(
     'GET',
-    magicAuthReqUrl + encodeURIComponent(data.email) + '&destination=' + extractTokenFromWindowLocation('destination') + '&token=' + data.token,
+    getMagicAuthReqUrl() + encodeURIComponent(data.email) + '&destination=' + extractTokenFromWindowLocation('destination') + '&token=' + data.token,
     undefined,
     onJsonResponse,
     () => { }
@@ -161,7 +160,7 @@ export const requestMagicLink = (data: any, onJsonResponse: (response: any) => a
 }
 
 export const openMagicLink = (magicToken: string, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
-  backendRequest('GET', magicAuthUrl + magicToken, undefined, onJsonResponse, onHelpMessage);
+  backendRequest('GET', getMagicAuthUrl() + magicToken, undefined, onJsonResponse, onHelpMessage);
 }
 
 export const getMXData = async (domainName: string): Promise<any> => {

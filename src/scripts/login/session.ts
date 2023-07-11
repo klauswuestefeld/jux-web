@@ -1,4 +1,4 @@
-import { backendGet, backendGetPromise, microsoftAuthUrl, openMagicLink, requestMagicLink } from '../api-client';
+import { backendGet, backendGetPromise, getMicrosoftAuthUrl, openMagicLink, requestMagicLink } from '../api-client';
 import * as msal from '@azure/msal-browser';
 import { validateThirdPartyCookies } from './utils/cookies';
 import { authSignIn } from './auth';
@@ -117,7 +117,7 @@ export const onMicrosoftSignIn = async (onUserLogin: any) => {
   try {
     const loginResponse = await msalInstance.loginPopup(loginRequest);
     const { accessToken } = loginResponse;
-    await backendGetPromise(microsoftAuthUrl + accessToken)
+    await backendGetPromise(getMicrosoftAuthUrl() + accessToken)
       .then((res: any) => {
         const { token } = res;
         // @ts-ignore

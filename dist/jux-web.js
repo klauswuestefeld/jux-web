@@ -164,20 +164,19 @@ var juxWeb = (function (exports) {
       return token;
   };
 
-  var _a;
-  var kebabCasedProvider = ((_a = localStorage.getItem('provider')) === null || _a === void 0 ? void 0 : _a.replace(/\./g, '-')) || '';
+  var kebabCaseProvider = function () { var _a; return ((_a = localStorage.getItem('provider')) === null || _a === void 0 ? void 0 : _a.replace(/\./g, '-')) || ''; };
   //@ts-ignore
-  var dynamicBackendUrl = process.env.DYNAMIC_BACKEND_URL ? process.env.DYNAMIC_BACKEND_URL.replace('%provider', kebabCasedProvider) : false;
+  var getDynamicBackendUrl = function () { return process.env.DYNAMIC_BACKEND_URL ? process.env.DYNAMIC_BACKEND_URL.replace('%provider', kebabCaseProvider()) : false; };
   //@ts-ignore
-  var backendUrl = dynamicBackendUrl || process.env.BACKEND_URL;
+  var getBackendUrl = function () { return getDynamicBackendUrl() || process.env.BACKEND_URL; };
   //@ts-ignore
-  var secondaryBackendUrl = process.env.STAGING_BACKEND_URL || backendUrl;
-  var backendUrlToTry = backendUrl;
-  var apiUrl = backendUrl + 'api/';
-  var googleAuthUrl = backendUrl + 'auth-google?google-id-token=';
-  var microsoftAuthUrl = backendUrl + 'auth-microsoft?access-token=';
-  var magicAuthUrl = backendUrl + 'auth-magic?token=';
-  var magicAuthReqUrl = backendUrl + 'magic-link-request?email=';
+  var getSecondaryBackendUrl = function () { return process.env.STAGING_BACKEND_URL || getBackendUrl(); };
+  var getBackendUrlToTry = function () { return getBackendUrl(); };
+  var getApiUrl = function () { return getBackendUrl() + 'api/'; };
+  var getGoogleAuthUrl = function () { return getBackendUrl() + 'auth-google?google-id-token='; };
+  var getMicrosoftAuthUrl = function () { return getBackendUrl() + 'auth-microsoft?access-token='; };
+  var getMagicAuthUrl = function () { return getBackendUrl() + 'auth-magic?token='; };
+  var getMagicAuthReqUrl = function () { return getBackendUrl() + 'magic-link-request?email='; };
   var timeout;
   var maxRetries = 20;
   var retries = 0;
@@ -206,11 +205,11 @@ var juxWeb = (function (exports) {
       return req.response && req.response.error || req.response || req;
   };
   var backendRequest = function (requestType, url, postContent, onJsonResponse, onHelpMessage) {
-      if (url.includes(backendUrl)) {
-          url = url.replace(backendUrl, backendUrlToTry);
+      if (url.includes(getBackendUrl())) {
+          url = url.replace(getBackendUrl(), getBackendUrlToTry());
       }
-      else if (url.includes(secondaryBackendUrl)) {
-          url = url.replace(secondaryBackendUrl, backendUrlToTry);
+      else if (url.includes(getSecondaryBackendUrl())) {
+          url = url.replace(getSecondaryBackendUrl(), getBackendUrlToTry());
       }
       clearInterval(timeout);
       var req = new XMLHttpRequest();
@@ -239,11 +238,11 @@ var juxWeb = (function (exports) {
               if (!document.querySelector('reconnect-overlay')) {
                   renderOverlay();
               }
-              var backupBackendUrl = backendUrlToTry === backendUrl
-                  ? secondaryBackendUrl
-                  : backendUrl;
-              url = url.replace(backendUrlToTry, backupBackendUrl);
-              backendUrlToTry = backupBackendUrl;
+              var backupBackendUrl_1 = getBackendUrlToTry() === getBackendUrl()
+                  ? getSecondaryBackendUrl()
+                  : getBackendUrl();
+              url = url.replace(getBackendUrlToTry(), backupBackendUrl_1);
+              getBackendUrlToTry = function () { return backupBackendUrl_1; };
               timeout = setTimeout(function () {
                   backendRequest(requestType, url, postContent, onJsonResponse, onHelpMessage);
               }, 2000);
@@ -269,11 +268,11 @@ var juxWeb = (function (exports) {
       req.send(postContent);
   };
   var backendPost = function (endpoint, postContent, onJsonResponse, onHelpMessage) {
-      backendRequest('POST', apiUrl + endpoint, postContent, onJsonResponse, onHelpMessage);
+      backendRequest('POST', getApiUrl() + endpoint, postContent, onJsonResponse, onHelpMessage);
   };
   var backendGet = function (endpoint, onJsonResponse, onHelpMessage) {
-      var api = apiUrl + endpoint;
-      if (endpoint.includes(googleAuthUrl) || endpoint.includes(microsoftAuthUrl)) {
+      var api = getApiUrl() + endpoint;
+      if (endpoint.includes(getGoogleAuthUrl()) || endpoint.includes(getMicrosoftAuthUrl())) {
           api = endpoint;
       }
       backendRequest('GET', api, undefined, onJsonResponse, onHelpMessage);
@@ -282,10 +281,10 @@ var juxWeb = (function (exports) {
       return backendGet(endpoint, resolve, reject);
   }); };
   var requestMagicLink = function (data, onJsonResponse) {
-      backendRequest('GET', magicAuthReqUrl + encodeURIComponent(data.email) + '&destination=' + extractTokenFromWindowLocation('destination') + '&token=' + data.token, undefined, onJsonResponse, function () { });
+      backendRequest('GET', getMagicAuthReqUrl() + encodeURIComponent(data.email) + '&destination=' + extractTokenFromWindowLocation('destination') + '&token=' + data.token, undefined, onJsonResponse, function () { });
   };
   var openMagicLink = function (magicToken, onJsonResponse, onHelpMessage) {
-      backendRequest('GET', magicAuthUrl + magicToken, undefined, onJsonResponse, onHelpMessage);
+      backendRequest('GET', getMagicAuthUrl() + magicToken, undefined, onJsonResponse, onHelpMessage);
   };
   var getMXData = function (domainName) { return __awaiter$2(void 0, void 0, void 0, function () {
       var records, recordsJson, answer, data;
@@ -13705,7 +13704,7 @@ var juxWeb = (function (exports) {
                   _a.label = 1;
               case 1:
                   _a.trys.push([1, 3, , 4]);
-                  return [4 /*yield*/, backendGetPromise(googleAuthUrl + googleUser.googletoken)
+                  return [4 /*yield*/, backendGetPromise(getGoogleAuthUrl() + googleUser.googletoken)
                           .then(function (res) {
                           var token = res.token;
                           // @ts-ignore
@@ -14281,7 +14280,7 @@ var juxWeb = (function (exports) {
               case 2:
                   loginResponse = _a.sent();
                   accessToken = loginResponse.accessToken;
-                  return [4 /*yield*/, backendGetPromise(microsoftAuthUrl + accessToken)
+                  return [4 /*yield*/, backendGetPromise(getMicrosoftAuthUrl() + accessToken)
                           .then(function (res) {
                           var token = res.token;
                           // @ts-ignore
