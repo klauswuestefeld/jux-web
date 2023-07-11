@@ -92,7 +92,7 @@ export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[
     return;
   };
 
-  displayPage(clientApp, loginPage(backgroundImage, onUserLogin, supportedLoginTypes));
+  displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, supportedLoginTypes));
 
   // const linkedinToken = extractTokenFromWindowLocation('code', '\&state=9893849343');
   // if (linkedinToken) {

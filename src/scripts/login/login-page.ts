@@ -27,13 +27,12 @@ const applyPageStyles = (page: HTMLElement) => {
     page.style.height = '100%';
 }
 
-const onEmailLoginRequest = (loginPage: HTMLElement, onUserLogin: any, backgroundImage: string, loginTypes: string[]): void => {
-    const body = document.body;
-    const onReturn = () => body.appendChild(loginPage);
-    loginPage.appendChild(magicLinkModal(onUserLogin, onReturn, backgroundImage, loginPage, body, loginTypes));
+const onEmailLoginRequest = (clientApp: HTMLElement, loginPage: HTMLElement, onUserLogin: any, backgroundImage: string, loginTypes: string[]): void => {
+    const onReturn = () => clientApp.appendChild(loginPage);
+    loginPage.appendChild(magicLinkModal(onUserLogin, onReturn, backgroundImage, loginPage, clientApp, loginTypes));
 }
 
-const appendLoginTypes = (loginPage: HTMLElement, section: HTMLElement, onUserLogin: any, loginTypes: string[], backgroundImg: string) => {
+const appendLoginTypes = (loginPage: HTMLElement, section: HTMLElement, clientApp: HTMLElement, onUserLogin: any, loginTypes: string[], backgroundImg: string) => {
     if (loginTypes.includes('Google')) {
         section.appendChild(loginButton('Google', () => onGoogleSignIn(onUserLogin)));
     }
@@ -44,11 +43,11 @@ const appendLoginTypes = (loginPage: HTMLElement, section: HTMLElement, onUserLo
         section.appendChild(loginButton('LinkedIn', () => console.log('login with Linkedin')));
     }
     if (loginTypes.includes('Email')) {
-        section.appendChild(loginButton('Email', () => onEmailLoginRequest(loginPage, onUserLogin, backgroundImg, loginTypes)));
+        section.appendChild(loginButton('Email', () => onEmailLoginRequest(clientApp, loginPage, onUserLogin, backgroundImg, loginTypes)));
     }
 }
 
-export const loginPage = (backgroundImg: string, onUserLogin: any, loginTypes: string[]): HTMLElement => {
+export const loginPage = (clientApp: HTMLElement, backgroundImg: string, onUserLogin: any, loginTypes: string[]): HTMLElement => {
     const result = document.createElement('login-page');
     applyPageStyles(result);
 
@@ -67,7 +66,7 @@ export const loginPage = (backgroundImg: string, onUserLogin: any, loginTypes: s
     result.style.backgroundImage = `url(${backgroundImg})`;
     section.append(salutation, explanation, msg);
 
-    appendLoginTypes(result, section, onUserLogin, loginTypes, backgroundImg);
+    appendLoginTypes(result, section, clientApp, onUserLogin, loginTypes, backgroundImg);
 
     result.appendChild(section);
 

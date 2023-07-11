@@ -953,7 +953,7 @@ var initSession = function (clientApp, supportedLoginTypes, onUserLogin, backgro
         backendGet('profile', function (res) { return onAuthentication(onUserLogin, res, 'Token Authentication'); }, function (_err) { return onAuthenticationFailure('login-failed'); });
         return;
     }
-    displayPage(clientApp, loginPage(backgroundImage, onUserLogin, supportedLoginTypes));
+    displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, supportedLoginTypes));
     // const linkedinToken = extractTokenFromWindowLocation('code', '\&state=9893849343');
     // if (linkedinToken) {
     //   openLinkedinSession(
@@ -1215,12 +1215,11 @@ var applyPageStyles = function (page) {
     page.style.display = 'block';
     page.style.height = '100%';
 };
-var onEmailLoginRequest = function (loginPage, onUserLogin, backgroundImage, loginTypes) {
-    var body = document.body;
-    var onReturn = function () { return body.appendChild(loginPage); };
-    loginPage.appendChild(magicLinkModal(onUserLogin, onReturn, backgroundImage, loginPage, body, loginTypes));
+var onEmailLoginRequest = function (clientApp, loginPage, onUserLogin, backgroundImage, loginTypes) {
+    var onReturn = function () { return clientApp.appendChild(loginPage); };
+    loginPage.appendChild(magicLinkModal(onUserLogin, onReturn, backgroundImage, loginPage, clientApp, loginTypes));
 };
-var appendLoginTypes = function (loginPage, section, onUserLogin, loginTypes, backgroundImg) {
+var appendLoginTypes = function (loginPage, section, clientApp, onUserLogin, loginTypes, backgroundImg) {
     if (loginTypes.includes('Google')) {
         section.appendChild(loginButton('Google', function () { return onGoogleSignIn(onUserLogin); }));
     }
@@ -1231,10 +1230,10 @@ var appendLoginTypes = function (loginPage, section, onUserLogin, loginTypes, ba
         section.appendChild(loginButton('LinkedIn', function () { return console.log('login with Linkedin'); }));
     }
     if (loginTypes.includes('Email')) {
-        section.appendChild(loginButton('Email', function () { return onEmailLoginRequest(loginPage, onUserLogin, backgroundImg, loginTypes); }));
+        section.appendChild(loginButton('Email', function () { return onEmailLoginRequest(clientApp, loginPage, onUserLogin, backgroundImg, loginTypes); }));
     }
 };
-var loginPage = function (backgroundImg, onUserLogin, loginTypes) {
+var loginPage = function (clientApp, backgroundImg, onUserLogin, loginTypes) {
     var result = document.createElement('login-page');
     applyPageStyles(result);
     var section = document.createElement('section');
@@ -1247,7 +1246,7 @@ var loginPage = function (backgroundImg, onUserLogin, loginTypes) {
     msg.textContent = getTranslation('sign-in-msg-general');
     result.style.backgroundImage = "url(".concat(backgroundImg, ")");
     section.append(salutation, explanation, msg);
-    appendLoginTypes(result, section, onUserLogin, loginTypes, backgroundImg);
+    appendLoginTypes(result, section, clientApp, onUserLogin, loginTypes, backgroundImg);
     result.appendChild(section);
     return result;
 };
