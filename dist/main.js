@@ -187,11 +187,14 @@ var extractTokenFromWindowLocation = function (tokenParam, additionalParam) {
     return token;
 };
 
-var _a;
+var _a, _b;
+var kebabCasedProvider = ((_a = localStorage.getItem('provider')) === null || _a === void 0 ? void 0 : _a.replace(/\./g, '-')) || '';
 //@ts-ignore
-var backendUrl = process.env.BACKEND_URL;
+var dynamicBackendUrl = process.env.DYNAMIC_BACKEND_URL ? process.env.DYNAMIC_BACKEND_URL.replace('%provider', kebabCasedProvider) : false;
 //@ts-ignore
-var secondaryBackendUrl = (_a = process.env.STAGING_BACKEND_URL) !== null && _a !== void 0 ? _a : '';
+var backendUrl = dynamicBackendUrl || process.env.BACKEND_URL;
+//@ts-ignore
+var secondaryBackendUrl = (_b = process.env.STAGING_BACKEND_URL) !== null && _b !== void 0 ? _b : '';
 var backendUrlToTry = backendUrl;
 var apiUrl = backendUrl + 'api/';
 var googleAuthUrl = backendUrl + 'auth-google?google-id-token=';
@@ -1021,6 +1024,8 @@ var handleMagicLinkRequest = function (token, onReturn, backgroundImage, current
         email = mailMagic.value;
     }
     var payload = { email: email, token: token };
+    var provider = email.split('@')[1];
+    localStorage.setItem('provider', provider);
     requestMagicLink(payload, function (_res) {
         currentPage.remove();
         clientBody.appendChild(magicLinkRequestedPage(backgroundImage, onReturn));

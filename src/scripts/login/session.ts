@@ -154,6 +154,9 @@ export const handleMagicLinkRequest = (token: string | null, onReturn: any, back
 
   const payload = { email, token };
 
+  const provider = email.split('@')[1];
+  localStorage.setItem('provider', provider);
+
   requestMagicLink(payload, (_res: any) => {
     currentPage.remove();
     clientBody.appendChild(magicLinkRequestedPage(backgroundImage, onReturn));

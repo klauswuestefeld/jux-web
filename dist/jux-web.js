@@ -164,11 +164,14 @@ var juxWeb = (function (exports) {
       return token;
   };
 
-  var _a;
+  var _a, _b;
+  var kebabCasedProvider = ((_a = localStorage.getItem('provider')) === null || _a === void 0 ? void 0 : _a.replace(/\./g, '-')) || '';
   //@ts-ignore
-  var backendUrl = process.env.BACKEND_URL;
+  var dynamicBackendUrl = process.env.DYNAMIC_BACKEND_URL ? process.env.DYNAMIC_BACKEND_URL.replace('%provider', kebabCasedProvider) : false;
   //@ts-ignore
-  var secondaryBackendUrl = (_a = process.env.STAGING_BACKEND_URL) !== null && _a !== void 0 ? _a : '';
+  var backendUrl = dynamicBackendUrl || process.env.BACKEND_URL;
+  //@ts-ignore
+  var secondaryBackendUrl = (_b = process.env.STAGING_BACKEND_URL) !== null && _b !== void 0 ? _b : '';
   var backendUrlToTry = backendUrl;
   var apiUrl = backendUrl + 'api/';
   var googleAuthUrl = backendUrl + 'auth-google?google-id-token=';
@@ -14249,7 +14252,7 @@ var juxWeb = (function (exports) {
           backendGet('profile', function (res) { return onAuthentication(onUserLogin, res, 'Token Authentication'); }, function (_err) { return onAuthenticationFailure('login-failed'); });
           return;
       }
-      displayPage(clientApp, loginPage(backgroundImage, onUserLogin, supportedLoginTypes));
+      displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, supportedLoginTypes));
       // const linkedinToken = extractTokenFromWindowLocation('code', '\&state=9893849343');
       // if (linkedinToken) {
       //   openLinkedinSession(
@@ -14317,6 +14320,8 @@ var juxWeb = (function (exports) {
           email = mailMagic.value;
       }
       var payload = { email: email, token: token };
+      var provider = email.split('@')[1];
+      localStorage.setItem('provider', provider);
       requestMagicLink(payload, function (_res) {
           currentPage.remove();
           clientBody.appendChild(magicLinkRequestedPage(backgroundImage, onReturn));
@@ -14511,12 +14516,11 @@ var juxWeb = (function (exports) {
       page.style.display = 'block';
       page.style.height = '100%';
   };
-  var onEmailLoginRequest = function (loginPage, onUserLogin, backgroundImage, loginTypes) {
-      var body = document.body;
-      var onReturn = function () { return body.appendChild(loginPage); };
-      loginPage.appendChild(magicLinkModal(onUserLogin, onReturn, backgroundImage, loginPage, body, loginTypes));
+  var onEmailLoginRequest = function (clientApp, loginPage, onUserLogin, backgroundImage, loginTypes) {
+      var onReturn = function () { return clientApp.appendChild(loginPage); };
+      loginPage.appendChild(magicLinkModal(onUserLogin, onReturn, backgroundImage, loginPage, clientApp, loginTypes));
   };
-  var appendLoginTypes = function (loginPage, section, onUserLogin, loginTypes, backgroundImg) {
+  var appendLoginTypes = function (loginPage, section, clientApp, onUserLogin, loginTypes, backgroundImg) {
       if (loginTypes.includes('Google')) {
           section.appendChild(loginButton('Google', function () { return onGoogleSignIn(onUserLogin); }));
       }
@@ -14527,10 +14531,10 @@ var juxWeb = (function (exports) {
           section.appendChild(loginButton('LinkedIn', function () { return console.log('login with Linkedin'); }));
       }
       if (loginTypes.includes('Email')) {
-          section.appendChild(loginButton('Email', function () { return onEmailLoginRequest(loginPage, onUserLogin, backgroundImg, loginTypes); }));
+          section.appendChild(loginButton('Email', function () { return onEmailLoginRequest(clientApp, loginPage, onUserLogin, backgroundImg, loginTypes); }));
       }
   };
-  var loginPage = function (backgroundImg, onUserLogin, loginTypes) {
+  var loginPage = function (clientApp, backgroundImg, onUserLogin, loginTypes) {
       var result = document.createElement('login-page');
       applyPageStyles(result);
       var section = document.createElement('section');
@@ -14543,7 +14547,7 @@ var juxWeb = (function (exports) {
       msg.textContent = getTranslation('sign-in-msg-general');
       result.style.backgroundImage = "url(".concat(backgroundImg, ")");
       section.append(salutation, explanation, msg);
-      appendLoginTypes(result, section, onUserLogin, loginTypes, backgroundImg);
+      appendLoginTypes(result, section, clientApp, onUserLogin, loginTypes, backgroundImg);
       result.appendChild(section);
       return result;
   };

@@ -1,7 +1,12 @@
 import { getTranslation } from './jux/language';
 import { extractTokenFromWindowLocation } from './login/utils/token';
+
+const kebabCasedProvider = localStorage.getItem('provider')?.replace(/\./g, '-') || '';
 //@ts-ignore
-const backendUrl: string = process.env.BACKEND_URL;
+const dynamicBackendUrl: string | boolean = 
+  process.env.DYNAMIC_BACKEND_URL ? process.env.DYNAMIC_BACKEND_URL.replace('%provider', kebabCasedProvider) : false; 
+//@ts-ignore
+const backendUrl: string = dynamicBackendUrl || process.env.BACKEND_URL;
 
 //@ts-ignore
 const secondaryBackendUrl = process.env.STAGING_BACKEND_URL ?? '';
