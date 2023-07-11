@@ -1,4 +1,6 @@
 import typescript from 'rollup-plugin-typescript2';
+import commonjs from 'rollup-plugin-commonjs';
+import nodeResolve from 'rollup-plugin-node-resolve';
 
 export default [
   {
@@ -18,5 +20,22 @@ export default [
     },
     plugins: [typescript()],
     external: ['@azure/msal-browser'],
+  },
+  {
+    input: './src/scripts/main.ts',
+    output: {
+      file: './dist/jux-web.js',
+      format: 'iife',
+      name: 'juxWeb',
+      exports: 'named',
+      globals: {
+        '@azure/msal-browser': 'msal',
+      },
+    },
+    plugins: [
+      commonjs({ include: 'node_modules/**', }),
+      nodeResolve(),
+      typescript()
+    ],
   },
 ]
