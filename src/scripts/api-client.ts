@@ -9,7 +9,7 @@ const dynamicBackendUrl: string | boolean =
 const backendUrl: string = dynamicBackendUrl || process.env.BACKEND_URL;
 
 //@ts-ignore
-const secondaryBackendUrl = process.env.STAGING_BACKEND_URL ?? '';
+const secondaryBackendUrl = process.env.STAGING_BACKEND_URL || backendUrl;
 let backendUrlToTry = backendUrl;
 
 const apiUrl = backendUrl + 'api/';

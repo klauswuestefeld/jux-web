@@ -163,14 +163,14 @@ var extractTokenFromWindowLocation = function (tokenParam, additionalParam) {
     return token;
 };
 
-var _a, _b;
+var _a;
 var kebabCasedProvider = ((_a = localStorage.getItem('provider')) === null || _a === void 0 ? void 0 : _a.replace(/\./g, '-')) || '';
 //@ts-ignore
 var dynamicBackendUrl = process.env.DYNAMIC_BACKEND_URL ? process.env.DYNAMIC_BACKEND_URL.replace('%provider', kebabCasedProvider) : false;
 //@ts-ignore
 var backendUrl = dynamicBackendUrl || process.env.BACKEND_URL;
 //@ts-ignore
-var secondaryBackendUrl = (_b = process.env.STAGING_BACKEND_URL) !== null && _b !== void 0 ? _b : '';
+var secondaryBackendUrl = process.env.STAGING_BACKEND_URL || backendUrl;
 var backendUrlToTry = backendUrl;
 var apiUrl = backendUrl + 'api/';
 var googleAuthUrl = backendUrl + 'auth-google?google-id-token=';
