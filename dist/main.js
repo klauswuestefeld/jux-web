@@ -948,6 +948,10 @@ var initSession = function (clientApp, supportedLoginTypes, onUserLogin, backgro
     // }
     var magicToken = extractTokenFromWindowLocation('magic-link');
     if (magicToken) {
+        var host = extractTokenFromWindowLocation('host');
+        if (host) {
+            localStorage.setItem('provider', host);
+        }
         openMagicLink(magicToken, function (res) { return onAuthentication(onUserLogin, res, 'Magic Link'); }, function () { return onAuthenticationFailure('unable-magic-login'); });
         return;
     }

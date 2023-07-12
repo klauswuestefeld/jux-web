@@ -74,6 +74,11 @@ export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[
 
   const magicToken = extractTokenFromWindowLocation('magic-link');
   if (magicToken) {
+    const host = extractTokenFromWindowLocation('host');
+    if (host) {
+      localStorage.setItem('provider', host);
+    }
+
     openMagicLink(
       magicToken,
       (res: any) => onAuthentication(onUserLogin, res, 'Magic Link'),
