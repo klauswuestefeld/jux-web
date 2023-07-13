@@ -171,14 +171,20 @@ var extractTokenFromWindowLocation = function (tokenParam, additionalParam) {
     }
     var token = '';
     var tokenParameterName = "".concat(tokenParam, "=");
-    var tokenParameterIndex = window.location.search.indexOf(tokenParameterName);
+    var search = window.location.search;
+    var tokenParameterIndex = search.indexOf(tokenParameterName);
     if (tokenParameterIndex !== -1) {
         var tokenParameterNameLength = tokenParameterName.length;
-        var nextParameterIndex = window.location.search.indexOf('&', tokenParameterIndex);
-        token = (nextParameterIndex === -1) ?
-            window.location.search.substring(tokenParameterIndex + tokenParameterNameLength) :
-            window.location.search.substring(tokenParameterIndex + tokenParameterNameLength, nextParameterIndex);
-        var searchWithoutToken = window.location.search.replace("".concat(tokenParam, "=") + token, '').replace(additionalParam, '').replace('\&cypress=true', '');
+        var leadingAmpersandIndex = search.indexOf('&', tokenParameterIndex);
+        var searchWithoutToken = search;
+        token = search.substring(tokenParameterIndex + tokenParameterNameLength);
+        if (leadingAmpersandIndex !== -1) {
+            token = search.substring(tokenParameterIndex + tokenParameterNameLength, leadingAmpersandIndex);
+            searchWithoutToken = searchWithoutToken.slice(0, leadingAmpersandIndex) + searchWithoutToken.slice(leadingAmpersandIndex + 1);
+        }
+        searchWithoutToken = searchWithoutToken.replace("".concat(tokenParam, "=") + token, '')
+            .replace(additionalParam, '')
+            .replace('\&cypress=true', '');
         if (searchWithoutToken === '?') {
             searchWithoutToken = '';
         }

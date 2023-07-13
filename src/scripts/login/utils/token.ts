@@ -5,17 +5,23 @@ export const extractTokenFromWindowLocation = (tokenParam: string, additionalPar
 
   let token = '';
   const tokenParameterName = `${tokenParam}=`;
-  const tokenParameterIndex = window.location.search.indexOf(tokenParameterName);
+  const search = window.location.search;
+  const tokenParameterIndex = search.indexOf(tokenParameterName);
 
   if (tokenParameterIndex !== -1) {
     const tokenParameterNameLength = tokenParameterName.length;
-    const nextParameterIndex = window.location.search.indexOf('&', tokenParameterIndex);
+    const leadingAmpersandIndex = search.indexOf('&', tokenParameterIndex);
+    let searchWithoutToken = search;
 
-    token = (nextParameterIndex === -1) ?
-      window.location.search.substring(tokenParameterIndex + tokenParameterNameLength) :
-      window.location.search.substring(tokenParameterIndex + tokenParameterNameLength, nextParameterIndex);
+    token = search.substring(tokenParameterIndex + tokenParameterNameLength);
+    if (leadingAmpersandIndex !== -1) {
+      token = search.substring(tokenParameterIndex + tokenParameterNameLength, leadingAmpersandIndex);
+      searchWithoutToken = searchWithoutToken.slice(0, leadingAmpersandIndex) + searchWithoutToken.slice(leadingAmpersandIndex + 1);
+    }
 
-    let searchWithoutToken = window.location.search.replace(`${tokenParam}=` + token, '').replace(additionalParam, '').replace('\&cypress=true', '');
+    searchWithoutToken = searchWithoutToken.replace(`${tokenParam}=` + token, '')
+                                           .replace(additionalParam, '')
+                                           .replace('\&cypress=true', '');
     if (searchWithoutToken === '?') {
       searchWithoutToken = '';
     }
