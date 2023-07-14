@@ -1,7 +1,5 @@
 export const extractTokenFromWindowLocation = (tokenParam: string, additionalParam = '') => {
-  if (!tokenParam) {
-    return;
-  }
+  if (!tokenParam) return;
 
   let token = '';
   const tokenParameterName = `${tokenParam}=`;
