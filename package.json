@@ -1,6 +1,6 @@
 {
-  "name": "jux-web",
-  "version": "0.0.1",
+  "name": "@klauswuestefeld/jux-web",
+  "version": "2023.07.26",
   "description": "",
   "main": "dist/main.esm.js",
   "types": "dist/main.d.ts",
