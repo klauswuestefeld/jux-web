@@ -170,7 +170,10 @@ var juxWeb = (function (exports) {
       return token;
   };
 
-  var kebabCaseProvider = function () { var _a; return ((_a = localStorage.getItem('provider')) === null || _a === void 0 ? void 0 : _a.replace(/\./g, '-')) || ''; };
+  var kebabCaseProvider = function () {
+      var provider = localStorage.getItem('override-provider') || localStorage.getItem('provider');
+      return (provider === null || provider === void 0 ? void 0 : provider.replace(/\./g, '-')) || '';
+  };
   //@ts-ignore
   var getDynamicBackendUrl = function () { return process.env.DYNAMIC_BACKEND_URL ? process.env.DYNAMIC_BACKEND_URL.replace('%provider', kebabCaseProvider()) : false; };
   //@ts-ignore

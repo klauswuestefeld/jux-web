@@ -1,7 +1,11 @@
 import { getTranslation } from './jux/language';
 import { extractTokenFromWindowLocation } from './login/utils/token';
 
-const kebabCaseProvider = (): string => localStorage.getItem('provider')?.replace(/\./g, '-') || '';
+const kebabCaseProvider = (): string => {
+  const provider = localStorage.getItem('override-provider') || localStorage.getItem('provider');
+
+  return provider?.replace(/\./g, '-') || '';
+};
 //@ts-ignore
 const getDynamicBackendUrl = (): string | boolean => process.env.DYNAMIC_BACKEND_URL ? process.env.DYNAMIC_BACKEND_URL.replace('%provider', kebabCaseProvider()) : false; 
 //@ts-ignore
