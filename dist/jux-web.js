@@ -143,9 +143,8 @@ var juxWeb = (function (exports) {
 
   var extractTokenFromWindowLocation = function (tokenParam, additionalParam) {
       if (additionalParam === void 0) { additionalParam = ''; }
-      if (!tokenParam) {
+      if (!tokenParam)
           return;
-      }
       var token = '';
       var tokenParameterName = "".concat(tokenParam, "=");
       var search = window.location.search;
