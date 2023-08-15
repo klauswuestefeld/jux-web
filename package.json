@@ -1,7 +1,20 @@
 {
   "name": "@klauswuestefeld/jux-web",
   "version": "2023.07.26",
+  "author": "Jux.House",
+  "license": "Copyrighted",
   "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/klauswuestefeld/jux-web.git"
+  },
+  "homepage": "https://github.com/klauswuestefeld/jux-web#readme",
+  "bugs": {
+    "url": "https://github.com/klauswuestefeld/jux-web/issues"
+  },
+  "dependencies": {
+    "@azure/msal-browser": "2.21.0"
+  },
   "main": "dist/main.esm.js",
   "types": "dist/main.d.ts",
   "files": [
@@ -12,19 +25,6 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rollup -c"
   },
-  "dependencies": {
-    "@azure/msal-browser": "2.21.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/klauswuestefeld/jux-web.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/klauswuestefeld/jux-web/issues"
-  },
-  "homepage": "https://github.com/klauswuestefeld/jux-web#readme",
   "devDependencies": {
     "rollup": "^2.79.1",
     "rollup-plugin-commonjs": "^10.1.0",
