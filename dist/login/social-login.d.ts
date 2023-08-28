@@ -1,1 +1,0 @@
-export declare const socialLoginModal: (userEmail: string, mailExchanger: string, token: any, onUserLogin: any, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, closeMagicLinkModal: any) => HTMLElement;

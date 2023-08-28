@@ -1,1 +1,0 @@
-export declare const juxModal: (title: string, btns?: string[], content?: string, persistent?: boolean, _busy?: boolean, body?: HTMLElement | null | undefined, okTxt?: string, cancelTxt?: string | null, onClose?: any, titleStyle?: string | undefined) => HTMLElement;
