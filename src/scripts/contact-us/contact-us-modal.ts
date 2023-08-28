@@ -36,7 +36,7 @@ const sendInquiry = (
     () => { } // TODO: change it to be an error handling fn provided by the client
   );
 
-  // checkMixpanel(() => mixpanel.track("Sent Contact Inquiry", {}));
+  // checkMixpanel(() => mixpanel.track('Sent Contact Inquiry', {}));
 }
 
 export const contactUsModal = (subject: string): HTMLElement => {
