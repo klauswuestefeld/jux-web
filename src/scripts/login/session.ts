@@ -65,12 +65,20 @@ const displayPage = (clientApp: HTMLElement, page: HTMLElement) => {
   clientApp.appendChild(page);
 }
 
-export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[], onUserLogin: any, backgroundImage: string) => {
+export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[], onUserLogin: any, backgroundImage: string, fetchUserBackendUrl: any) => {
   // if (startNewDemo()) {
   //   initDemo(setBackendToken, onAuthentication);
 
   //   return;
   // }
+
+  // @ts-ignore
+  if (!window.store) {
+    // @ts-ignore
+    window.store = {};
+  }
+  // @ts-ignore
+  window.store.fetchUserBackendUrl = fetchUserBackendUrl;
 
   const magicToken = extractTokenFromWindowLocation('magic-link');
   if (magicToken) {
@@ -161,6 +169,12 @@ export const handleMagicLinkRequest = (token: string | null, onReturn: any, back
 
   const provider = email.split('@')[1];
   localStorage.setItem('provider', provider);
+
+  if (window.store.fetchUserBackendUrl) {
+    window.store.fetchUserBackendUrl(email, (backendUrl) => {
+      
+    })
+  }
 
   requestMagicLink(payload, (_res: any) => {
     currentPage.remove();
