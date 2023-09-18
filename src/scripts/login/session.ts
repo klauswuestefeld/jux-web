@@ -170,17 +170,25 @@ export const handleMagicLinkRequest = (token: string | null, onReturn: any, back
   const provider = email.split('@')[1];
   localStorage.setItem('provider', provider);
 
-  if (window.store.fetchUserBackendUrl) {
-    window.store.fetchUserBackendUrl(email, (backendUrl) => {
-      
-    })
+  const onRequestMagicLink = () => {
+    requestMagicLink(payload, (_res: any) => {
+      currentPage.remove();
+      clientBody.appendChild(magicLinkRequestedPage(backgroundImage, onReturn));
+  
+      const magicLinkEmail = document.querySelector('#magic-link-email') as HTMLElement;
+      magicLinkEmail.textContent = email;
+    });
   }
 
-  requestMagicLink(payload, (_res: any) => {
-    currentPage.remove();
-    clientBody.appendChild(magicLinkRequestedPage(backgroundImage, onReturn));
+  // @ts-ignore
+  if (window.store.fetchUserBackendUrl) {
+    // @ts-ignore
+    window.store.fetchUserBackendUrl(email, (backendUrl) => {
+      onRequestMagicLink();
+    });
 
-    const magicLinkEmail = document.querySelector('#magic-link-email') as HTMLElement;
-    magicLinkEmail.textContent = email;
-  });
+    return;
+  }
+
+  onRequestMagicLink();
 }
