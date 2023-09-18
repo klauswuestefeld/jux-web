@@ -1,4 +1,4 @@
-import { backendGet, backendGetPromise, getMicrosoftAuthUrl, openMagicLink, requestMagicLink } from '../api-client';
+import { backendGet, backendGetPromise, getMicrosoftAuthUrl, openMagicLink, requestMagicLink, setBackendUrl } from '../api-client';
 import * as msal from '@azure/msal-browser';
 import { validateThirdPartyCookies } from './utils/cookies';
 import { authSignIn } from './auth';
@@ -82,16 +82,24 @@ export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[
 
   const magicToken = extractTokenFromWindowLocation('magic-link');
   if (magicToken) {
+    const onOpenMagicLink = () => {
+      openMagicLink(
+        magicToken,
+        (res: any) => onAuthentication(onUserLogin, res, 'Magic Link'),
+        () => onAuthenticationFailure('unable-magic-login')
+      );
+    }
     const host = extractTokenFromWindowLocation('host');
     if (host) {
-      localStorage.setItem('provider', host);
+      // @ts-ignore
+      window.store.fetchUserBackendUrl({host}, (backendUrl) => {
+        setBackendUrl(backendUrl);
+        onOpenMagicLink();
+      });
+      return
     }
 
-    openMagicLink(
-      magicToken,
-      (res: any) => onAuthentication(onUserLogin, res, 'Magic Link'),
-      () => onAuthenticationFailure('unable-magic-login')
-    );
+    onOpenMagicLink();
 
     return;
   }
@@ -167,9 +175,6 @@ export const handleMagicLinkRequest = (token: string | null, onReturn: any, back
 
   const payload = { email, token };
 
-  const provider = email.split('@')[1];
-  localStorage.setItem('provider', provider);
-
   const onRequestMagicLink = () => {
     requestMagicLink(payload, (_res: any) => {
       currentPage.remove();
@@ -183,7 +188,8 @@ export const handleMagicLinkRequest = (token: string | null, onReturn: any, back
   // @ts-ignore
   if (window.store.fetchUserBackendUrl) {
     // @ts-ignore
-    window.store.fetchUserBackendUrl(email, (backendUrl) => {
+    window.store.fetchUserBackendUrl({email}, (backendUrl) => {
+      setBackendUrl(backendUrl);
       onRequestMagicLink();
     });
 
