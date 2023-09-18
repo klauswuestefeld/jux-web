@@ -92,7 +92,7 @@ export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[
     const host = extractTokenFromWindowLocation('host');
     if (host) {
       // @ts-ignore
-      window.store.fetchUserBackendUrl({host}, (backendUrl) => {
+      window.store.fetchUserBackendUrl({ host }, (backendUrl) => {
         setBackendUrl(backendUrl);
         onOpenMagicLink();
       });
@@ -188,7 +188,7 @@ export const handleMagicLinkRequest = (token: string | null, onReturn: any, back
   // @ts-ignore
   if (window.store.fetchUserBackendUrl) {
     // @ts-ignore
-    window.store.fetchUserBackendUrl({email}, (backendUrl) => {
+    window.store.fetchUserBackendUrl({ email }, (backendUrl) => {
       setBackendUrl(backendUrl);
       onRequestMagicLink();
     });
