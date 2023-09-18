@@ -1,16 +1,9 @@
 import { getTranslation } from './jux/language';
 import { extractTokenFromWindowLocation } from './login/utils/token';
 
-const kebabCaseProvider = (): string => {
-  const provider = localStorage.getItem('override-provider') || localStorage.getItem('provider');
-
-  return provider?.replace(/\./g, '-') || '';
-};
+export const setBackendUrl = (backendUrl: string) => localStorage.setItem('backend-url', backendUrl);
 //@ts-ignore
-const getDynamicBackendUrl = (): string | boolean => process.env.DYNAMIC_BACKEND_URL ? process.env.DYNAMIC_BACKEND_URL.replace('%provider', kebabCaseProvider()) : false; 
-//@ts-ignore
-const getBackendUrl = (): string => getDynamicBackendUrl() || process.env.BACKEND_URL;
-
+const getBackendUrl = (): string => process.env.BACKEND_URL || localStorage.getItem('backend-url');
 //@ts-ignore
 const getSecondaryBackendUrl = (): string => process.env.STAGING_BACKEND_URL || getBackendUrl();
 let getBackendUrlToTry = (): string => getBackendUrl();
