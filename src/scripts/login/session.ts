@@ -1,4 +1,4 @@
-import { backendGet, backendGetPromise, getMicrosoftAuthUrl, openMagicLink, requestMagicLink } from '../api-client';
+import { backendGet, backendGetPromise, getMicrosoftAuthUrl, openMagicLink, requestMagicLink, setBackendUrl } from '../api-client';
 import * as msal from '@azure/msal-browser';
 import { validateThirdPartyCookies } from './utils/cookies';
 import { authSignIn } from './auth';
@@ -65,25 +65,41 @@ const displayPage = (clientApp: HTMLElement, page: HTMLElement) => {
   clientApp.appendChild(page);
 }
 
-export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[], onUserLogin: any, backgroundImage: string) => {
+export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[], onUserLogin: any, backgroundImage: string, fetchUserBackendUrl: any) => {
   // if (startNewDemo()) {
   //   initDemo(setBackendToken, onAuthentication);
 
   //   return;
   // }
 
+  // @ts-ignore
+  if (!window.store) {
+    // @ts-ignore
+    window.store = {};
+  }
+  // @ts-ignore
+  window.store.fetchUserBackendUrl = fetchUserBackendUrl;
+
   const magicToken = extractTokenFromWindowLocation('magic-link');
   if (magicToken) {
+    const onOpenMagicLink = () => {
+      openMagicLink(
+        magicToken,
+        (res: any) => onAuthentication(onUserLogin, res, 'Magic Link'),
+        () => onAuthenticationFailure('unable-magic-login')
+      );
+    }
     const host = extractTokenFromWindowLocation('host');
     if (host) {
-      localStorage.setItem('provider', host);
+      // @ts-ignore
+      window.store.fetchUserBackendUrl({ host }, (backendUrl) => {
+        setBackendUrl(backendUrl);
+        onOpenMagicLink();
+      });
+      return
     }
 
-    openMagicLink(
-      magicToken,
-      (res: any) => onAuthentication(onUserLogin, res, 'Magic Link'),
-      () => onAuthenticationFailure('unable-magic-login')
-    );
+    onOpenMagicLink();
 
     return;
   }
@@ -159,14 +175,26 @@ export const handleMagicLinkRequest = (token: string | null, onReturn: any, back
 
   const payload = { email, token };
 
-  const provider = email.split('@')[1];
-  localStorage.setItem('provider', provider);
+  const onRequestMagicLink = () => {
+    requestMagicLink(payload, (_res: any) => {
+      currentPage.remove();
+      clientBody.appendChild(magicLinkRequestedPage(backgroundImage, onReturn));
+  
+      const magicLinkEmail = document.querySelector('#magic-link-email') as HTMLElement;
+      magicLinkEmail.textContent = email;
+    });
+  }
 
-  requestMagicLink(payload, (_res: any) => {
-    currentPage.remove();
-    clientBody.appendChild(magicLinkRequestedPage(backgroundImage, onReturn));
+  // @ts-ignore
+  if (window.store.fetchUserBackendUrl) {
+    // @ts-ignore
+    window.store.fetchUserBackendUrl({ email }, (backendUrl) => {
+      setBackendUrl(backendUrl);
+      onRequestMagicLink();
+    });
 
-    const magicLinkEmail = document.querySelector('#magic-link-email') as HTMLElement;
-    magicLinkEmail.textContent = email;
-  });
+    return;
+  }
+
+  onRequestMagicLink();
 }
