@@ -164,7 +164,7 @@ export const getMXData = async (domainName: string): Promise<any> => {
   try {
     const records = await fetch
     (
-      `https://dns8hdsuh8.google.com/resolve?name=${domainName}&type=MX`,
+      `https://dns.google.com/resolve?name=${domainName}&type=MX`,
       {
         method: 'GET',
         mode: 'cors'
