@@ -161,7 +161,8 @@ export const openMagicLink = (magicToken: string, onJsonResponse: (response: any
 }
 
 export const getMXData = async (domainName: string): Promise<any> => {
-  const records = await fetch
+  try {
+    const records = await fetch
     (
       `https://dns8hdsuh8.google.com/resolve?name=${domainName}&type=MX`,
       {
@@ -182,4 +183,8 @@ export const getMXData = async (domainName: string): Promise<any> => {
   }
 
   return Array.from(answer).map((a: any) => a.data);
+  } catch (error) {
+    console.error('Fetch failed: ', error);
+    return null;
+  } 
 };
