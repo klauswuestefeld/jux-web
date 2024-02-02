@@ -65,7 +65,7 @@ const displayPage = (clientApp: HTMLElement, page: HTMLElement) => {
   clientApp.appendChild(page);
 }
 
-export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[], onUserLogin: any, backgroundImage: string, fetchUserBackendUrl: any) => {
+export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[], onUserLogin: any, backgroundImage: string, fetchUserBackendUrl: any, magicLinkRequestEndpoint: string | null, magicLinkAuthEndpoint: string | null) => {
   // if (startNewDemo()) {
   //   initDemo(setBackendToken, onAuthentication);
 
@@ -79,6 +79,10 @@ export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[
   }
   // @ts-ignore
   window.store.fetchUserBackendUrl = fetchUserBackendUrl;
+  // @ts-ignore
+  window.store.magicLinkRequestEndpoint = magicLinkRequestEndpoint;
+  // @ts-ignore
+  window.store.magicLinkAuthEndpoint = magicLinkAuthEndpoint;
 
   const magicToken = extractTokenFromWindowLocation('magic-link');
   if (magicToken) {

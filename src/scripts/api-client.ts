@@ -11,8 +11,19 @@ let getBackendUrlToTry = (): string => getBackendUrl();
 const getApiUrl = (): string => getBackendUrl() + 'api/';
 export const getGoogleAuthUrl = (): string => getBackendUrl() + 'auth-google?google-id-token=';
 export const getMicrosoftAuthUrl = (): string => getBackendUrl() + 'auth-microsoft?access-token=';
-const getMagicAuthUrl = (): string => getBackendUrl() + 'auth-magic?token=';
-const getMagicAuthReqUrl = (): string => getBackendUrl() + 'magic-link-request?email=';
+
+const getMagicAuthUrl = (): string => {
+  // @ts-ignore
+  const endpoint = window?.store?.magicLinkAuthEndpoint || 'auth-magic';
+  return getBackendUrl() + endpoint + '?token=';
+}
+
+const getMagicAuthReqUrl = (): string => {
+  // @ts-ignore
+  const endpoint = window?.store?.magicLinkRequestEndpoint || 'magic-link-request';
+  return getBackendUrl() + endpoint + '?email=';
+}
+
 let timeout: any;
 const maxRetries = 20;
 let retries = 0;
