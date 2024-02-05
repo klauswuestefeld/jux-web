@@ -1,7 +1,25 @@
 import { getTranslation } from './jux/language';
+import { JuxEvent } from './jux/jux-event';
 import { extractTokenFromWindowLocation } from './login/utils/token';
 
-export const setBackendUrl = (backendUrl: string) => localStorage.setItem('backend-url', backendUrl);
+export const setBackendUrl = (backendUrl: string) => {
+  localStorage.setItem('backend-url', backendUrl);
+  // dont add here
+  document.addEventListener('jux-event', (ev) => {
+    const { method, endpoint, onResult, params, onError } = ev as JuxEvent;
+
+    const onJsonResponse = (res: any) => onResult ? onResult(res) : null;
+    const onHelpMessage = (err: any) => onError ? onError(err) : null;
+
+    if (method === 'GET') {
+      backendGet2(endpoint, params, onJsonResponse, onHelpMessage);
+    }
+    if (method === 'POST') {
+      backendPost(endpoint, params, onJsonResponse, onHelpMessage);
+    }
+  });
+};
+
 //@ts-ignore
 const getBackendUrl = (): string => process.env.BACKEND_URL || localStorage.getItem('backend-url');
 //@ts-ignore
@@ -144,6 +162,10 @@ export const backendRequest = (
 
 export const backendPost = (endpoint: string, postContent: any, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
   backendRequest('POST', getApiUrl() + endpoint, postContent, onJsonResponse, onHelpMessage);
+}
+
+const backendGet2 = (endpoint: string, params: any, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any) => {
+  backendRequest('GET', getApiUrl() + endpoint, params, onJsonResponse, onHelpMessage);
 }
 
 export const backendGet = (endpoint: string, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
