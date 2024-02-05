@@ -4,6 +4,7 @@ export { loginPage } from './login/login-page';
 export { handleMagicLinkRequest, initSession, onMicrosoftSignIn } from './login/session';
 export { requestMagicLink } from './api-client';
 export { magicLinkModal } from './login/magic-link-modal';
+export { query } from './jux/query';
 
 declare global {
   interface Window {
