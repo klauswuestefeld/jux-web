@@ -6,7 +6,7 @@ export class JuxEvent extends Event {
   public onError?: (error: any) => void;
 
   constructor(method: string, endpoint: string, onResult?: (result: any) => any, params?: any, onError?: (error: any) => void) {
-    super('jux-event'); // in the future maybe we might need to modify bubbles, cancelable and composed properties
+    super('jux-event', { bubbles: true, cancelable: true, composed: true });
     this.method = method;
     this.endpoint = endpoint;
     this.onResult = onResult;
