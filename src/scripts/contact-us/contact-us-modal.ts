@@ -84,6 +84,7 @@ export const contactUsModal = (subject: string): HTMLElement => {
     const admin = window.store?.selectedTeam?.admin || window.store.currentUser.email;
     backendGet(
       `credits-balance-for?admin=${admin}`,
+      null,
       (res) => {
         const balance = res;
 

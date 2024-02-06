@@ -1,4 +1,4 @@
-import { backendGet, backendGetPromise, getMicrosoftAuthUrl, openMagicLink, requestMagicLink, setBackendUrl } from '../api-client';
+import { backendGet, handleJuxEvents, microsoftLogin, openMagicLink, requestMagicLink, setBackendUrl } from '../api-client';
 import * as msal from '@azure/msal-browser';
 import { validateThirdPartyCookies } from './utils/cookies';
 import { authSignIn } from './auth';
@@ -65,6 +65,11 @@ const displayPage = (clientApp: HTMLElement, page: HTMLElement) => {
   clientApp.appendChild(page);
 }
 
+const setJuxEventHandler = () => {
+  document.removeEventListener('jux-event', handleJuxEvents);
+  document.addEventListener('jux-event', handleJuxEvents);
+}
+
 export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[], onUserLogin: any, backgroundImage: string, fetchUserBackendUrl: any, magicLinkRequestEndpoint: string | null, magicLinkAuthEndpoint: string | null) => {
   // if (startNewDemo()) {
   //   initDemo(setBackendToken, onAuthentication);
@@ -84,11 +89,14 @@ export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[
   // @ts-ignore
   window.store.magicLinkAuthEndpoint = magicLinkAuthEndpoint;
 
-  const magicToken = extractTokenFromWindowLocation('magic-link');
-  if (magicToken) {
+  // TODO: use jux-events to call commands and queries
+  setJuxEventHandler();
+
+  const signInToken = extractTokenFromWindowLocation('sign-in') || extractTokenFromWindowLocation('magic-link');
+  if (signInToken) {
     const onOpenMagicLink = () => {
       openMagicLink(
-        magicToken,
+        signInToken,
         (res: any) => onAuthentication(onUserLogin, res, 'Magic Link'),
         () => onAuthenticationFailure('unable-magic-login')
       );
@@ -100,7 +108,7 @@ export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[
         setBackendUrl(backendUrl);
         onOpenMagicLink();
       });
-      return
+      return;
     }
 
     onOpenMagicLink();
@@ -110,6 +118,7 @@ export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[
 
   if (getBackendToken()) {
     backendGet('profile',
+      null,
       (res: any) => onAuthentication(onUserLogin, res, 'Token Authentication'),
       (_err: any) => onAuthenticationFailure('login-failed')
     );
@@ -142,15 +151,19 @@ export const onMicrosoftSignIn = async (onUserLogin: any) => {
   try {
     const loginResponse = await msalInstance.loginPopup(loginRequest);
     const { accessToken } = loginResponse;
-    await backendGetPromise(getMicrosoftAuthUrl() + accessToken)
-      .then((res: any) => {
-        const { token } = res;
-        // @ts-ignore
-        window.store.currentUser = res;
-        onTokenAcquired(token, onUserLogin);
-      })
-      .catch(console.error)
-      .finally(() => disableSignInLayout());
+    const onSuccess = (res: any) => {
+      const { token } = res;
+      // @ts-ignore
+      window.store.currentUser = res;
+      onTokenAcquired(token, onUserLogin);
+      disableSignInLayout();
+    }
+    const onError = (err: any) => {
+      console.error(err);
+      reportError(err);
+      disableSignInLayout();
+    }
+    microsoftLogin(accessToken, onSuccess, onError);
   } catch (err) {
     reportError(err);
     disableSignInLayout();
@@ -183,7 +196,7 @@ export const handleMagicLinkRequest = (token: string | null, onReturn: any, back
     requestMagicLink(payload, (_res: any) => {
       currentPage.remove();
       clientBody.appendChild(magicLinkRequestedPage(backgroundImage, onReturn));
-  
+
       const magicLinkEmail = document.querySelector('#magic-link-email') as HTMLElement;
       magicLinkEmail.textContent = email;
     });
