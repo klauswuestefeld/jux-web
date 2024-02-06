@@ -69,19 +69,26 @@ const backendHelpMessage = (req: XMLHttpRequest): any => {
 
 export const backendRequest = (
   requestType: string,
-  url: string,
-  postContent: any,
+  urlString: string,
+  params: any,
   onJsonResponse: (response: any) => any,
   onHelpMessage: (message: string) => any
 ): void => {
-  if (url.includes(getBackendUrl())) {
-    url = url.replace(getBackendUrl(), getBackendUrlToTry());
-  } else if (url.includes(getSecondaryBackendUrl())) {
-    url = url.replace(getSecondaryBackendUrl(), getBackendUrlToTry());
+  if (urlString.includes(getBackendUrl())) {
+    urlString = urlString.replace(getBackendUrl(), getBackendUrlToTry());
+  } else if (urlString.includes(getSecondaryBackendUrl())) {
+    urlString = urlString.replace(getSecondaryBackendUrl(), getBackendUrlToTry());
   }
 
   clearInterval(timeout);
   const req = new XMLHttpRequest();
+  const url = new URL(urlString);
+
+  if (requestType === 'GET') {
+    if (!params) return;
+    Object.keys(params).forEach(k => url.searchParams.set(k, params[k]));
+  }
+
   req.open(requestType, url, true);
 
   // @ts-ignore
@@ -118,15 +125,15 @@ export const backendRequest = (
         ? getSecondaryBackendUrl()
         : getBackendUrl();
 
-      url = url.replace(getBackendUrlToTry(), backupBackendUrl);
+      urlString = urlString.replace(getBackendUrlToTry(), backupBackendUrl);
 
       getBackendUrlToTry = () => backupBackendUrl;
 
       timeout = setTimeout(() => {
         backendRequest(
           requestType,
-          url,
-          postContent,
+          urlString,
+          params,
           onJsonResponse,
           onHelpMessage,
         );
@@ -151,7 +158,7 @@ export const backendRequest = (
   }
 
   req.timeout = 25000;
-  req.send(postContent);
+  req.send(params);
 }
 
 export const backendPost = (endpoint: string, postContent: any, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
