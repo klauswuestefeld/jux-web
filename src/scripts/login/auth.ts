@@ -1,4 +1,4 @@
-import { backendGetPromise, getGoogleAuthUrl } from '../api-client';
+import { googleLogin } from '../api-client';
 import { disableSignInLayout } from './utils/layout-changes';
 import { onTokenAcquired, setBackendToken } from './session';
 
@@ -22,29 +22,24 @@ const highLevelUser = (gUser: any) => {
   };
 }
 
-const onUserChanged = async (googleUser: any, onUserLogin: any) => {
+const onUserChanged = (googleUser: any, onUserLogin: any) => {
   document.documentElement.classList.remove('progress');
   document.body.classList.remove('disabled');
 
   if (googleUser) {
     // mixpanelIdentify(googleUser); TODO
-
-    try {
-      await backendGetPromise(getGoogleAuthUrl() + googleUser.googletoken)
-        .then(res => {
-          const { token } = res as any;
-          // @ts-ignore
-          window.store.currentUser = res;
-          onTokenAcquired(token, onUserLogin);
-        })
-        .catch((error) => { throw Error(error) });
-    } catch (error) {
-      console.error(error);
+    const onSuccess = (res: any) => {
+      const { token } = res;
+      // @ts-ignore
+      window.store.currentUser = res;
+      onTokenAcquired(token, onUserLogin);
+    }
+    const onError = (err: any) => {
+      console.error(err);
       // logError(error); TODO
       // checkMixpanel(() => mixpanel.track('Login Error', { 'Login Type': 'Google', 'Error': error })); TODO
-
-      return;
     }
+    googleLogin(googleUser.googletoken, onSuccess, onError);
 
     // checkMixpanel(() => mixpanel.track('Login', { 'Login Type': 'Google' })); TODO
   } else {
@@ -109,7 +104,7 @@ const onSignInError = (error: any) => {
   // logError(error); TODO
 
   if (error && error.error === 'popup_closed_by_user') {
-    onUserChanged(null, () => {});
+    onUserChanged(null, () => { });
 
     return;
   }

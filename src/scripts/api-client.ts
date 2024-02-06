@@ -1,4 +1,5 @@
 import { getTranslation } from './jux/language';
+import { JuxEvent } from './jux/jux-event';
 import { extractTokenFromWindowLocation } from './login/utils/token';
 
 export const setBackendUrl = (backendUrl: string) => localStorage.setItem('backend-url', backendUrl);
@@ -6,11 +7,8 @@ export const setBackendUrl = (backendUrl: string) => localStorage.setItem('backe
 const getBackendUrl = (): string => process.env.BACKEND_URL || localStorage.getItem('backend-url');
 //@ts-ignore
 const getSecondaryBackendUrl = (): string => process.env.STAGING_BACKEND_URL || getBackendUrl();
-let getBackendUrlToTry = (): string => getBackendUrl();
-
 const getApiUrl = (): string => getBackendUrl() + 'api/';
-export const getGoogleAuthUrl = (): string => getBackendUrl() + 'auth-google?google-id-token=';
-export const getMicrosoftAuthUrl = (): string => getBackendUrl() + 'auth-microsoft?access-token=';
+let getBackendUrlToTry = (): string => getBackendUrl();
 
 const getMagicAuthUrl = (): string => {
   // @ts-ignore
@@ -22,6 +20,20 @@ const getMagicAuthReqUrl = (): string => {
   // @ts-ignore
   const endpoint = window?.store?.magicLinkRequestEndpoint || 'magic-link-request';
   return getBackendUrl() + endpoint + '?email=';
+}
+
+export const handleJuxEvents = (ev: Event) => {
+  const { method, endpoint, onResult, params, onError } = ev as JuxEvent;
+
+  const onJsonResponse = (res: any) => onResult ? onResult(res) : null;
+  const onHelpMessage = (err: any) => onError ? onError(err) : null;
+
+  if (method === 'GET') {
+    backendGet(endpoint, params, onJsonResponse, onHelpMessage);
+  }
+  if (method === 'POST') {
+    backendPost(endpoint, params, onJsonResponse, onHelpMessage);
+  }
 }
 
 let timeout: any;
@@ -146,29 +158,32 @@ export const backendPost = (endpoint: string, postContent: any, onJsonResponse: 
   backendRequest('POST', getApiUrl() + endpoint, postContent, onJsonResponse, onHelpMessage);
 }
 
-export const backendGet = (endpoint: string, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
-  let api = getApiUrl() + endpoint;
-  if (endpoint.includes(getGoogleAuthUrl()) || endpoint.includes(getMicrosoftAuthUrl())) {
-    api = endpoint;
-  }
-  backendRequest('GET', api, undefined, onJsonResponse, onHelpMessage);
+export const backendGet = (endpoint: string, params: any, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
+  backendRequest('GET', getApiUrl() + endpoint, params, onJsonResponse, onHelpMessage);
 }
-
-export const backendGetPromise = (endpoint: string) => new Promise((resolve, reject) =>
-  backendGet(endpoint, resolve, reject));
 
 export const requestMagicLink = (data: any, onJsonResponse: (response: any) => any): void => {
   backendRequest(
     'GET',
     getMagicAuthReqUrl() + encodeURIComponent(data.email) + '&destination=' + extractTokenFromWindowLocation('destination') + '&token=' + data.token,
-    undefined,
+    null,
     onJsonResponse,
     () => { }
   );
 }
 
 export const openMagicLink = (magicToken: string, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
-  backendRequest('GET', getMagicAuthUrl() + magicToken, undefined, onJsonResponse, onHelpMessage);
+  backendRequest('GET', getMagicAuthUrl() + magicToken, null, onJsonResponse, onHelpMessage);
+}
+
+export const googleLogin = (token: string, onLogin: (response: any) => any, onLoginError: (message: string) => any) => {
+  const url = getBackendUrl() + 'auth-google?google-id-token=' + token;
+  backendRequest('GET', url, null, onLogin, onLoginError);
+}
+
+export const microsoftLogin = (token: string, onLogin: (response: any) => any, onLoginError: (message: string) => any) => {
+  const url = getBackendUrl() + 'auth-microsoft?access-token=' + token;
+  backendRequest('GET', url, null, onLogin, onLoginError);
 }
 
 export const getMXData = async (domainName: string): Promise<any> => {
