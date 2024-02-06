@@ -84,8 +84,7 @@ export const backendRequest = (
   const req = new XMLHttpRequest();
   const url = new URL(urlString);
 
-  if (requestType === 'GET') {
-    if (!params) return;
+  if (requestType === 'GET' && params) {
     Object.keys(params).forEach(k => url.searchParams.set(k, params[k]));
   }
 
