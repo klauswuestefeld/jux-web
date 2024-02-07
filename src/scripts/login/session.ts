@@ -1,4 +1,4 @@
-import { backendGet, handleJuxEvents, microsoftLogin, openMagicLink, requestMagicLink, setBackendUrl } from '../api-client';
+import { backendGet, getBackendUrl, handleJuxEvents, microsoftLogin, openMagicLink, requestMagicLink, setBackendUrl } from '../api-client';
 import * as msal from '@azure/msal-browser';
 import { validateThirdPartyCookies } from './utils/cookies';
 import { authSignIn } from './auth';
@@ -31,9 +31,12 @@ export const onTokenAcquired = (token: string, onUserLogin: any) => {
   onUserLogin();
 }
 
-export const clearSession = () => {
+const clearSession = () => {
   // onUserChanged(null);
+  // TODO: find a better way to preserve backend-url
+  const backendUrl = getBackendUrl(); // Preserve backend, since the authentication was succcessfull
   localStorage.clear();
+  setBackendUrl(backendUrl);
   // @ts-ignore
   window.store = {};
 }

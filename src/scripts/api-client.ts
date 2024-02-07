@@ -4,7 +4,7 @@ import { extractTokenFromWindowLocation } from './login/utils/token';
 
 export const setBackendUrl = (backendUrl: string) => localStorage.setItem('backend-url', backendUrl);
 //@ts-ignore
-const getBackendUrl = (): string => process.env.BACKEND_URL || localStorage.getItem('backend-url');
+export const getBackendUrl = (): string => process.env.BACKEND_URL || localStorage.getItem('backend-url');
 //@ts-ignore
 const getSecondaryBackendUrl = (): string => process.env.STAGING_BACKEND_URL || getBackendUrl();
 const getApiUrl = (): string => getBackendUrl() + 'api/';
