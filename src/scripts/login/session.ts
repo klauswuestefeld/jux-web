@@ -1,4 +1,4 @@
-import { backendGet, getBackendUrl, handleJuxEvents, microsoftLogin, openMagicLink, requestMagicLink, setBackendUrl } from '../api-client';
+import { backendGet, getBackendUrl, microsoftLogin, openMagicLink, requestMagicLink, setBackendUrl } from '../api-client';
 import * as msal from '@azure/msal-browser';
 import { validateThirdPartyCookies } from './utils/cookies';
 import { authSignIn } from './auth';
@@ -69,11 +69,6 @@ const displayPage = (clientApp: HTMLElement, page: HTMLElement) => {
   clientApp.appendChild(page);
 }
 
-const setJuxEventHandler = () => {
-  document.removeEventListener('jux-event', handleJuxEvents);
-  document.addEventListener('jux-event', handleJuxEvents);
-}
-
 export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[], onUserLogin: any, backgroundImage: string, fetchUserBackendUrl: any, magicLinkRequestEndpoint: string | null, magicLinkAuthEndpoint: string | null) => {
   // if (startNewDemo()) {
   //   initDemo(setBackendToken, onAuthentication);
@@ -92,9 +87,6 @@ export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[
   window.store.magicLinkRequestEndpoint = magicLinkRequestEndpoint;
   // @ts-ignore
   window.store.magicLinkAuthEndpoint = magicLinkAuthEndpoint;
-
-  // TODO: use jux-events to call commands and queries
-  setJuxEventHandler();
 
   const signInToken = extractTokenFromWindowLocation('sign-in') || extractTokenFromWindowLocation('magic-link');
   if (signInToken) {

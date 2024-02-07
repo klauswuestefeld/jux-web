@@ -2,7 +2,7 @@ export { chosenLanguage, reloadWithLanguageOverride, initLanguage, getTranslatio
 export { loginButton } from './login/login-button';
 export { loginPage } from './login/login-page';
 export { handleMagicLinkRequest, initSession, onMicrosoftSignIn } from './login/session';
-export { requestMagicLink } from './api-client';
+export { handleJuxEvents, requestMagicLink } from './api-client';
 export { magicLinkModal } from './login/magic-link-modal';
 export { command, query } from './jux/jux-event';
 

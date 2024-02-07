@@ -22,6 +22,7 @@ const getMagicAuthReqUrl = (): string => {
   return getBackendUrl() + endpoint + '?email=';
 }
 
+// TODO: use jux-events to call commands and queries inside jux-web library
 export const handleJuxEvents = (ev: Event) => {
   const { method, endpoint, onResult, params, onError } = ev as JuxEvent;
 
