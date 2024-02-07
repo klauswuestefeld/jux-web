@@ -67,12 +67,20 @@ const backendHelpMessage = (req: XMLHttpRequest): any => {
   return req.response && req.response.error || req.response || req;
 }
 
+const defaultHandleUnauthorized = () => {
+  localStorage.removeItem('token');
+  alert(getTranslation('session-expired-msg'));
+  location.reload();
+  // googleAuthSignOut(); TODO
+}
+
 export const backendRequest = (
   requestType: string,
   urlString: string,
   params: any,
   onJsonResponse: (response: any) => any,
-  onHelpMessage: (message: string) => any
+  onHelpMessage: (message: string) => any,
+  handleUnauthorized: () => void = defaultHandleUnauthorized,
 ): void => {
   if (urlString.includes(getBackendUrl())) {
     urlString = urlString.replace(getBackendUrl(), getBackendUrlToTry());
@@ -102,10 +110,7 @@ export const backendRequest = (
 
   req.onerror = req.ontimeout = (): any => {
     if (req.status === 401) {
-      localStorage.removeItem('token');
-      alert(getTranslation('session-expired-msg'));
-      location.reload();
-      // googleAuthSignOut(); TODO
+      handleUnauthorized();
     } else if (req.status === 0) {
       if (retries >= maxRetries) {
         removeOverlay();
@@ -168,13 +173,17 @@ export const backendGet = (endpoint: string, params: any, onJsonResponse: (respo
   backendRequest('GET', getApiUrl() + endpoint, params, onJsonResponse, onHelpMessage);
 }
 
-export const requestMagicLink = (data: any, onJsonResponse: (response: any) => any): void => {
+export const requestMagicLink = (data: any, onJsonResponse: (response: any) => any, onUnauthorized: () => void): void => {
+  const { email, token } = data;
+  const url = getMagicAuthReqUrl() + encodeURIComponent(email) + '&destination=' + extractTokenFromWindowLocation('destination') + '&token=' + token;
+
   backendRequest(
     'GET',
-    getMagicAuthReqUrl() + encodeURIComponent(data.email) + '&destination=' + extractTokenFromWindowLocation('destination') + '&token=' + data.token,
+    url,
     null,
     onJsonResponse,
-    () => { }
+    console.error,
+    onUnauthorized,
   );
 }
 

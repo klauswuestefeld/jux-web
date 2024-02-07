@@ -1,32 +1,6 @@
 import { contactUsModal } from '../contact-us/contact-us-modal';
 import { getTranslation } from '../jux/language';
-
-const applyPageStyles = (page: HTMLElement, backgroundImg: string) => {
-  page.style.backgroundImage = `url(${backgroundImg})`;
-  page.style.display = 'block';
-  page.style.width = '100%';
-  page.style.height = '100%';
-  page.style.backgroundPosition = '50%';
-  page.style.backgroundSize = 'cover';
-  page.style.display = 'block';
-}
-
-const applyContainerStyles = (container: HTMLElement) => {
-  container.style.backgroundColor = '#ffffffdd';
-  container.style.borderRadius = '16px';
-  container.style.inset = '50% 50% 50% 0';
-  container.style.position = 'relative';
-  container.style.transform = 'translateY(-50%)';
-  container.style.width = '620px';
-  container.style.alignItems = 'center';
-  container.style.display = 'flex';
-  container.style.flexDirection = 'column';
-  container.style.fontSize = '16px';
-  container.style.height = '100%';
-  container.style.justifyContent = 'center';
-  container.style.margin = '0 auto';
-  container.style.paddingTop = '0';
-}
+import { basePage } from './base-page';
 
 const applyBtnStyles = (btn: HTMLButtonElement) => {
   btn.style.cursor = 'pointer';
@@ -43,26 +17,23 @@ const applyBtnStyles = (btn: HTMLButtonElement) => {
 }
 
 export const magicLinkRequestedPage = (backgroundImg: string, onReturn: any): HTMLElement => {
-  const result = document.createElement('magic-link-requested-page');
+  const content = [];
 
-  const section = document.createElement('section');
-  applyContainerStyles(section);
+  const sent = document.createElement('p');
+  sent.id = 'magic-link-sent';
+  sent.textContent = getTranslation(sent.id);
+  sent.style.marginBottom = '10px';
 
-  const magicLinkSent = document.createElement('p');
-  magicLinkSent.id = 'magic-link-sent';
-  magicLinkSent.textContent = getTranslation(magicLinkSent.id);
-  magicLinkSent.style.marginBottom = '10px';
+  const email = document.createElement('p');
+  email.id = 'magic-link-email';
+  email.style.fontWeight = '700';
+  email.style.marginBottom = '10px';
 
-  const magicLinkEmail = document.createElement('p');
-  magicLinkEmail.id = 'magic-link-email';
-  magicLinkEmail.style.fontWeight = '700';
-  magicLinkEmail.style.marginBottom = '10px';
-
-  const magicLinkHowTo = document.createElement('p');
-  magicLinkHowTo.id = 'magic-link-how-to';
-  magicLinkHowTo.innerHTML = getTranslation(magicLinkHowTo.id);
-  magicLinkHowTo.style.padding = '0 30px';
-  magicLinkHowTo.style.textAlign = 'center';
+  const howTo = document.createElement('p');
+  howTo.id = 'magic-link-how-to';
+  howTo.innerHTML = getTranslation(howTo.id);
+  howTo.style.padding = '0 30px';
+  howTo.style.textAlign = 'center';
 
   const btn = document.createElement('button');
   btn.id = 'email-not-received-btn';
@@ -81,9 +52,8 @@ export const magicLinkRequestedPage = (backgroundImg: string, onReturn: any): HT
   returnLink.style.fontWeight = '700';
   returnLink.style.textDecoration = 'underline';
 
-  section.append(magicLinkSent, magicLinkEmail, magicLinkHowTo, btn, returnLink);
-  applyPageStyles(result, backgroundImg);
-  result.appendChild(section);
+  content.push(sent, email, howTo, btn, returnLink);
+  const result = basePage('magic-link-requested-page', backgroundImg, content);
 
   return result;
 }

@@ -4,6 +4,7 @@ import { validateThirdPartyCookies } from './utils/cookies';
 import { authSignIn } from './auth';
 import { enableSignInLayout, disableSignInLayout } from './utils/layout-changes';
 import { magicLinkRequestedPage } from './magic-link-requested-page';
+import { unauthorizedMagicLinkRequestPage } from './unauthorized-magic-link-request-page';
 import { getTranslation } from '../jux/language';
 import { extractTokenFromWindowLocation } from './utils/token';
 import { loginPage } from './login-page';
@@ -193,13 +194,18 @@ export const handleMagicLinkRequest = (token: string | null, onReturn: any, back
   const payload = { email, token };
 
   const onRequestMagicLink = () => {
-    requestMagicLink(payload, (_res: any) => {
+    const onResponse = (page: HTMLElement) => {
       currentPage.remove();
-      clientBody.appendChild(magicLinkRequestedPage(backgroundImage, onReturn));
+      clientBody.appendChild(page);
 
-      const magicLinkEmail = document.querySelector('#magic-link-email') as HTMLElement;
+      const magicLinkEmail = page.querySelector('#magic-link-email') as HTMLElement;
       magicLinkEmail.textContent = email;
-    });
+    }
+
+    const onSuccess = () => onResponse(magicLinkRequestedPage(backgroundImage, onReturn));
+    const onUnauthorized = () => onResponse(unauthorizedMagicLinkRequestPage(backgroundImage, onReturn));
+
+    requestMagicLink(payload, onSuccess, onUnauthorized);
   }
 
   // @ts-ignore
