@@ -28,7 +28,7 @@ const sendInquiry = (
 
   backendPost(
     'contact-us',
-    JSON.stringify(inquiryPayload),
+    inquiryPayload,
     (_res) => {
       // success(getTranslation('form-success'), Length.long);
       document.querySelector('#contact-us-modal')?.remove();
@@ -83,8 +83,8 @@ export const contactUsModal = (subject: string): HTMLElement => {
     // @ts-ignore
     const admin = window.store?.selectedTeam?.admin || window.store.currentUser.email;
     backendGet(
-      `credits-balance-for?admin=${admin}`,
-      null,
+      'credits-balance-for',
+      { admin },
       (res) => {
         const balance = res;
 

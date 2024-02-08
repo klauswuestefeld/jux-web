@@ -16,7 +16,7 @@ export class JuxEvent extends Event {
 }
 
 export const query = (element: HTMLElement, endpoint: string, onResult: (result: any) => any, params?: any, onError?: (error: any) => void) => {
-  element.dispatchEvent(new JuxEvent('GET', endpoint, onResult, params, onError));
+  element.dispatchEvent(new JuxEvent('POST', endpoint, onResult, params, onError));
 }
 
 export const command = (element: HTMLElement, endpoint: string, onResult?: (result: any) => any, params?: any, onError?: (error: any) => void) => {

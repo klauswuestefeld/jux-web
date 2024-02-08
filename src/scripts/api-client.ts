@@ -24,17 +24,12 @@ const getMagicAuthReqUrl = (): string => {
 
 // TODO: use jux-events to call commands and queries inside jux-web library
 export const handleJuxEvents = (ev: Event) => {
-  const { method, endpoint, onResult, params, onError } = ev as JuxEvent;
+  const { endpoint, onResult, params, onError } = ev as JuxEvent;
 
   const onJsonResponse = (res: any) => onResult ? onResult(res) : null;
   const onHelpMessage = (err: any) => onError ? onError(err) : null;
 
-  if (method === 'GET') {
-    backendGet(endpoint, params, onJsonResponse, onHelpMessage);
-  }
-  if (method === 'POST') {
-    backendPost(endpoint, params, onJsonResponse, onHelpMessage);
-  }
+  backendPost(endpoint, params, onJsonResponse, onHelpMessage);
 }
 
 let timeout: any;
@@ -167,7 +162,8 @@ export const backendRequest = (
 }
 
 export const backendPost = (endpoint: string, postContent: any, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
-  backendRequest('POST', getApiUrl() + endpoint, postContent, onJsonResponse, onHelpMessage);
+  const params = JSON.stringify(postContent);
+  backendRequest('POST', getApiUrl() + endpoint, params, onJsonResponse, onHelpMessage);
 }
 
 export const backendGet = (endpoint: string, params: any, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
