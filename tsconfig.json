@@ -4,7 +4,6 @@
       "outDir": "dist",
       "sourceMap": true,
       "forceConsistentCasingInFileNames": true,
-      "watch": false,
       "allowJs": false,
       "declaration": true,
       "module": "esnext",

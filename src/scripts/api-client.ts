@@ -8,7 +8,6 @@ export const getBackendUrl = (): string => process.env.BACKEND_URL || localStora
 //@ts-ignore
 const getSecondaryBackendUrl = (): string => process.env.STAGING_BACKEND_URL || getBackendUrl();
 const getApiUrl = (): string => getBackendUrl() + 'api/';
-let getBackendUrlToTry = (): string => getBackendUrl();
 
 const getMagicAuthUrl = (): string => {
   // @ts-ignore
@@ -23,18 +22,14 @@ const getMagicAuthReqUrl = (): string => {
 }
 
 // TODO: use jux-events to call commands and queries inside jux-web library
-export const handleJuxEvents = (ev: Event) => {
-  const { endpoint, onResult, params, onError } = ev as JuxEvent;
+export const handleJuxEvent = (ev: Event) => {
+  const { endpoint, onResult, params, onError, onRedirect } = ev as JuxEvent;
 
   const onJsonResponse = (res: any) => onResult ? onResult(res) : null;
   const onHelpMessage = (err: any) => onError ? onError(err) : null;
 
-  backendPost(endpoint, params, onJsonResponse, onHelpMessage);
+  post(endpoint, params, onJsonResponse, onHelpMessage, onRedirect);
 }
-
-let timeout: any;
-const maxRetries = 20;
-let retries = 0;
 
 const applySpinnerStyle = (spinner: HTMLElement) => {
   spinner.style.position = 'fixed';
@@ -59,10 +54,6 @@ const removeOverlay = (): void => {
   document.querySelector('.reconnect-spinner')?.remove();
 }
 
-const backendHelpMessage = (req: XMLHttpRequest): any => {
-  return req.response && req.response.error || req.response || req;
-}
-
 const defaultHandleUnauthorized = () => {
   localStorage.removeItem('token');
   alert(getTranslation('session-expired-msg'));
@@ -70,159 +61,197 @@ const defaultHandleUnauthorized = () => {
   // googleAuthSignOut(); TODO
 }
 
-export const backendRequest = (
-  requestType: string,
-  urlString: string,
-  params: any,
-  onJsonResponse: (response: any) => any,
-  onHelpMessage: (message: string) => any,
+let requestRunning = false;
+const maxRetries = 20;
+
+export const backendRequest = async (
+  url: string,
+  options: any,
+  onSuccess: any,
+  onError: any,
+  onRedirect?: any,
   handleUnauthorized: () => void = defaultHandleUnauthorized,
-): void => {
-  if (urlString.includes(getBackendUrl())) {
-    urlString = urlString.replace(getBackendUrl(), getBackendUrlToTry());
-  } else if (urlString.includes(getSecondaryBackendUrl())) {
-    urlString = urlString.replace(getSecondaryBackendUrl(), getBackendUrlToTry());
-  }
+  retrial = false,
+  retrialNum = 0,
+) => {
+  if (requestRunning && !retrial) { // only allow one request at a time
+    setTimeout(() => backendRequest(url, options, onSuccess, onError, onRedirect, handleUnauthorized, false), 300);
 
-  clearInterval(timeout);
-  const req = new XMLHttpRequest();
-  const url = new URL(urlString);
-
-  if (requestType === 'GET' && params) {
-    Object.keys(params).forEach(k => url.searchParams.set(k, params[k]));
-  }
-
-  req.open(requestType, url, true);
+    return;
+  };
 
   // @ts-ignore
   const backendToken = window.store.backendToken;
-
   if (backendToken) {
-    req.setRequestHeader('auth', backendToken);
+    if (!options.headers) options.headers = {};
+    options.headers.auth = backendToken;
   }
 
-  req.setRequestHeader('Content-Type', 'application/json');
-  req.responseType = 'json';
+  let response;
+  requestRunning = true;
+  const requestInit = {
+    ...options,
+    signal: AbortSignal.timeout(6000)
+  }
 
-  req.onerror = req.ontimeout = (): any => {
-    if (req.status === 401) {
-      handleUnauthorized();
-    } else if (req.status === 0) {
-      if (retries >= maxRetries) {
-        removeOverlay();
-        // displayPage(Page.DISCONNECTED); TODO
+  if (onRedirect) requestInit.redirect = 'manual'; // Treat redirects manually instead of following them automatically.
 
-        return;
-      }
+  try {
+    response = await fetch(url, requestInit);
+  } catch (err) {
+    // network errors
+    if (retrialNum > maxRetries) {
+      removeOverlay();
+      requestRunning = false;
 
-      retries++;
+      return;
+    }
 
+    const retryRequest = () => {
+      retrialNum++;
       if (!document.querySelector('reconnect-overlay')) {
         renderOverlay();
       }
-
-      const backupBackendUrl = getBackendUrlToTry() === getBackendUrl()
-        ? getSecondaryBackendUrl()
-        : getBackendUrl();
-
-      urlString = urlString.replace(getBackendUrlToTry(), backupBackendUrl);
-
-      getBackendUrlToTry = () => backupBackendUrl;
-
-      timeout = setTimeout(() => {
-        backendRequest(
-          requestType,
-          urlString,
-          params,
-          onJsonResponse,
-          onHelpMessage,
-        );
-      }, 2000);
-    } else {
-      onHelpMessage(backendHelpMessage(req));
-    }
-  }
-
-  req.onload = () => {
-    retries = 0;
-    removeOverlay();
-
-    if (req.status === 200 || req.status === 202) {
-      onJsonResponse(req.response);
-    } else {
-      if (req.onerror) {
-        // @ts-ignore
-        req.onerror();
+      if (url.includes(getBackendUrl())) {
+        url = url.replace(getBackendUrl(), getSecondaryBackendUrl());
+      } else if (url.includes(getSecondaryBackendUrl())) {
+        url = url.replace(getSecondaryBackendUrl(), getBackendUrl());
       }
+      setTimeout(() => backendRequest(url, options, onSuccess, onError, onRedirect, handleUnauthorized, true, retrialNum), 2000);
+    }
+    retryRequest();
+
+    return;
+  } finally {
+    requestRunning = false;
+  }
+
+  removeOverlay();
+
+  if (onRedirect) onRedirect(response);
+
+  if (response.status === 401) {
+    handleUnauthorized();
+
+    return;
+  }
+
+  try {
+    const jsonResponse = await response.json();
+    if (response.ok) {
+      if (onSuccess) {
+        onSuccess(jsonResponse);
+      } else {
+        return jsonResponse;
+      }
+    } else {
+      // backend predicted exceptions
+      onError(jsonResponse.error);
+    }
+  } catch (err) {
+    // json conversion error / json response dealing errors
+    onError(err);
+  }
+}
+
+const post = (endpoint: string, body: any, onSuccess: any, onError: any, onRedirect?: any) => {
+  const options = {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
     }
   }
 
-  req.timeout = 25000;
-  req.send(params);
+  if (body) {
+    // @ts-ignore
+    options.body = JSON.stringify(body);
+  }
+
+  return backendRequest(getApiUrl() + endpoint, options, onSuccess, onError, onRedirect);
+}
+
+const get = (endpoint: string, onSuccess: any, onError: any, onRedirect?: any) => {
+  const options = {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    }
+  }
+
+  return backendRequest(getApiUrl() + endpoint, options, onSuccess, onError, onRedirect);
 }
 
 export const backendPost = (endpoint: string, postContent: any, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
-  const params = JSON.stringify(postContent);
-  backendRequest('POST', getApiUrl() + endpoint, params, onJsonResponse, onHelpMessage);
+  post(endpoint, postContent, onJsonResponse, onHelpMessage);
 }
 
 export const backendGet = (endpoint: string, params: any, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
-  backendRequest('GET', getApiUrl() + endpoint, params, onJsonResponse, onHelpMessage);
+  if (params) {
+    endpoint += '?';
+    Object.keys(params).forEach((k, i) => {
+      if (i > 0) endpoint += '&';
+      endpoint += `${k}=${params[k]}`;
+    });
+  }
+  get(endpoint, onJsonResponse, onHelpMessage);
 }
 
 export const requestMagicLink = (data: any, onJsonResponse: (response: any) => any, onUnauthorized: () => void): void => {
   const { email, token } = data;
   const url = getMagicAuthReqUrl() + encodeURIComponent(email) + '&destination=' + extractTokenFromWindowLocation('destination') + '&token=' + token;
+  const options = {};
 
   backendRequest(
-    'GET',
     url,
-    null,
+    options,
     onJsonResponse,
     console.error,
+    null,
     onUnauthorized,
   );
 }
 
 export const openMagicLink = (magicToken: string, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
-  backendRequest('GET', getMagicAuthUrl() + magicToken, null, onJsonResponse, onHelpMessage);
+  backendRequest(getMagicAuthUrl() + magicToken, {}, onJsonResponse, onHelpMessage);
 }
 
 export const googleLogin = (token: string, onLogin: (response: any) => any, onLoginError: (message: string) => any) => {
   const url = getBackendUrl() + 'auth-google?google-id-token=' + token;
-  backendRequest('GET', url, null, onLogin, onLoginError);
+  backendRequest(url, {}, onLogin, onLoginError);
 }
 
 export const microsoftLogin = (token: string, onLogin: (response: any) => any, onLoginError: (message: string) => any) => {
   const url = getBackendUrl() + 'auth-microsoft?access-token=' + token;
-  backendRequest('GET', url, null, onLogin, onLoginError);
+  backendRequest(url, {}, onLogin, onLoginError);
 }
 
 export const getMXData = async (domainName: string): Promise<any> => {
   try {
     const records = await fetch
-    (
-      `https://dns.google.com/resolve?name=${domainName}&type=MX`,
-      {
-        method: 'GET',
-        mode: 'cors'
-      }
-    );
-  if (!records.ok) {
-    console.log('response was not ok');
-    return null;
-  }
-  const recordsJson = await records.json();
+      (
+        `https://dns.google.com/resolve?name=${domainName}&type=MX`,
+        {
+          method: 'GET',
+          mode: 'cors'
+        }
+      );
+    if (!records.ok) {
+      console.log('response was not ok');
+      return null;
+    }
+    const recordsJson = await records.json();
 
-  const answer = recordsJson.Answer;
+    const answer = recordsJson.Answer;
 
-  if (!answer) {
-    return null;
-  }
+    if (!answer) {
+      return null;
+    }
 
-  return Array.from(answer).map((a: any) => a.data);
+    return Array.from(answer).map((a: any) => a.data);
   } catch (error) {
     console.error('Fetch failed: ', error);
     return null;
-  } 
+  }
 };
