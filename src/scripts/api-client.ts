@@ -23,12 +23,12 @@ const getMagicAuthReqUrl = (): string => {
 
 // TODO: use jux-events to call commands and queries inside jux-web library
 export const handleJuxEvent = (ev: Event) => {
-  const { endpoint, onResult, params, onError, onRedirect } = ev as JuxEvent;
+  const { requestType, endpoint, onResult, params, onError, onRedirect } = ev as JuxEvent;
 
   const onJsonResponse = (res: any) => onResult ? onResult(res) : null;
   const onHelpMessage = (err: any) => onError ? onError(err) : null;
 
-  post(endpoint, params, onJsonResponse, onHelpMessage, onRedirect);
+  post(endpoint, params, onJsonResponse, onHelpMessage, onRedirect, requestType);
 }
 
 const applySpinnerStyle = (spinner: HTMLElement) => {
@@ -70,12 +70,13 @@ export const backendRequest = async (
   onSuccess: any,
   onError: any,
   onRedirect?: any,
+  requestType: string = 'query',
   handleUnauthorized: () => void = defaultHandleUnauthorized,
   retrial = false,
   retrialNum = 0,
 ) => {
   if (requestRunning && !retrial) { // only allow one request at a time
-    setTimeout(() => backendRequest(url, options, onSuccess, onError, onRedirect, handleUnauthorized, false), 300);
+    setTimeout(() => backendRequest(url, options, onSuccess, onError, onRedirect, requestType, handleUnauthorized, false), 300);
 
     return;
   };
@@ -89,9 +90,10 @@ export const backendRequest = async (
 
   let response;
   requestRunning = true;
-  const requestInit = {
-    ...options,
-    signal: AbortSignal.timeout(6000)
+  const requestInit = { ...options };
+
+  if (requestType === 'query') {
+    requestInit.signal = AbortSignal.timeout(6000);
   }
 
   if (onRedirect) requestInit.redirect = 'manual'; // Treat redirects manually instead of following them automatically.
@@ -100,6 +102,13 @@ export const backendRequest = async (
     response = await fetch(url, requestInit);
   } catch (err) {
     // network errors
+    if (requestType === 'command') {
+      // Do not retry applying command if it fails for the first time.
+      onError('There was an error performing your request. Please try again later.');
+      requestRunning = false;
+
+      return;
+    }
     if (retrialNum > maxRetries) {
       removeOverlay();
       requestRunning = false;
@@ -117,7 +126,7 @@ export const backendRequest = async (
       } else if (url.includes(getSecondaryBackendUrl())) {
         url = url.replace(getSecondaryBackendUrl(), getBackendUrl());
       }
-      setTimeout(() => backendRequest(url, options, onSuccess, onError, onRedirect, handleUnauthorized, true, retrialNum), 2000);
+      setTimeout(() => backendRequest(url, options, onSuccess, onError, onRedirect, requestType, handleUnauthorized, true, retrialNum), 2000);
     }
     retryRequest();
 
@@ -154,7 +163,7 @@ export const backendRequest = async (
   }
 }
 
-const post = (endpoint: string, body: any, onSuccess: any, onError: any, onRedirect?: any) => {
+const post = (endpoint: string, body: any, onSuccess: any, onError: any, onRedirect?: any, requestType: string = "query") => {
   const options = {
     method: 'POST',
     headers: {
@@ -168,7 +177,7 @@ const post = (endpoint: string, body: any, onSuccess: any, onError: any, onRedir
     options.body = JSON.stringify(body);
   }
 
-  return backendRequest(getApiUrl() + endpoint, options, onSuccess, onError, onRedirect);
+  return backendRequest(getApiUrl() + endpoint, options, onSuccess, onError, onRedirect, requestType);
 }
 
 const get = (endpoint: string, onSuccess: any, onError: any, onRedirect?: any) => {
@@ -209,6 +218,7 @@ export const requestMagicLink = (data: any, onJsonResponse: (response: any) => a
     onJsonResponse,
     console.error,
     null,
+    'query',
     onUnauthorized,
   );
 }

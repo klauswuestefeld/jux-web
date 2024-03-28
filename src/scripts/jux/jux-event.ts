@@ -1,4 +1,5 @@
 export class JuxEvent extends Event {
+  public requestType: string;
   public method: string;
   public endpoint: string;
   public onResult?: (result: any) => any;
@@ -6,8 +7,9 @@ export class JuxEvent extends Event {
   public onError?: (error: any) => void;
   public onRedirect?: (result: any) => any;
 
-  constructor(method: string, endpoint: string, onResult?: (result: any) => any, params?: any, onError?: (error: any) => void, onRedirect?: (result: any) => any) {
+  constructor(type: string, method: string, endpoint: string, onResult?: (result: any) => any, params?: any, onError?: (error: any) => void, onRedirect?: (result: any) => any) {
     super('jux-event', { bubbles: true, cancelable: true, composed: true });
+    this.requestType = type;
     this.method = method;
     this.endpoint = endpoint;
     this.onResult = onResult;
@@ -18,9 +20,9 @@ export class JuxEvent extends Event {
 }
 
 export const query = (element: HTMLElement, endpoint: string, onResult: (result: any) => any, params?: any, onError?: (error: any) => void, onRedirect?: (result: any) => any) => {
-  element.dispatchEvent(new JuxEvent('POST', endpoint, onResult, params, onError, onRedirect));
+  element.dispatchEvent(new JuxEvent('query', 'POST', endpoint, onResult, params, onError, onRedirect));
 }
 
 export const command = (element: HTMLElement, endpoint: string, onResult?: (result: any) => any, params?: any, onError?: (error: any) => void, onRedirect?: (result: any) => any) => {
-  element.dispatchEvent(new JuxEvent('POST', endpoint, onResult, params, onError, onRedirect));
+  element.dispatchEvent(new JuxEvent('command', 'POST', endpoint, onResult, params, onError, onRedirect));
 }
