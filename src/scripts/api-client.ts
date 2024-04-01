@@ -93,7 +93,7 @@ export const backendRequest = async (
   const requestInit = { ...options };
 
   if (requestType === 'query') {
-    requestInit.signal = AbortSignal.timeout(6000);
+    requestInit.signal = AbortSignal.timeout(15000);
   }
 
   if (onRedirect) requestInit.redirect = 'manual'; // Treat redirects manually instead of following them automatically.
