@@ -63,6 +63,7 @@ const defaultHandleUnauthorized = () => {
 
 let requestRunning = false;
 const maxRetries = 20;
+const timeout = 15000;
 
 export const backendRequest = async (
   url: string,
@@ -90,11 +91,14 @@ export const backendRequest = async (
 
   let response;
   requestRunning = true;
-  const requestInit = { ...options };
 
+  const controller = new AbortController();
+  let timeoutId;
   if (requestType === 'query') {
-    requestInit.signal = AbortSignal.timeout(15000);
+    timeoutId = setTimeout(() => controller.abort(), timeout); // abort connections that take longer than the value set on the timeout const
   }
+
+  const requestInit = { ...options, signal: controller.signal };
 
   if (onRedirect) requestInit.redirect = 'manual'; // Treat redirects manually instead of following them automatically.
 
@@ -132,7 +136,7 @@ export const backendRequest = async (
 
     return;
   } finally {
-    requestRunning = false;
+    clearTimeout(timeoutId);
   }
 
   removeOverlay();
@@ -160,6 +164,8 @@ export const backendRequest = async (
   } catch (err) {
     // json conversion error / json response dealing errors
     onError(err);
+  } finally {
+    requestRunning = false;
   }
 }
 
