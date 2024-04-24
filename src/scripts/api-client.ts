@@ -142,6 +142,12 @@ export const backendRequest = async (
   removeOverlay();
 
   if (onRedirect) onRedirect(response);
+  if (response.type === 'opaqueredirect') {
+    console.info('opaqueredirect'); // Stop processing request if its an opaqueredirect
+
+    return; 
+  } 
+
 
   if (response.status === 401) {
     handleUnauthorized();
