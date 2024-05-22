@@ -164,12 +164,12 @@ export const backendRequest = async (
         return jsonResponse;
       }
     } else {
-      // backend predicted exceptions
+      // backend exceptions
       onError(jsonResponse.error);
     }
   } catch (err) {
-    // json conversion error / json response dealing errors
-    onError(err);
+    // json conversion error / json response dealing errors / onSuccess errors
+    console.error(err)
   } finally {
     requestRunning = false;
   }
