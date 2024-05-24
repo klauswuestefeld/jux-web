@@ -63,7 +63,10 @@ const defaultHandleUnauthorized = () => {
 
 let requestRunning = false;
 const maxRetries = 20;
-const timeout = 15000;
+let timeout = 15000;
+
+// @ts-ignore
+window.setRequestTimeout = (newTimeout: number) => timeout = newTimeout;
 
 export const backendRequest = async (
   url: string,
