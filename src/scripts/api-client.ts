@@ -63,7 +63,7 @@ const defaultHandleUnauthorized = () => {
 
 let requestRunning = false;
 const maxRetries = 20;
-let timeout = 15000;
+let timeout = 20000;
 
 // @ts-ignore
 window.setRequestTimeout = (newTimeout: number) => timeout = newTimeout;
