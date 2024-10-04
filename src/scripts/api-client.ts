@@ -168,11 +168,11 @@ export const backendRequest = async (
       }
     } else {
       // backend exceptions
-      onError(jsonResponse.error);
+      onError(jsonResponse);
     }
   } catch (err) {
     // json conversion error / json response dealing errors / onSuccess errors
-    console.error(err)
+    console.error(err);
   } finally {
     requestRunning = false;
   }
