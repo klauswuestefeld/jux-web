@@ -64,6 +64,7 @@ const defaultHandleUnauthorized = () => {
 let requestRunning = false;
 const maxRetries = 20;
 let timeout = 20000;
+const slowRequestTimeout = 2000;
 
 // @ts-ignore
 window.setRequestTimeout = (newTimeout: number) => timeout = newTimeout;
@@ -100,6 +101,14 @@ export const backendRequest = async (
   if (requestType === 'query') {
     timeoutId = setTimeout(() => controller.abort(), timeout); // abort connections that take longer than the value set on the timeout const
   }
+
+  let isSlowRequest = false
+  const slowRequestTimeoutId = setTimeout(() => {
+    isSlowRequest = true
+    const requestUrl = new URL(url)
+    const event = new CustomEvent('slow-request', { detail: requestUrl.pathname, bubbles: true });
+    window.dispatchEvent(event);
+  }, slowRequestTimeout);
 
   const requestInit = { ...options, signal: controller.signal };
 
@@ -140,6 +149,13 @@ export const backendRequest = async (
     return;
   } finally {
     clearTimeout(timeoutId);
+    clearTimeout(slowRequestTimeoutId);
+
+    if (isSlowRequest) {
+      const requestUrl = new URL(url)
+      const event = new CustomEvent('slow-request-completed', { detail: requestUrl.pathname, bubbles: true });
+      window.dispatchEvent(event);
+    }
   }
 
   removeOverlay();
@@ -148,8 +164,8 @@ export const backendRequest = async (
   if (response.type === 'opaqueredirect') {
     console.info('opaqueredirect'); // Stop processing request if its an opaqueredirect
 
-    return; 
-  } 
+    return;
+  }
 
 
   if (response.status === 401) {
