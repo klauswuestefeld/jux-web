@@ -268,6 +268,14 @@ export const microsoftLogin = (token: string, onLogin: (response: any) => any, o
   backendRequest(url, {}, onLogin, onLoginError);
 }
 
+export const getSSOAuthorizationEndpoint = (onSuccess: (response: any) => any, onError: (message: string) => any) => {
+  backendGet('openid/authorization-endpoint', null, onSuccess, onError);
+}
+
+export const validateSSOToken = (token: string, redirectUri: string, onLogin: (response: any) => any, onError: (message: string) => any) => {
+  backendGet('openid/callback', { code: token, 'redirect-uri': redirectUri }, onLogin, onError);
+}
+
 export const getMXData = async (domainName: string): Promise<any> => {
   try {
     const records = await fetch

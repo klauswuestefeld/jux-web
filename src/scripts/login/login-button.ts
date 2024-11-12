@@ -41,31 +41,35 @@ export const loginButton = (type: string, fn: any): HTMLElement => {
   applyComponentStyle(result);
   result.tabIndex = 0;
   result.setAttribute('data-cy', `${loweredCasedType}-button`);
-
-  const icon = document.createElement('login-icon');
-  icon.style.gridColumnStart = '2';
-
-  icon.style.width = '28px';
-  icon.style.height = '28px';
-  icon.style.padding = '6px';
-  icon.style.marginLeft = '4px';
-  icon.style.boxSizing = 'content-box';
-  icon.className = 'ico';
-
+  
   // @ts-ignore
-  icon.innerHTML = icons[loweredCasedType];
+  const iconHTML = icons[loweredCasedType];
+  if (iconHTML) {
+    const icon = document.createElement('login-icon');
+    icon.style.gridColumnStart = '2';
+  
+    icon.style.width = '28px';
+    icon.style.height = '28px';
+    icon.style.padding = '6px';
+    icon.style.marginLeft = '4px';
+    icon.style.boxSizing = 'content-box';
+    icon.className = 'ico';
+
+    icon.innerHTML = iconHTML;
+    result.appendChild(icon);
+  }
+
   const label = document.createElement('login-label');
   label.textContent = window.innerWidth <= THRESHOLD_WIDTH ? type : getTranslation(`${loweredCasedType}-label`);
   applyLabelStyle(label);
-
-  result.append(icon, label);
+  result.appendChild(label);
   
   result.addEventListener('click', fn);
-  result.addEventListener('mouseenter', () => {
+  result.addEventListener('mouseenter', (_ev) => {
     result.style.cursor = 'pointer';
     result.style.boxShadow = '0 0 6px #808080';
   });
-  result.addEventListener('mouseleave', () => {
+  result.addEventListener('mouseleave', (_ev) => {
     result.style.cursor = 'auto';
     result.style.boxShadow = '1px 1px 1px grey';
   });

@@ -1,4 +1,4 @@
-import { backendGet, getBackendUrl, microsoftLogin, openMagicLink, requestMagicLink, setBackendUrl } from '../api-client';
+import { backendGet, getBackendUrl, getSSOAuthorizationEndpoint, microsoftLogin, openMagicLink, requestMagicLink, setBackendUrl, validateSSOToken } from '../api-client';
 import * as msal from '@azure/msal-browser';
 import { validateThirdPartyCookies } from './utils/cookies';
 import { authSignIn } from './auth';
@@ -69,6 +69,11 @@ const displayPage = (clientApp: HTMLElement, page: HTMLElement) => {
   clientApp.appendChild(page);
 }
 
+const getSSOCallbackURI = (): string => {
+  const { protocol, host } = window.location;
+  return protocol + '//' + host + '/callback';
+}
+
 export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[], onUserLogin: any, backgroundImage: string, fetchUserBackendUrl: any, magicLinkRequestEndpoint: string | null, magicLinkAuthEndpoint: string | null) => {
   // if (startNewDemo()) {
   //   initDemo(setBackendToken, onAuthentication);
@@ -122,18 +127,19 @@ export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[
     return;
   };
 
+  const ssoToken = extractTokenFromWindowLocation('code');
+  if (ssoToken) {
+    validateSSOToken(
+      ssoToken,
+      getSSOCallbackURI(),
+      (res: any) => onAuthentication(onUserLogin, res, 'SSO Authentication'),
+      () => onAuthenticationFailure('login-failed')
+    );
+
+    return;
+  }
+
   displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, supportedLoginTypes));
-
-  // const linkedinToken = extractTokenFromWindowLocation('code', '\&state=9893849343');
-  // if (linkedinToken) {
-  //   openLinkedinSession(
-  //     linkedinToken,
-  //     (res) => onAuthentication(res, 'Linkedin Authentication'),
-  //     () => onAuthenticationFailure('unable-linkedin-login')
-  //   );
-
-  //   return;
-  // }
 
   // validateThirdPartyCookies(initGapi, () => displayPage(Page.LOGIN));
   // checkMixpanel(() => mixpanel.track('View Login Page'));
@@ -178,6 +184,17 @@ export const onGoogleSignIn = (onUserLogin: any) => {
     enableSignInLayout();
     authSignIn(onUserLogin);
   }, onCookieError);
+}
+
+export const handleSSOLogin = () => {
+  const onSuccess = (authEndpoint: any) => {
+    const authUrl = authEndpoint + `&redirect_uri=${getSSOCallbackURI()}`;
+    window.location.replace(authUrl);
+  };
+
+  const onError = () => onAuthenticationFailure('login-failed');
+
+  getSSOAuthorizationEndpoint(onSuccess, onError);
 }
 
 export const handleMagicLinkRequest = (token: string | null, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, email: string = '') => {
