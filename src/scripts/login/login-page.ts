@@ -1,4 +1,4 @@
-import { handleSSOLogin, onGoogleSignIn, onMicrosoftSignIn } from './session';
+import { onGoogleSignIn, onMicrosoftSignIn } from './session';
 import { loginButton } from './login-button';
 import { getTranslation } from '../jux/language';
 import { magicLinkModal } from './magic-link-modal';
@@ -21,9 +21,6 @@ const appendLoginTypes = (loginPage: HTMLElement, section: HTMLElement, clientAp
     }
     if (loginTypes.includes('Email')) {
         section.appendChild(loginButton('Email', () => onEmailLoginRequest(clientApp, loginPage, onUserLogin, backgroundImg, loginTypes)));
-    }
-    if (loginTypes.includes('SSO')) {
-        section.appendChild(loginButton('SSO', () => handleSSOLogin()));
     }
 }
 

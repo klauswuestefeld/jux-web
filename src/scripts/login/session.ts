@@ -74,6 +74,17 @@ const getSSOCallbackURI = (): string => {
   return protocol + '//' + host + '/callback';
 }
 
+const handleSSOLogin = () => {
+  const onSuccess = (authEndpoint: any) => {
+    const authUrl = authEndpoint + `&redirect_uri=${getSSOCallbackURI()}`;
+    window.location.replace(authUrl);
+  };
+
+  const onError = () => onAuthenticationFailure('login-failed');
+
+  getSSOAuthorizationEndpoint(onSuccess, onError);
+}
+
 export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[], onUserLogin: any, backgroundImage: string, fetchUserBackendUrl: any, magicLinkRequestEndpoint: string | null, magicLinkAuthEndpoint: string | null) => {
   // if (startNewDemo()) {
   //   initDemo(setBackendToken, onAuthentication);
@@ -139,6 +150,12 @@ export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[
     return;
   }
 
+  if (supportedLoginTypes.includes('SSO')) {
+    handleSSOLogin();
+
+    return;
+  }
+
   displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, supportedLoginTypes));
 
   // validateThirdPartyCookies(initGapi, () => displayPage(Page.LOGIN));
@@ -184,17 +201,6 @@ export const onGoogleSignIn = (onUserLogin: any) => {
     enableSignInLayout();
     authSignIn(onUserLogin);
   }, onCookieError);
-}
-
-export const handleSSOLogin = () => {
-  const onSuccess = (authEndpoint: any) => {
-    const authUrl = authEndpoint + `&redirect_uri=${getSSOCallbackURI()}`;
-    window.location.replace(authUrl);
-  };
-
-  const onError = () => onAuthenticationFailure('login-failed');
-
-  getSSOAuthorizationEndpoint(onSuccess, onError);
 }
 
 export const handleMagicLinkRequest = (token: string | null, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, email: string = '') => {
