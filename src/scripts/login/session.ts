@@ -144,7 +144,15 @@ export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[
       ssoToken,
       getSSOCallbackURI(),
       (res: any) => onAuthentication(onUserLogin, res, 'SSO Authentication'),
-      () => onAuthenticationFailure('login-failed')
+      () => onAuthenticationFailure('login-failed'),
+      () => {
+        const page = loginPage(clientApp, backgroundImage, onUserLogin, supportedLoginTypes);
+        const onReturn = () => {
+          clientApp.appendChild(page);
+          handleSSOLogin();
+        };
+        displayPage(clientApp, unauthorizedMagicLinkRequestPage(backgroundImage, onReturn));
+      }
     );
 
     return;
