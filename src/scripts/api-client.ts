@@ -76,7 +76,7 @@ export const backendRequest = async (
   onError: any,
   onRedirect?: any,
   requestType: string = 'query',
-  handleUnauthorized: () => void = defaultHandleUnauthorized,
+  handleUnauthorized: (res: any) => void = defaultHandleUnauthorized,
   retrial = false,
   retrialNum = 0,
 ) => {
@@ -169,7 +169,8 @@ export const backendRequest = async (
 
 
   if (response.status === 401) {
-    handleUnauthorized();
+    requestRunning = false;
+    handleUnauthorized(response);
 
     return;
   }
@@ -211,7 +212,7 @@ const post = (endpoint: string, body: any, onSuccess: any, onError: any, onRedir
   return backendRequest(getApiUrl() + endpoint, options, onSuccess, onError, onRedirect, requestType);
 }
 
-const get = (endpoint: string, onSuccess: any, onError: any, onRedirect?: any) => {
+const get = (endpoint: string, onSuccess: any, onError: any, onRedirect?: any, handleUnauthorized?: any) => {
   const options = {
     method: 'GET',
     headers: {
@@ -220,14 +221,14 @@ const get = (endpoint: string, onSuccess: any, onError: any, onRedirect?: any) =
     }
   }
 
-  return backendRequest(getApiUrl() + endpoint, options, onSuccess, onError, onRedirect);
+  return backendRequest(getApiUrl() + endpoint, options, onSuccess, onError, onRedirect, 'query', handleUnauthorized);
 }
 
 export const backendPost = (endpoint: string, postContent: any, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
   post(endpoint, postContent, onJsonResponse, onHelpMessage);
 }
 
-export const backendGet = (endpoint: string, params: any, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
+export const backendGet = (endpoint: string, params: any, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any, handleUnauthorized?: any): void => {
   if (params) {
     endpoint += '?';
     Object.keys(params).forEach((k, i) => {
@@ -235,7 +236,7 @@ export const backendGet = (endpoint: string, params: any, onJsonResponse: (respo
       endpoint += `${k}=${params[k]}`;
     });
   }
-  get(endpoint, onJsonResponse, onHelpMessage);
+  get(endpoint, onJsonResponse, onHelpMessage, null, handleUnauthorized);
 }
 
 export const requestMagicLink = (data: any, onJsonResponse: (response: any) => any, onUnauthorized: () => void): void => {
@@ -272,8 +273,8 @@ export const getSSOAuthorizationEndpoint = (onSuccess: (response: any) => any, o
   backendGet('openid/authorization-endpoint', null, onSuccess, onError);
 }
 
-export const validateSSOToken = (token: string, redirectUri: string, onLogin: (response: any) => any, onError: (message: string) => any) => {
-  backendGet('openid/callback', { code: token, 'redirect-uri': redirectUri }, onLogin, onError);
+export const validateSSOToken = (token: string, redirectUri: string, onLogin: (response: any) => any, onError: (message: string) => any, handleUnauthorized: (response: any) => void) => {
+  backendGet('openid/callback', { code: token, 'redirect-uri': redirectUri }, onLogin, onError, handleUnauthorized);
 }
 
 export const getMXData = async (domainName: string): Promise<any> => {

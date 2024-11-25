@@ -144,7 +144,19 @@ export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[
       ssoToken,
       getSSOCallbackURI(),
       (res: any) => onAuthentication(onUserLogin, res, 'SSO Authentication'),
-      () => onAuthenticationFailure('login-failed')
+      (_res: any) => onAuthenticationFailure('login-failed'),
+      async (res: any) => {
+        const jsonResponse = await res.json();
+        const unauthorizedEmail = jsonResponse.email;
+
+        const onReturn = () => handleSSOLogin();
+        const page = unauthorizedMagicLinkRequestPage(backgroundImage, onReturn);
+
+        const magicLinkEmail = page.querySelector('#magic-link-email') as HTMLElement;
+        magicLinkEmail.textContent = unauthorizedEmail;
+
+        displayPage(clientApp, page);
+      }
     );
 
     return;
