@@ -76,7 +76,7 @@ export const backendRequest = async (
   onError: any,
   onRedirect?: any,
   requestType: string = 'query',
-  handleUnauthorized: () => void = defaultHandleUnauthorized,
+  handleUnauthorized: (res: any) => void = defaultHandleUnauthorized,
   retrial = false,
   retrialNum = 0,
 ) => {
@@ -169,7 +169,8 @@ export const backendRequest = async (
 
 
   if (response.status === 401) {
-    handleUnauthorized();
+    requestRunning = false;
+    handleUnauthorized(response);
 
     return;
   }
@@ -272,7 +273,7 @@ export const getSSOAuthorizationEndpoint = (onSuccess: (response: any) => any, o
   backendGet('openid/authorization-endpoint', null, onSuccess, onError);
 }
 
-export const validateSSOToken = (token: string, redirectUri: string, onLogin: (response: any) => any, onError: (message: string) => any, handleUnauthorized: () => void) => {
+export const validateSSOToken = (token: string, redirectUri: string, onLogin: (response: any) => any, onError: (message: string) => any, handleUnauthorized: (response: any) => void) => {
   backendGet('openid/callback', { code: token, 'redirect-uri': redirectUri }, onLogin, onError, handleUnauthorized);
 }
 
