@@ -1,4 +1,4 @@
-import { onGoogleSignIn, onMicrosoftSignIn } from './session';
+import { onAuthPasswordLogin, onGoogleSignIn, onMicrosoftSignIn } from './session';
 import { loginButton } from './login-button';
 import { getTranslation } from '../jux/language';
 import { magicLinkModal } from './magic-link-modal';
@@ -21,6 +21,30 @@ const appendLoginTypes = (loginPage: HTMLElement, section: HTMLElement, clientAp
     }
     if (loginTypes.includes('Email')) {
         section.appendChild(loginButton('Email', () => onEmailLoginRequest(clientApp, loginPage, onUserLogin, backgroundImg, loginTypes)));
+    }
+    if (loginTypes.includes('auth-password')) {
+        const emailField = document.createElement('input');
+        emailField.id = 'input-email';
+        emailField.type = 'email';
+
+        const passwordRow = document.createElement('password-row');
+        passwordRow.style.display = 'flex';
+
+        const passwordField = document.createElement('input');
+        passwordField.id = 'input-password';
+        passwordField.type = 'password';
+
+        const togglePasswordDisplayBtn = document.createElement('button');
+        togglePasswordDisplayBtn.addEventListener('click', (_ev) => {
+            const passwordType = passwordField.type === 'password' ? 'text' : 'password';
+            passwordField.type = passwordType;
+        });
+
+        passwordRow.append(passwordField, togglePasswordDisplayBtn);
+
+        const onReturn = () => clientApp.appendChild(loginPage);
+        const button = loginButton('Login', () => onAuthPasswordLogin({ email: emailField.value, password: passwordField.value || null }, onUserLogin, onReturn, clientApp, backgroundImg));
+        section.append(emailField, passwordRow, button);
     }
 }
 

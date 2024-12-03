@@ -195,7 +195,7 @@ export const backendRequest = async (
   }
 }
 
-const post = (endpoint: string, body: any, onSuccess: any, onError: any, onRedirect?: any, requestType: string = "query") => {
+const post = (endpoint: string, body: any, onSuccess: any, onError: any, onRedirect?: any, requestType: string = "query", handleUnauthorized?: any) => {
   const options = {
     method: 'POST',
     headers: {
@@ -209,7 +209,7 @@ const post = (endpoint: string, body: any, onSuccess: any, onError: any, onRedir
     options.body = JSON.stringify(body);
   }
 
-  return backendRequest(getApiUrl() + endpoint, options, onSuccess, onError, onRedirect, requestType);
+  return backendRequest(getApiUrl() + endpoint, options, onSuccess, onError, onRedirect, requestType, handleUnauthorized);
 }
 
 const get = (endpoint: string, onSuccess: any, onError: any, onRedirect?: any, handleUnauthorized?: any) => {
@@ -224,8 +224,8 @@ const get = (endpoint: string, onSuccess: any, onError: any, onRedirect?: any, h
   return backendRequest(getApiUrl() + endpoint, options, onSuccess, onError, onRedirect, 'query', handleUnauthorized);
 }
 
-export const backendPost = (endpoint: string, postContent: any, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
-  post(endpoint, postContent, onJsonResponse, onHelpMessage);
+export const backendPost = (endpoint: string, postContent: any, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any, handleUnauthorized?: any): void => {
+  post(endpoint, postContent, onJsonResponse, onHelpMessage, null, 'command', handleUnauthorized);
 }
 
 export const backendGet = (endpoint: string, params: any, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any, handleUnauthorized?: any): void => {
@@ -275,6 +275,10 @@ export const getSSOAuthorizationEndpoint = (onSuccess: (response: any) => any, o
 
 export const validateSSOToken = (token: string, redirectUri: string, onLogin: (response: any) => any, onError: (message: string) => any, handleUnauthorized: (response: any) => void) => {
   backendGet('openid/callback', { code: token, 'redirect-uri': redirectUri }, onLogin, onError, handleUnauthorized);
+}
+
+export const authPasswordLogin = (credentials: any, onLogin: (response: any) => any, onLoginError: (message: string) => any, handleUnauthorized: (response: any) => void) => {
+  backendPost('auth-password', credentials, onLogin, onLoginError, handleUnauthorized);
 }
 
 export const getMXData = async (domainName: string): Promise<any> => {

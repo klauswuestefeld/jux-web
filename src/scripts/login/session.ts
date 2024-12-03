@@ -1,4 +1,4 @@
-import { backendGet, getBackendUrl, getSSOAuthorizationEndpoint, microsoftLogin, openMagicLink, requestMagicLink, setBackendUrl, validateSSOToken } from '../api-client';
+import { authPasswordLogin, backendGet, getBackendUrl, getSSOAuthorizationEndpoint, microsoftLogin, openMagicLink, requestMagicLink, setBackendUrl, validateSSOToken } from '../api-client';
 import * as msal from '@azure/msal-browser';
 import { validateThirdPartyCookies } from './utils/cookies';
 import { authSignIn } from './auth';
@@ -213,6 +213,37 @@ export const onGoogleSignIn = (onUserLogin: any) => {
     enableSignInLayout();
     authSignIn(onUserLogin);
   }, onCookieError);
+}
+
+export const onAuthPasswordLogin = (credentials: any, onUserLogin: any, onReturn: any, clientApp: HTMLElement, backgroundImg: string) => {
+  const { email } = credentials;
+  enableSignInLayout();
+
+  const onSuccess = (res: any) => {
+    const { token } = res;
+    // @ts-ignore
+    window.store.currentUser = res;
+    onTokenAcquired(token, onUserLogin);
+    disableSignInLayout();
+  }
+
+  const onError = (err: any) => {
+    console.error(err);
+    reportError(err);
+    disableSignInLayout();
+  }
+
+  const onUnauthorized = () => {
+    disableSignInLayout();
+
+    const page = unauthorizedMagicLinkRequestPage(backgroundImg, onReturn);
+    const magicLinkEmail = page.querySelector('#magic-link-email') as HTMLElement;
+    magicLinkEmail.textContent = email;
+
+    displayPage(clientApp, page);
+  }
+
+  authPasswordLogin(credentials, onSuccess, onError, onUnauthorized);
 }
 
 export const handleMagicLinkRequest = (token: string | null, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, email: string = '') => {
