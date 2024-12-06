@@ -4,6 +4,60 @@ import { getTranslation } from '../jux/language';
 import { magicLinkModal } from './magic-link-modal';
 import { basePage } from './base-page';
 
+const authPasswordRow = (type: string, autoCompleteValue: AutoFill): HTMLElement => {
+    const result = document.createElement(`${type}-row`);
+    result.style.display = 'flex';
+
+    const label = document.createElement('label');
+    label.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+    label.htmlFor = `input-${type}`;
+    
+    const input = document.createElement('input');
+    input.id = `input-${type}`;
+    input.type = type;
+    input.autocomplete = autoCompleteValue;
+
+    result.append(label, input);
+
+    return result;
+}
+
+const authPasswordForm = (clientApp: HTMLElement, loginPage: HTMLElement, onUserLogin: any, backgroundImg: string): HTMLFormElement => {
+    const result = document.createElement('form');
+
+    const emailRow = authPasswordRow('email', 'username');
+    const emailInput = emailRow.querySelector('input') as HTMLInputElement;
+
+    const passwordRow = authPasswordRow('password', 'current-password');
+    const passwordInput = passwordRow.querySelector('input') as HTMLInputElement;
+
+    const togglePasswordDisplayBtn = document.createElement('button');
+    togglePasswordDisplayBtn.type ='button';
+    togglePasswordDisplayBtn.addEventListener('click', (_ev) => {
+        const passwordType = passwordInput.type === 'password' ? 'text' : 'password';
+        passwordInput.type = passwordType;
+    });
+    passwordRow.appendChild(togglePasswordDisplayBtn);
+
+    const handlePasswordLogin = () => onAuthPasswordLogin({ email: emailInput.value, password: passwordInput.value || null }, onUserLogin, onReturn, clientApp, backgroundImg);
+
+    const onReturn = () => clientApp.appendChild(loginPage);
+    const button = loginButton('Login', handlePasswordLogin);
+    button.classList.add('auth-password');
+    button.setAttribute('type', 'submit');
+
+    const submitButton = document.createElement('button');
+    submitButton.style.display = 'none';
+
+    result.append(emailRow, passwordRow, button, submitButton);
+    result.addEventListener('submit', (ev) => {
+        ev.preventDefault();
+        handlePasswordLogin();
+    });
+
+    return result;
+}
+
 const onEmailLoginRequest = (clientApp: HTMLElement, loginPage: HTMLElement, onUserLogin: any, backgroundImage: string, loginTypes: string[]): void => {
     const onReturn = () => clientApp.appendChild(loginPage);
     loginPage.appendChild(magicLinkModal(onUserLogin, onReturn, backgroundImage, loginPage, clientApp, loginTypes));
@@ -23,28 +77,7 @@ const appendLoginTypes = (loginPage: HTMLElement, section: HTMLElement, clientAp
         section.appendChild(loginButton('Email', () => onEmailLoginRequest(clientApp, loginPage, onUserLogin, backgroundImg, loginTypes)));
     }
     if (loginTypes.includes('auth-password')) {
-        const emailField = document.createElement('input');
-        emailField.id = 'input-email';
-        emailField.type = 'email';
-
-        const passwordRow = document.createElement('password-row');
-        passwordRow.style.display = 'flex';
-
-        const passwordField = document.createElement('input');
-        passwordField.id = 'input-password';
-        passwordField.type = 'password';
-
-        const togglePasswordDisplayBtn = document.createElement('button');
-        togglePasswordDisplayBtn.addEventListener('click', (_ev) => {
-            const passwordType = passwordField.type === 'password' ? 'text' : 'password';
-            passwordField.type = passwordType;
-        });
-
-        passwordRow.append(passwordField, togglePasswordDisplayBtn);
-
-        const onReturn = () => clientApp.appendChild(loginPage);
-        const button = loginButton('Login', () => onAuthPasswordLogin({ email: emailField.value, password: passwordField.value || null }, onUserLogin, onReturn, clientApp, backgroundImg));
-        section.append(emailField, passwordRow, button);
+        section.appendChild(authPasswordForm(clientApp, loginPage, onUserLogin, backgroundImg));
     }
 }
 
