@@ -85,7 +85,7 @@ const handleSSOLogin = () => {
   getSSOAuthorizationEndpoint(onSuccess, onError);
 }
 
-export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[], onUserLogin: any, backgroundImage: string, fetchUserBackendUrl: any, magicLinkRequestEndpoint: string | null, magicLinkAuthEndpoint: string | null) => {
+export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[], onUserLogin: any, onLoginError: any, backgroundImage: string, fetchUserBackendUrl: any, magicLinkRequestEndpoint: string | null, magicLinkAuthEndpoint: string | null) => {
   // if (startNewDemo()) {
   //   initDemo(setBackendToken, onAuthentication);
 
@@ -168,7 +168,7 @@ export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[
     return;
   }
 
-  displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, supportedLoginTypes));
+  displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, onLoginError, supportedLoginTypes));
 
   // validateThirdPartyCookies(initGapi, () => displayPage(Page.LOGIN));
   // checkMixpanel(() => mixpanel.track('View Login Page'));
@@ -215,7 +215,7 @@ export const onGoogleSignIn = (onUserLogin: any) => {
   }, onCookieError);
 }
 
-export const onAuthPasswordLogin = (credentials: any, onUserLogin: any, onReturn: any, clientApp: HTMLElement, backgroundImg: string) => {
+export const onAuthPasswordLogin = (credentials: any, onUserLogin: any, onLoginError: any, onReturn: any, clientApp: HTMLElement, backgroundImg: string) => {
   const { email } = credentials;
   enableSignInLayout();
 
@@ -228,9 +228,8 @@ export const onAuthPasswordLogin = (credentials: any, onUserLogin: any, onReturn
   }
 
   const onError = (err: any) => {
-    console.error(err);
-    reportError(err);
     disableSignInLayout();
+    onLoginError(err);
   }
 
   const onUnauthorized = () => {

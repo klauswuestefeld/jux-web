@@ -22,7 +22,7 @@ const authPasswordRow = (type: string, autoCompleteValue: AutoFill): HTMLElement
     return result;
 }
 
-const authPasswordForm = (clientApp: HTMLElement, loginPage: HTMLElement, onUserLogin: any, backgroundImg: string): HTMLFormElement => {
+const authPasswordForm = (clientApp: HTMLElement, loginPage: HTMLElement, onUserLogin: any, onLoginError: any, backgroundImg: string): HTMLFormElement => {
     const result = document.createElement('form');
 
     const emailRow = authPasswordRow('email', 'username');
@@ -39,7 +39,7 @@ const authPasswordForm = (clientApp: HTMLElement, loginPage: HTMLElement, onUser
     });
     passwordRow.appendChild(togglePasswordDisplayBtn);
 
-    const handlePasswordLogin = () => onAuthPasswordLogin({ email: emailInput.value, password: passwordInput.value || null }, onUserLogin, onReturn, clientApp, backgroundImg);
+    const handlePasswordLogin = () => onAuthPasswordLogin({ email: emailInput.value, password: passwordInput.value || null }, onUserLogin, onLoginError, onReturn, clientApp, backgroundImg);
 
     const onReturn = () => clientApp.appendChild(loginPage);
     const button = loginButton('Login', handlePasswordLogin);
@@ -63,7 +63,7 @@ const onEmailLoginRequest = (clientApp: HTMLElement, loginPage: HTMLElement, onU
     loginPage.appendChild(magicLinkModal(onUserLogin, onReturn, backgroundImage, loginPage, clientApp, loginTypes));
 }
 
-const appendLoginTypes = (loginPage: HTMLElement, section: HTMLElement, clientApp: HTMLElement, onUserLogin: any, loginTypes: string[], backgroundImg: string) => {
+const appendLoginTypes = (loginPage: HTMLElement, section: HTMLElement, clientApp: HTMLElement, onUserLogin: any, onLoginError: any, loginTypes: string[], backgroundImg: string) => {
     if (loginTypes.includes('Google')) {
         section.appendChild(loginButton('Google', () => onGoogleSignIn(onUserLogin)));
     }
@@ -77,11 +77,11 @@ const appendLoginTypes = (loginPage: HTMLElement, section: HTMLElement, clientAp
         section.appendChild(loginButton('Email', () => onEmailLoginRequest(clientApp, loginPage, onUserLogin, backgroundImg, loginTypes)));
     }
     if (loginTypes.includes('auth-password')) {
-        section.appendChild(authPasswordForm(clientApp, loginPage, onUserLogin, backgroundImg));
+        section.appendChild(authPasswordForm(clientApp, loginPage, onUserLogin, onLoginError, backgroundImg));
     }
 }
 
-export const loginPage = (clientApp: HTMLElement, backgroundImg: string, onUserLogin: any, loginTypes: string[]): HTMLElement => {
+export const loginPage = (clientApp: HTMLElement, backgroundImg: string, onUserLogin: any, onLoginError: any, loginTypes: string[]): HTMLElement => {
     const content = [];
 
     const salutation = document.createElement('sign-in-salutation');
@@ -97,7 +97,7 @@ export const loginPage = (clientApp: HTMLElement, backgroundImg: string, onUserL
     const result = basePage('login-page', backgroundImg, content);
     const section = result.querySelector('section') as HTMLElement;
 
-    appendLoginTypes(result, section, clientApp, onUserLogin, loginTypes, backgroundImg);
+    appendLoginTypes(result, section, clientApp, onUserLogin, onLoginError, loginTypes, backgroundImg);
 
     return result;
 }
