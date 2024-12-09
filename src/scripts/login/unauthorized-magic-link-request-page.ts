@@ -1,7 +1,7 @@
 import { getTranslation } from '../jux/language';
 import { basePage } from './base-page';
 
-export const unauthorizedMagicLinkRequestPage = (backgroundImg: string, onReturn: any): HTMLElement => {
+export const unauthorizedMagicLinkRequestPage = (backgroundImg: string, onReturn: any, failInfo?: string): HTMLElement => {
   const content = [];
 
   const notSent = document.createElement('p');
@@ -16,7 +16,7 @@ export const unauthorizedMagicLinkRequestPage = (backgroundImg: string, onReturn
 
   const info = document.createElement('p');
   info.id = 'magic-link-fail-info';
-  info.innerHTML = getTranslation(info.id);
+  info.innerHTML = getTranslation(failInfo || info.id);
   info.style.padding = '0 30px';
   info.style.textAlign = 'center';
 

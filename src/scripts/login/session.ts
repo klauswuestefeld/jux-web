@@ -235,7 +235,7 @@ export const onAuthPasswordLogin = (credentials: any, onUserLogin: any, onLoginE
   const onUnauthorized = () => {
     disableSignInLayout();
 
-    const page = unauthorizedMagicLinkRequestPage(backgroundImg, onReturn);
+    const page = unauthorizedMagicLinkRequestPage(backgroundImg, onReturn, 'auth-password-fail-info');
     const magicLinkEmail = page.querySelector('#magic-link-email') as HTMLElement;
     magicLinkEmail.textContent = email;
 
