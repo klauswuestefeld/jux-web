@@ -195,7 +195,7 @@ export const backendRequest = async (
   }
 }
 
-const post = (endpoint: string, body: any, onSuccess: any, onError: any, onRedirect?: any, requestType: string = "query", handleUnauthorized?: any) => {
+const post = (endpoint: string, params: any, onSuccess: any, onError: any, onRedirect?: any, requestType: string = "query", handleUnauthorized?: any) => {
   const options = {
     method: 'POST',
     headers: {
@@ -204,9 +204,13 @@ const post = (endpoint: string, body: any, onSuccess: any, onError: any, onRedir
     }
   }
 
-  if (body) {
+  if (params) {
+    let content = params;
+    if (!(params instanceof File)) {
+      content = JSON.stringify(params);
+    }
     // @ts-ignore
-    options.body = JSON.stringify(body);
+    options.body = content;
   }
 
   return backendRequest(getApiUrl() + endpoint, options, onSuccess, onError, onRedirect, requestType, handleUnauthorized);
