@@ -31,11 +31,13 @@ export const onTokenAcquired = (token: string, onUserLogin: any) => {
   onUserLogin();
 }
 
-const clearSession = () => {
+export const clearSession = (itemsToSave?: string[]) => {
   // onUserChanged(null);
   // TODO: find a better way to preserve backend-url
   const backendUrl = getBackendUrl(); // Preserve backend, since the authentication was succcessfull
+  const savedItems = itemsToSave?.map((item: string) => ({ key: item, value: localStorage.getItem(item) }));
   localStorage.clear();
+  savedItems?.forEach((item: any) => localStorage.setItem(item.key, item.value));
   setBackendUrl(backendUrl);
   // @ts-ignore
   window.store = {};
