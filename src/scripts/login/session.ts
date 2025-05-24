@@ -1,4 +1,4 @@
-import { authPasswordLogin, backendGet, getBackendUrl, getSSOAuthorizationEndpoint, microsoftLogin, openMagicLink, requestMagicLink, setBackendUrl, validateSSOToken } from '../api-client';
+import { authPasswordLogin, backendGet, getSSOAuthorizationEndpoint, microsoftLogin, openMagicLink, requestMagicLink, setBackendUrl, validateSSOToken } from '../api-client';
 import * as msal from '@azure/msal-browser';
 import { validateThirdPartyCookies } from './utils/cookies';
 import { authSignIn } from './auth';
@@ -31,14 +31,8 @@ export const onTokenAcquired = (token: string, onUserLogin: any) => {
   onUserLogin();
 }
 
-export const clearSession = (itemsToSave?: string[]) => {
-  // onUserChanged(null);
-  // TODO: find a better way to preserve backend-url
-  const backendUrl = getBackendUrl(); // Preserve backend, since the authentication was succcessfull
-  const savedItems = itemsToSave?.map((item: string) => ({ key: item, value: localStorage.getItem(item) }));
-  localStorage.clear();
-  savedItems?.forEach((item: any) => localStorage.setItem(item.key, item.value));
-  setBackendUrl(backendUrl);
+export const clearSession = () => {
+  localStorage.removeItem('token');
   // @ts-ignore
   window.store = {};
 }
