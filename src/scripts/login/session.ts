@@ -71,14 +71,26 @@ const displayPage = (clientApp: HTMLElement, page: HTMLElement) => {
   clientApp.appendChild(page);
 }
 
-const getSSOCallbackURI = (): string => {
-  const { protocol, host } = window.location;
-  return protocol + '//' + host + '/callback';
+const getBaseElementHref = (): string | null => {
+  const baseElement = document.getElementsByTagName('base')[0];
+  if (!baseElement) return null;
+  
+  return baseElement.href || null;
 }
+
+const produceSSORedirectURI = (): string => {
+  const baseElementHref = getBaseElementHref();
+  if (baseElementHref) return baseElementHref;
+
+  const { protocol, host } = window.location;
+  return protocol + '//' + host + '/';
+}
+
+const getSSORedirectURI = (): string =>  produceSSORedirectURI() + 'callback';
 
 const handleSSOLogin = () => {
   const onSuccess = (authEndpoint: any) => {
-    const authUrl = authEndpoint + `&redirect_uri=${getSSOCallbackURI()}`;
+    const authUrl = authEndpoint + `&redirect_uri=${getSSORedirectURI()}`;
     window.location.replace(authUrl);
   };
 
@@ -144,7 +156,7 @@ export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[
   if (ssoToken) {
     validateSSOToken(
       ssoToken,
-      getSSOCallbackURI(),
+      getSSORedirectURI(),
       (res: any) => onAuthentication(onUserLogin, res, 'SSO Authentication'),
       (_res: any) => onAuthenticationFailure('login-failed'),
       async (res: any) => {
