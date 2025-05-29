@@ -1,10 +1,11 @@
 import { getTranslation } from './jux/language';
 import { JuxEvent } from './jux/jux-event';
 import { extractTokenFromWindowLocation } from './login/utils/token';
+import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from './local-storage/utils';
 
-export const setBackendUrl = (backendUrl: string) => localStorage.setItem('backend-url', backendUrl);
+export const setBackendUrl = (backendUrl: string) => setLocalStorageItem('backend-url', backendUrl);
 //@ts-ignore
-export const getBackendUrl = (): string => process.env.BACKEND_URL || localStorage.getItem('backend-url');
+export const getBackendUrl = (): string => process.env.BACKEND_URL || getLocalStorageItem('backend-url');
 //@ts-ignore
 const getSecondaryBackendUrl = (): string => process.env.STAGING_BACKEND_URL || getBackendUrl();
 const getApiUrl = (): string => getBackendUrl() + 'api/';
@@ -55,7 +56,7 @@ const removeOverlay = (): void => {
 }
 
 const defaultHandleUnauthorized = () => {
-  localStorage.removeItem('token');
+  removeLocalStorageItem('token');
   alert(getTranslation('session-expired-msg'));
   location.reload();
   // googleAuthSignOut(); TODO

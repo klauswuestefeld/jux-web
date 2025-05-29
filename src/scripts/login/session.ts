@@ -8,17 +8,18 @@ import { unauthorizedMagicLinkRequestPage } from './unauthorized-magic-link-requ
 import { getTranslation } from '../jux/language';
 import { extractTokenFromWindowLocation } from './utils/token';
 import { loginPage } from './login-page';
+import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem, setUrlPrefix } from '../local-storage/utils';
 
 export const setBackendToken = (token: string): void => {
   // @ts-ignore
   window.store.backendToken = token;
   if (token) {
-    localStorage.setItem('token', token);
+    setLocalStorageItem('token', token);
   }
 }
 
 const getBackendToken = (): string => {
-  const token = localStorage.getItem('token') ?? '';
+  const token = getLocalStorageItem('token') ?? '';
   // @ts-ignore
   window.store.backendToken = token;
 
@@ -32,13 +33,13 @@ export const onTokenAcquired = (token: string, onUserLogin: any) => {
 }
 
 export const clearSession = () => {
-  localStorage.removeItem('token');
+  removeLocalStorageItem('token');
   // @ts-ignore
   window.store = {};
 }
 
 const onAuthenticationFailure = (msg: string) => {
-  localStorage.removeItem('token');
+  removeLocalStorageItem('token');
   // displayPage(Page.LOGIN);
   alert(getTranslation(msg));
 }
@@ -52,7 +53,7 @@ const onAuthentication = (onUserLogin: any, user: any, type: string) => {
   window.store.currentUser = user;
 
   if (type === 'Token Authentication') {
-    user.token = localStorage.getItem('token');
+    user.token = getLocalStorageItem('token');
   }
 
   onTokenAcquired(user.token, onUserLogin);
@@ -93,7 +94,30 @@ const handleSSOLogin = () => {
   getSSOAuthorizationEndpoint(onSuccess, onError);
 }
 
-export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[], onUserLogin: any, onLoginError: any, backgroundImage: string, fetchUserBackendUrl: any, magicLinkRequestEndpoint: string | null, magicLinkAuthEndpoint: string | null) => {
+interface InitSessionParams {
+  clientApp: HTMLElement;
+  supportedLoginTypes: string[];
+  onUserLogin: any;
+  onLoginError: any;
+  backgroundImage: string;
+  fetchUserBackendUrl: any;
+  magicLinkRequestEndpoint: string | null;
+  magicLinkAuthEndpoint: string | null;
+  urlPrefix: string;
+}
+
+export const initSession = (
+  {
+    clientApp,
+    supportedLoginTypes,
+    onUserLogin,
+    onLoginError,
+    backgroundImage,
+    fetchUserBackendUrl,
+    magicLinkRequestEndpoint,
+    magicLinkAuthEndpoint,
+    urlPrefix
+  } : InitSessionParams) => {
   // if (startNewDemo()) {
   //   initDemo(setBackendToken, onAuthentication);
 
@@ -111,6 +135,9 @@ export const initSession = (clientApp: HTMLElement, supportedLoginTypes: string[
   window.store.magicLinkRequestEndpoint = magicLinkRequestEndpoint;
   // @ts-ignore
   window.store.magicLinkAuthEndpoint = magicLinkAuthEndpoint;
+
+  if (urlPrefix)
+    setUrlPrefix(urlPrefix);
 
   const signInToken = extractTokenFromWindowLocation('sign-in') || extractTokenFromWindowLocation('magic-link');
   if (signInToken) {

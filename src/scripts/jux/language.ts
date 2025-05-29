@@ -1,3 +1,5 @@
+import { getLocalStorageItem, setLocalStorageItem } from '../local-storage/utils';
+
 declare const navigator: any;
 
 const getBrowserLanguage = () => {
@@ -11,9 +13,9 @@ const getBrowserLanguage = () => {
 const OVERRIDE_KEY = 'jux.language.override';
 let translations = {};
 
-export const chosenLanguage = localStorage.getItem(OVERRIDE_KEY) || getBrowserLanguage();
+export const chosenLanguage = getLocalStorageItem(OVERRIDE_KEY) || getBrowserLanguage();
 export const reloadWithLanguageOverride = (lang: string) => {
-  localStorage.setItem(OVERRIDE_KEY, lang)
+  setLocalStorageItem(OVERRIDE_KEY, lang)
   location.reload();
 };
 // @ts-ignore
