@@ -13,7 +13,8 @@
     "url": "https://github.com/klauswuestefeld/jux-web/issues"
   },
   "dependencies": {
-    "@azure/msal-browser": "2.21.0"
+    "@azure/msal-browser": "2.21.0",
+    "tslib": "^2.8.1"
   },
   "main": "dist/main.esm.js",
   "types": "dist/main.d.ts",
