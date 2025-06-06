@@ -4,7 +4,7 @@ export { loginPage } from './login/login-page';
 export { handleMagicLinkRequest, initSession, onMicrosoftSignIn, clearSession } from './login/session';
 export { handleJuxEvent, requestMagicLink } from './api-client';
 export { magicLinkModal } from './login/magic-link-modal';
-export { command, query } from './jux/jux-event';
+export { command, query, upload } from './jux/jux-event';
 import './jux/jux-listener';
 
 
