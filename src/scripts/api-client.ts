@@ -2,6 +2,12 @@ import { getTranslation } from './jux/language';
 import { JuxEvent } from './jux/jux-event';
 import { extractTokenFromWindowLocation } from './login/utils/token';
 import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from './local-storage/utils';
+export { };
+declare global {
+  interface Window {
+    store: { backendToken?: string };
+  }
+}
 
 export const setBackendUrl = (backendUrl: string) => setLocalStorageItem('backend-url', backendUrl);
 //@ts-ignore
@@ -70,28 +76,37 @@ const slowRequestTimeout = 2000;
 // @ts-ignore
 window.setRequestTimeout = (newTimeout: number) => timeout = newTimeout;
 
+export interface BackendRequestOptions extends RequestInit {
+  file?: File;
+  onProgress?: (percent: number) => void;
+}
+
+export type RequestType = 'query' | 'command' | 'upload';
+
 export const backendRequest = async (
   url: string,
-  options: any,
-  onSuccess: any,
-  onError: any,
-  onRedirect?: any,
+  options: BackendRequestOptions = {},
+  onSuccess?: (response: any) => void,
+  onError?: (error: any) => void,
+  onRedirect?: (response: Response) => void,
   requestType: string = 'query',
-  handleUnauthorized: (res: any) => void = defaultHandleUnauthorized,
-  retrial = false,
-  retrialNum = 0,
+  handleUnauthorized: (res: Response) => void = defaultHandleUnauthorized,
+  retrial: boolean = false,
+  retrialNum: number = 0
 ) => {
   if (requestRunning && !retrial) { // only allow one request at a time
-    setTimeout(() => backendRequest(url, options, onSuccess, onError, onRedirect, requestType, handleUnauthorized, false), 300);
+    setTimeout(() => backendRequest(
+      url, options, onSuccess, onError, onRedirect,
+      requestType, handleUnauthorized, false, /* retrialNum */ retrialNum
+    ), 300);
 
     return;
   };
 
   // @ts-ignore
-  const backendToken = window.store.backendToken;
-  if (backendToken) {
-    if (!options.headers) options.headers = {};
-    options.headers.auth = backendToken;
+  const headers = new Headers(options.headers);
+  if (window.store?.backendToken) {
+    headers.set('auth', window.store.backendToken);
   }
 
   let response;
@@ -111,19 +126,60 @@ export const backendRequest = async (
     window.dispatchEvent(event);
   }, slowRequestTimeout);
 
-  const requestInit = { ...options, signal: controller.signal };
+  const requestInit = {
+    ...options,
+    headers,
+    signal: controller.signal
+  };
 
   if (onRedirect) requestInit.redirect = 'manual'; // Treat redirects manually instead of following them automatically.
+
+  if (requestType === 'upload' && options.file) {
+    return new Promise<any>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open(options.method ?? 'POST', url);
+
+      // auth header
+      if (window.store.backendToken) {
+        xhr.setRequestHeader('auth', window.store.backendToken);
+      }
+
+      // progress
+      xhr.upload.onprogress = (e: ProgressEvent<EventTarget>) => {
+        if (e.lengthComputable && options.onProgress) {
+          options.onProgress(Math.round((e.loaded / e.total) * 100));
+        }
+      };
+
+      xhr.onload = () => {
+        requestRunning = false;
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const resp = xhr.responseText as unknown as any;
+          onSuccess?.(resp);
+          resolve(resp);
+        } else {
+          onError?.(xhr.responseText);
+          reject(xhr.responseText);
+        }
+      };
+
+      xhr.onerror = () => {
+        requestRunning = false;
+        const msg = 'Error sending file. Please try again.';
+        onError?.(msg);
+        reject(msg);
+      };
+
+      xhr.send(options.file);
+    });
+  }
 
   try {
     response = await fetch(url, requestInit);
   } catch (err) {
-    // network errors
     if (requestType === 'command') {
-      // Do not retry applying command if it fails for the first time.
-      onError('There was an error performing your request. Please try again later.');
+      onError?.('There was an error performing your request. Please try again later.');
       requestRunning = false;
-
       return;
     }
     if (retrialNum > maxRetries) {
@@ -143,7 +199,10 @@ export const backendRequest = async (
       } else if (url.includes(getSecondaryBackendUrl())) {
         url = url.replace(getSecondaryBackendUrl(), getBackendUrl());
       }
-      setTimeout(() => backendRequest(url, options, onSuccess, onError, onRedirect, requestType, handleUnauthorized, true, retrialNum), 2000);
+      setTimeout(() => backendRequest(
+        url, options, onSuccess, onError, onRedirect,
+        requestType, handleUnauthorized, true, /* retrialNum */ retrialNum
+      ), 2000);
     }
     retryRequest();
 
@@ -179,17 +238,12 @@ export const backendRequest = async (
   try {
     const jsonResponse = await response.json();
     if (response.ok) {
-      if (onSuccess) {
-        onSuccess(jsonResponse);
-      } else {
-        return jsonResponse;
-      }
+      onSuccess?.(jsonResponse);
+      return jsonResponse;
     } else {
-      // backend exceptions
-      onError(jsonResponse);
+      onError?.(jsonResponse);  // ← CHANGE HERE: guard onError
     }
   } catch (err) {
-    // json conversion error / json response dealing errors / onSuccess errors
     console.error(err);
   } finally {
     requestRunning = false;
@@ -244,9 +298,19 @@ export const backendGet = (endpoint: string, params: any, onJsonResponse: (respo
   get(endpoint, onJsonResponse, onHelpMessage, null, handleUnauthorized);
 }
 
-export const requestMagicLink = (data: any, onJsonResponse: (response: any) => any, onUnauthorized: () => void): void => {
+export const requestMagicLink = (
+  data: any,
+  onJsonResponse: (response: any) => any,
+  onUnauthorized: () => void
+): void => {
   const { email, token } = data;
-  const url = getMagicAuthReqUrl() + encodeURIComponent(email) + '&destination=' + extractTokenFromWindowLocation('destination') + '&token=' + token;
+  const url =
+    getMagicAuthReqUrl() +
+    encodeURIComponent(email) +
+    '&destination=' +
+    extractTokenFromWindowLocation('destination') +
+    '&token=' +
+    token;
   const options = {};
 
   backendRequest(
@@ -254,11 +318,11 @@ export const requestMagicLink = (data: any, onJsonResponse: (response: any) => a
     options,
     onJsonResponse,
     console.error,
-    null,
+    undefined,    // ← use undefined instead of null
     'query',
-    onUnauthorized,
+    onUnauthorized
   );
-}
+};
 
 export const openMagicLink = (magicToken: string, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
   backendRequest(getMagicAuthUrl() + magicToken, {}, onJsonResponse, onHelpMessage);
