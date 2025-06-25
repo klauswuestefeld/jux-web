@@ -6,8 +6,7 @@ export class JuxEvent extends Event {
   public params: any;
   public onError?: (error: any) => void;
   public onRedirect?: (result: any) => any;
-  public file?: File;
-  public onProgress?: (percent: number) => void;
+  public extras?: any;
 
   constructor(
     type: string,
@@ -17,8 +16,7 @@ export class JuxEvent extends Event {
     params?: any,
     onError?: (error: any) => void,
     onRedirect?: (result: any) => any,
-    file?: File,
-    onProgress?: (percent: number) => void
+    extras?: {}
   ) {
     super('jux-event', { bubbles: true, cancelable: true, composed: true });
     this.requestType = type;
@@ -28,8 +26,7 @@ export class JuxEvent extends Event {
     this.params = params;
     this.onError = onError;
     this.onRedirect = onRedirect;
-    this.file = file;
-    this.onProgress = onProgress;
+    this.extras = extras;
   }
 }
 
@@ -41,6 +38,15 @@ export const command = (element: HTMLElement, endpoint: string, onResult?: (resu
   element.dispatchEvent(new JuxEvent('command', 'POST', endpoint, onResult, params, onError, onRedirect));
 }
 
-export const upload = (element: HTMLElement, endpoint: string, file: File, onResult?: (result: any) => any, onError?: (error: any) => void, onProgress?: (percent: number) => void) => {
-  element.dispatchEvent(new JuxEvent('upload', 'POST', endpoint, onResult,{ file }, onError, undefined, file, onProgress));
+export const upload = (
+  element: HTMLElement,
+  endpoint: string,
+  file: File,
+  onResult?: (result: any) => any,
+  onError?: (error: any) => void,
+  extras?: {
+    onProgress?: (percent: number) => void;
+    onStart?: () => void;
+  }) => {
+  element.dispatchEvent(new JuxEvent('upload', 'POST', endpoint, onResult, undefined, onError, undefined, {...extras, file}));
 }
