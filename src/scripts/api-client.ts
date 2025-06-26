@@ -215,6 +215,7 @@ const backendRequest = async (
         abortUpload: () => {
           console.log('Aborting upload');
           xhr.abort()
+          requestRunning = false;
         }
       });
     }
