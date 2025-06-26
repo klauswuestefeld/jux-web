@@ -83,36 +83,62 @@ export interface BackendRequestOptions extends RequestInit {
 
 export type RequestType = 'query' | 'command' | 'upload';
 
-export const apiRequest = async (
+export const upload = (
+  endpoint: string,
+  file: File,
+  onResult?: (result: any) => any,
+  onError?: (error: any) => void,
+  extras?: {
+    onProgress?: (percent: number) => void;
+    onStart?: () => void;
+  }) => {
+  apiRequest(
+    endpoint,
+    {
+      file,
+      onProgress: (pct: number) => extras?.onProgress?.(pct)
+    },
+    (text: string) => onResult?.(text),
+    (err: any) => onError?.(err),
+    undefined,            // no redirect handler
+    'upload',             // requestType
+    undefined,
+    undefined,
+    undefined,
+    extras
+  );
+}
+
+const apiRequest = async (
   url: string,
   options: BackendRequestOptions = {},
   onSuccess?: (response: any) => void,
   onError?: (error: any) => void,
   onRedirect?: (response: Response) => void,
   requestType: string = 'query',
-  handleUnauthorized: (res: Response) => void = defaultHandleUnauthorized, // TODO: move this to extras
-  retrial: boolean = false, // TODO: move this to extras
-  retrialNum: number = 0, // TODO: move this to extras
+  handleUnauthorized: (res: Response) => void = defaultHandleUnauthorized,
+  retrial: boolean = false,
+  retrialNum: number = 0,
   extras?: any
 ) => {
   url = getApiUrl() + url;
-  backendRequestOld(url, options, onSuccess, onError, onRedirect, requestType, handleUnauthorized, retrial, retrialNum, extras);
+  backendRequest(url, options, onSuccess, onError, onRedirect, requestType, handleUnauthorized, retrial, retrialNum, extras);
 }
 
-export const backendRequestOld = async (
+const backendRequest = async (
   url: string,
   options: BackendRequestOptions = {},
   onSuccess?: (response: any) => void,
   onError?: (error: any) => void,
   onRedirect?: (response: Response) => void,
   requestType: string = 'query',
-  handleUnauthorized: (res: Response) => void = defaultHandleUnauthorized, // TODO: move this to extras
-  retrial: boolean = false, // TODO: move this to extras
-  retrialNum: number = 0, // TODO: move this to extras
+  handleUnauthorized: (res: Response) => void = defaultHandleUnauthorized,
+  retrial: boolean = false,
+  retrialNum: number = 0,
   extras?: any
 ) => {
   if (requestRunning && !retrial) { // only allow one request at a time
-    setTimeout(() => backendRequestOld(
+    setTimeout(() => backendRequest(
       url, options, onSuccess, onError, onRedirect,
       requestType, handleUnauthorized, false, /* retrialNum */ retrialNum
     ), 300);
@@ -220,7 +246,7 @@ export const backendRequestOld = async (
       } else if (url.includes(getSecondaryBackendUrl())) {
         url = url.replace(getSecondaryBackendUrl(), getBackendUrl());
       }
-      setTimeout(() => backendRequestOld(
+      setTimeout(() => backendRequest(
         url, options, onSuccess, onError, onRedirect,
         requestType, handleUnauthorized, true, /* retrialNum */ retrialNum
       ), 2000);
@@ -289,7 +315,7 @@ const post = (endpoint: string, params: any, onSuccess: any, onError: any, onRed
     options.body = content;
   }
 
-  return backendRequestOld(getApiUrl() + endpoint, options, onSuccess, onError, onRedirect, requestType, handleUnauthorized);
+  return apiRequest(endpoint, options, onSuccess, onError, onRedirect, requestType, handleUnauthorized);
 }
 
 const get = (endpoint: string, onSuccess: any, onError: any, onRedirect?: any, handleUnauthorized?: any) => {
@@ -301,7 +327,7 @@ const get = (endpoint: string, onSuccess: any, onError: any, onRedirect?: any, h
     }
   }
 
-  return backendRequestOld(getApiUrl() + endpoint, options, onSuccess, onError, onRedirect, 'query', handleUnauthorized);
+  return apiRequest(endpoint, options, onSuccess, onError, onRedirect, 'query', handleUnauthorized);
 }
 
 export const backendPost = (endpoint: string, postContent: any, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any, handleUnauthorized?: any): void => {
@@ -334,7 +360,7 @@ export const requestMagicLink = (
     token;
   const options = {};
 
-  backendRequestOld(
+  backendRequest(
     url,
     options,
     onJsonResponse,
@@ -346,17 +372,17 @@ export const requestMagicLink = (
 };
 
 export const openMagicLink = (magicToken: string, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
-  backendRequestOld(getMagicAuthUrl() + magicToken, {}, onJsonResponse, onHelpMessage);
+  backendRequest(getMagicAuthUrl() + magicToken, {}, onJsonResponse, onHelpMessage);
 }
 
 export const googleLogin = (token: string, onLogin: (response: any) => any, onLoginError: (message: string) => any) => {
   const url = getBackendUrl() + 'auth-google?google-id-token=' + token;
-  backendRequestOld(url, {}, onLogin, onLoginError);
+  backendRequest(url, {}, onLogin, onLoginError);
 }
 
 export const microsoftLogin = (token: string, onLogin: (response: any) => any, onLoginError: (message: string) => any) => {
   const url = getBackendUrl() + 'auth-microsoft?access-token=' + token;
-  backendRequestOld(url, {}, onLogin, onLoginError);
+  backendRequest(url, {}, onLogin, onLoginError);
 }
 
 export const getSSOAuthorizationEndpoint = (onSuccess: (response: any) => any, onError: (message: string) => any) => {
