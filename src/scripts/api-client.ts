@@ -181,12 +181,10 @@ const backendRequest = async (
     const xhr = new XMLHttpRequest();
     xhr.open('POST', url);
 
-    // auth header
     if (window.store.backendToken) {
       xhr.setRequestHeader('auth', window.store.backendToken);
     }
 
-    // progress
     xhr.upload.onprogress = (e: ProgressEvent<EventTarget>) => {
       if (e.lengthComputable && extras.onProgress) {
         extras.onProgress(Math.round((e.loaded / e.total) * 100));
