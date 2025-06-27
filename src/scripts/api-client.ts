@@ -140,7 +140,7 @@ const backendRequest = async (
   if (requestRunning && !retrial) { // only allow one request at a time
     setTimeout(() => backendRequest(
       url, options, onSuccess, onError, onRedirect,
-      requestType, handleUnauthorized, false, /* retrialNum */ retrialNum
+      requestType, handleUnauthorized, false, retrialNum
     ), 300);
 
     return;
@@ -249,7 +249,7 @@ const backendRequest = async (
       }
       setTimeout(() => backendRequest(
         url, options, onSuccess, onError, onRedirect,
-        requestType, handleUnauthorized, true, /* retrialNum */ retrialNum
+        requestType, handleUnauthorized, true, retrialNum
       ), 2000);
     }
     retryRequest();
@@ -287,9 +287,9 @@ const backendRequest = async (
     const jsonResponse = await response.json();
     if (response.ok) {
       onSuccess?.(jsonResponse);
-      return jsonResponse; // TODO: return nothing
+      return;
     } else {
-      onError?.(jsonResponse);  // ← CHANGE HERE: guard onError
+      onError?.(jsonResponse);
     }
   } catch (err) {
     console.error(err);
