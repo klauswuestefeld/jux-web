@@ -6,8 +6,18 @@ export class JuxEvent extends Event {
   public params: any;
   public onError?: (error: any) => void;
   public onRedirect?: (result: any) => any;
+  public extras?: any;
 
-  constructor(type: string, method: string, endpoint: string, onResult?: (result: any) => any, params?: any, onError?: (error: any) => void, onRedirect?: (result: any) => any) {
+  constructor(
+    type: string,
+    method: string,
+    endpoint: string,
+    onResult?: (result: any) => any,
+    params?: any,
+    onError?: (error: any) => void,
+    onRedirect?: (result: any) => any,
+    extras?: {}
+  ) {
     super('jux-event', { bubbles: true, cancelable: true, composed: true });
     this.requestType = type;
     this.method = method;
@@ -16,6 +26,7 @@ export class JuxEvent extends Event {
     this.params = params;
     this.onError = onError;
     this.onRedirect = onRedirect;
+    this.extras = extras;
   }
 }
 
