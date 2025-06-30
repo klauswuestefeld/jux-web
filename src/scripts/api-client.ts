@@ -18,13 +18,13 @@ const getApiUrl = (): string => getBackendUrl() + 'api/';
 
 const getMagicAuthUrl = (): string => {
   // @ts-ignore
-  const endpoint = window?.store?.magicLinkAuthEndpoint || 'auth-magic';
+  const endpoint = window.juxwebGlobal?.magicLinkAuthEndpoint || 'auth-magic';
   return getBackendUrl() + endpoint + '?token=';
 }
 
 const getMagicAuthReqUrl = (): string => {
   // @ts-ignore
-  const endpoint = window?.store?.magicLinkRequestEndpoint || 'magic-link-request';
+  const endpoint = window.juxwebGlobal?.magicLinkRequestEndpoint || 'magic-link-request';
   return getBackendUrl() + endpoint + '?email=';
 }
 
@@ -125,6 +125,60 @@ const apiRequest = async (
   backendRequest(url, options, onSuccess, onError, onRedirect, requestType, handleUnauthorized, retrial, retrialNum, extras);
 }
 
+type UploadExtras = {
+  onProgress?: (percent: number) => void;
+  onStart?: (controls: { abortUpload: () => void }) => void;
+};
+
+const uploadRequest = (
+  url: string,
+  file: File,
+  onSuccess?: (response: any) => void,
+  onError?: (error: any) => void,
+  extras?: UploadExtras
+) => {
+  requestRunning = true;
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', url);
+
+  if (window.juxwebGlobal?.backendToken) {
+    xhr.setRequestHeader('auth', window.juxwebGlobal?.backendToken);
+  }
+
+  xhr.upload.onprogress = (e: ProgressEvent) => {
+    if (e.lengthComputable && extras?.onProgress) {
+      extras.onProgress(Math.round((e.loaded / e.total) * 100));
+    }
+  };
+
+  xhr.onload = () => {
+    requestRunning = false;
+    if (xhr.status >= 200 && xhr.status < 300) {
+      onSuccess?.(xhr.responseText);
+    } else {
+      onError?.(xhr.responseText);
+    }
+  };
+
+  xhr.onerror = () => {
+    requestRunning = false;
+    onError?.('Error sending file. Please try again.');
+  };
+
+  xhr.send(file);
+
+  if (extras?.onStart) {
+    extras.onStart({
+      abortUpload: () => {
+        console.log('Aborting upload');
+        xhr.abort();
+        requestRunning = false;
+      }
+    });
+  }
+}
+
 const backendRequest = async (
   url: string,
   options: BackendRequestOptions = {},
@@ -148,8 +202,8 @@ const backendRequest = async (
 
   // @ts-ignore
   const headers = new Headers(options.headers);
-  if (window.store?.backendToken) {
-    headers.set('auth', window.store.backendToken);
+  if (window.juxwebGlobal?.backendToken) {
+    headers.set('auth', window.juxwebGlobal.backendToken);
   }
 
   let response;
@@ -178,45 +232,13 @@ const backendRequest = async (
   if (onRedirect) requestInit.redirect = 'manual'; // Treat redirects manually instead of following them automatically.
 
   if (requestType === 'upload') {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', url);
-
-    if (window.store.backendToken) {
-      xhr.setRequestHeader('auth', window.store.backendToken);
-    }
-
-    xhr.upload.onprogress = (e: ProgressEvent<EventTarget>) => {
-      if (e.lengthComputable && extras.onProgress) {
-        extras.onProgress(Math.round((e.loaded / e.total) * 100));
-      }
-    };
-
-    xhr.onload = () => {
-      requestRunning = false;
-      if (xhr.status >= 200 && xhr.status < 300) {
-        const resp = xhr.responseText as unknown as any;
-        onSuccess?.(resp);
-      } else {
-        onError?.(xhr.responseText);
-      }
-    };
-
-    xhr.onerror = () => {
-      requestRunning = false;
-      const msg = 'Error sending file. Please try again.';
-      onError?.(msg);
-    };
-
-    xhr.send(options.file);
-    if (extras?.onStart) {
-      extras.onStart({
-        abortUpload: () => {
-          console.log('Aborting upload');
-          xhr.abort()
-          requestRunning = false;
-        }
-      });
-    }
+    uploadRequest(
+      url,
+      options.file!,
+      onSuccess,
+      onError,
+      extras
+    );
     return;
   }
 

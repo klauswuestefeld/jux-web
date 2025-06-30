@@ -31,7 +31,7 @@ const onUserChanged = (googleUser: any, onUserLogin: any) => {
     const onSuccess = (res: any) => {
       const { token } = res;
       // @ts-ignore
-      window.store.currentUser = res;
+      window.juxwebGlobal.currentUser = res;
       onTokenAcquired(token, onUserLogin);
     }
     const onError = (err: any) => {
