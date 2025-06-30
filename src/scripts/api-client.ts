@@ -2,6 +2,12 @@ import { getTranslation } from './jux/language';
 import { JuxEvent } from './jux/jux-event';
 import { extractTokenFromWindowLocation } from './login/utils/token';
 import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from './local-storage/utils';
+export { };
+declare global {
+  interface Window {
+    store: { backendToken?: string };
+  }
+}
 
 export const setBackendUrl = (backendUrl: string) => setLocalStorageItem('backend-url', backendUrl);
 //@ts-ignore
@@ -12,13 +18,13 @@ const getApiUrl = (): string => getBackendUrl() + 'api/';
 
 const getMagicAuthUrl = (): string => {
   // @ts-ignore
-  const endpoint = window?.store?.magicLinkAuthEndpoint || 'auth-magic';
+  const endpoint = window.juxwebGlobal?.magicLinkAuthEndpoint || 'auth-magic';
   return getBackendUrl() + endpoint + '?token=';
 }
 
 const getMagicAuthReqUrl = (): string => {
   // @ts-ignore
-  const endpoint = window?.store?.magicLinkRequestEndpoint || 'magic-link-request';
+  const endpoint = window.juxwebGlobal?.magicLinkRequestEndpoint || 'magic-link-request';
   return getBackendUrl() + endpoint + '?email=';
 }
 
@@ -70,28 +76,134 @@ const slowRequestTimeout = 2000;
 // @ts-ignore
 window.setRequestTimeout = (newTimeout: number) => timeout = newTimeout;
 
-export const backendRequest = async (
+export interface BackendRequestOptions extends RequestInit {
+  file?: File;
+  onProgress?: (percent: number) => void;
+}
+
+export type RequestType = 'query' | 'command' | 'upload';
+
+export const upload = (
+  endpoint: string,
+  file: File,
+  onResult?: (result: any) => any,
+  onError?: (error: any) => void,
+  extras?: {
+    onProgress?: (percent: number) => void;
+    onStart?: () => void;
+  }) => {
+  apiRequest(
+    endpoint,
+    {
+      file,
+      onProgress: (pct: number) => extras?.onProgress?.(pct)
+    },
+    (text: string) => onResult?.(text),
+    (err: any) => onError?.(err),
+    undefined,            // no redirect handler
+    'upload',             // requestType
+    undefined,
+    undefined,
+    undefined,
+    extras
+  );
+}
+
+const apiRequest = async (
   url: string,
-  options: any,
-  onSuccess: any,
-  onError: any,
-  onRedirect?: any,
+  options: BackendRequestOptions = {},
+  onSuccess?: (response: any) => void,
+  onError?: (error: any) => void,
+  onRedirect?: (response: Response) => void,
   requestType: string = 'query',
-  handleUnauthorized: (res: any) => void = defaultHandleUnauthorized,
-  retrial = false,
-  retrialNum = 0,
+  handleUnauthorized: (res: Response) => void = defaultHandleUnauthorized,
+  retrial: boolean = false,
+  retrialNum: number = 0,
+  extras?: any
+) => {
+  url = getApiUrl() + url;
+  backendRequest(url, options, onSuccess, onError, onRedirect, requestType, handleUnauthorized, retrial, retrialNum, extras);
+}
+
+type UploadExtras = {
+  onProgress?: (percent: number) => void;
+  onStart?: (controls: { abortUpload: () => void }) => void;
+};
+
+const uploadRequest = (
+  url: string,
+  file: File,
+  onSuccess?: (response: any) => void,
+  onError?: (error: any) => void,
+  extras?: UploadExtras
+) => {
+  requestRunning = true;
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', url);
+
+  if (window.juxwebGlobal?.backendToken) {
+    xhr.setRequestHeader('auth', window.juxwebGlobal?.backendToken);
+  }
+
+  xhr.upload.onprogress = (e: ProgressEvent) => {
+    if (e.lengthComputable && extras?.onProgress) {
+      extras.onProgress(Math.round((e.loaded / e.total) * 100));
+    }
+  };
+
+  xhr.onload = () => {
+    requestRunning = false;
+    if (xhr.status >= 200 && xhr.status < 300) {
+      onSuccess?.(xhr.responseText);
+    } else {
+      onError?.(xhr.responseText);
+    }
+  };
+
+  xhr.onerror = () => {
+    requestRunning = false;
+    onError?.('Error sending file. Please try again.');
+  };
+
+  xhr.send(file);
+
+  if (extras?.onStart) {
+    extras.onStart({
+      abortUpload: () => {
+        console.log('Aborting upload');
+        xhr.abort();
+        requestRunning = false;
+      }
+    });
+  }
+}
+
+const backendRequest = async (
+  url: string,
+  options: BackendRequestOptions = {},
+  onSuccess?: (response: any) => void,
+  onError?: (error: any) => void,
+  onRedirect?: (response: Response) => void,
+  requestType: string = 'query',
+  handleUnauthorized: (res: Response) => void = defaultHandleUnauthorized,
+  retrial: boolean = false,
+  retrialNum: number = 0,
+  extras?: any
 ) => {
   if (requestRunning && !retrial) { // only allow one request at a time
-    setTimeout(() => backendRequest(url, options, onSuccess, onError, onRedirect, requestType, handleUnauthorized, false), 300);
+    setTimeout(() => backendRequest(
+      url, options, onSuccess, onError, onRedirect,
+      requestType, handleUnauthorized, false, retrialNum
+    ), 300);
 
     return;
   };
 
   // @ts-ignore
-  const backendToken = window.store.backendToken;
-  if (backendToken) {
-    if (!options.headers) options.headers = {};
-    options.headers.auth = backendToken;
+  const headers = new Headers(options.headers);
+  if (window.juxwebGlobal?.backendToken) {
+    headers.set('auth', window.juxwebGlobal.backendToken);
   }
 
   let response;
@@ -111,19 +223,31 @@ export const backendRequest = async (
     window.dispatchEvent(event);
   }, slowRequestTimeout);
 
-  const requestInit = { ...options, signal: controller.signal };
+  const requestInit = {
+    ...options,
+    headers,
+    signal: controller.signal
+  };
 
   if (onRedirect) requestInit.redirect = 'manual'; // Treat redirects manually instead of following them automatically.
+
+  if (requestType === 'upload') {
+    uploadRequest(
+      url,
+      options.file!,
+      onSuccess,
+      onError,
+      extras
+    );
+    return;
+  }
 
   try {
     response = await fetch(url, requestInit);
   } catch (err) {
-    // network errors
     if (requestType === 'command') {
-      // Do not retry applying command if it fails for the first time.
-      onError('There was an error performing your request. Please try again later.');
+      onError?.('There was an error performing your request. Please try again later.');
       requestRunning = false;
-
       return;
     }
     if (retrialNum > maxRetries) {
@@ -143,7 +267,10 @@ export const backendRequest = async (
       } else if (url.includes(getSecondaryBackendUrl())) {
         url = url.replace(getSecondaryBackendUrl(), getBackendUrl());
       }
-      setTimeout(() => backendRequest(url, options, onSuccess, onError, onRedirect, requestType, handleUnauthorized, true, retrialNum), 2000);
+      setTimeout(() => backendRequest(
+        url, options, onSuccess, onError, onRedirect,
+        requestType, handleUnauthorized, true, retrialNum
+      ), 2000);
     }
     retryRequest();
 
@@ -179,17 +306,12 @@ export const backendRequest = async (
   try {
     const jsonResponse = await response.json();
     if (response.ok) {
-      if (onSuccess) {
-        onSuccess(jsonResponse);
-      } else {
-        return jsonResponse;
-      }
+      onSuccess?.(jsonResponse);
+      return;
     } else {
-      // backend exceptions
-      onError(jsonResponse);
+      onError?.(jsonResponse);
     }
   } catch (err) {
-    // json conversion error / json response dealing errors / onSuccess errors
     console.error(err);
   } finally {
     requestRunning = false;
@@ -214,7 +336,7 @@ const post = (endpoint: string, params: any, onSuccess: any, onError: any, onRed
     options.body = content;
   }
 
-  return backendRequest(getApiUrl() + endpoint, options, onSuccess, onError, onRedirect, requestType, handleUnauthorized);
+  return apiRequest(endpoint, options, onSuccess, onError, onRedirect, requestType, handleUnauthorized);
 }
 
 const get = (endpoint: string, onSuccess: any, onError: any, onRedirect?: any, handleUnauthorized?: any) => {
@@ -226,7 +348,7 @@ const get = (endpoint: string, onSuccess: any, onError: any, onRedirect?: any, h
     }
   }
 
-  return backendRequest(getApiUrl() + endpoint, options, onSuccess, onError, onRedirect, 'query', handleUnauthorized);
+  return apiRequest(endpoint, options, onSuccess, onError, onRedirect, 'query', handleUnauthorized);
 }
 
 export const backendPost = (endpoint: string, postContent: any, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any, handleUnauthorized?: any): void => {
@@ -244,9 +366,19 @@ export const backendGet = (endpoint: string, params: any, onJsonResponse: (respo
   get(endpoint, onJsonResponse, onHelpMessage, null, handleUnauthorized);
 }
 
-export const requestMagicLink = (data: any, onJsonResponse: (response: any) => any, onUnauthorized: () => void): void => {
+export const requestMagicLink = (
+  data: any,
+  onJsonResponse: (response: any) => any,
+  onUnauthorized: () => void
+): void => {
   const { email, token } = data;
-  const url = getMagicAuthReqUrl() + encodeURIComponent(email) + '&destination=' + extractTokenFromWindowLocation('destination') + '&token=' + token;
+  const url =
+    getMagicAuthReqUrl() +
+    encodeURIComponent(email) +
+    '&destination=' +
+    extractTokenFromWindowLocation('destination') +
+    '&token=' +
+    token;
   const options = {};
 
   backendRequest(
@@ -254,11 +386,11 @@ export const requestMagicLink = (data: any, onJsonResponse: (response: any) => a
     options,
     onJsonResponse,
     console.error,
-    null,
+    undefined,    // ← use undefined instead of null
     'query',
-    onUnauthorized,
+    onUnauthorized
   );
-}
+};
 
 export const openMagicLink = (magicToken: string, onJsonResponse: (response: any) => any, onHelpMessage: (message: string) => any): void => {
   backendRequest(getMagicAuthUrl() + magicToken, {}, onJsonResponse, onHelpMessage);

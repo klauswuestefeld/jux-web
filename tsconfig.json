@@ -24,7 +24,8 @@
       "lib": ["es2015", "DOM"]
   },
   "include": [
-      "src/scripts/*"
+      "src/scripts/*",
+      "src/scripts/global.d.ts"
   ],
   "exclude": [ "node_modules" ],
 }
