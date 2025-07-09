@@ -5,6 +5,7 @@ export { handleMagicLinkRequest, initSession, onMicrosoftSignIn, clearSession } 
 export { handleJuxEvent, requestMagicLink, upload } from './api-client';
 export { magicLinkModal } from './login/magic-link-modal';
 export { command, query } from './jux/jux-event';
+export { getCurrentUser, resetJuxWebGlobal } from './jux/jux-web-global/utils'
 
 declare global {
   interface Window {

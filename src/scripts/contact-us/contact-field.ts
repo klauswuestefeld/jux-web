@@ -5,7 +5,7 @@ export const contactField = (
   elType: string,
   elName: string,
   required: boolean = true,
-  value?: string
+  value?: string | null
 ): HTMLElement => {
   const result = document.createElement('contact-field');
   const elId = 'contact-' + elName;

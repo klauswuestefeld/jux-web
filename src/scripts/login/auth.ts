@@ -1,6 +1,7 @@
 import { googleLogin } from '../api-client';
 import { disableSignInLayout } from './utils/layout-changes';
 import { onTokenAcquired, setBackendToken } from './session';
+import { CurrentUser } from '../jux/jux-web-global';
 
 // TODO: find a better way to import external scripts
 const script = document.createElement('script');
@@ -28,10 +29,9 @@ const onUserChanged = (googleUser: any, onUserLogin: any) => {
 
   if (googleUser) {
     // mixpanelIdentify(googleUser); TODO
-    const onSuccess = (res: any) => {
+    const onSuccess = (res: CurrentUser) => {
       const { token } = res;
-      // @ts-ignore
-      window.juxwebGlobal.currentUser = res;
+      window.juxWebGlobal?.setCurrentUser(res);
       onTokenAcquired(token, onUserLogin);
     }
     const onError = (err: any) => {

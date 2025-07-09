@@ -1,9 +1,9 @@
+import { JuxWebGlobal } from './jux/jux-web-global';
+
 export {};
 
 declare global {
   interface Window {
-    juxwebGlobal?: {
-      backendToken?: string;
-    };
+    juxWebGlobal?: JuxWebGlobal
   }
 }

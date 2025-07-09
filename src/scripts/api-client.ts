@@ -2,12 +2,6 @@ import { getTranslation } from './jux/language';
 import { JuxEvent } from './jux/jux-event';
 import { extractTokenFromWindowLocation } from './login/utils/token';
 import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from './local-storage/utils';
-export { };
-declare global {
-  interface Window {
-    store: { backendToken?: string };
-  }
-}
 
 export const setBackendUrl = (backendUrl: string) => setLocalStorageItem('backend-url', backendUrl);
 //@ts-ignore
@@ -17,14 +11,12 @@ const getSecondaryBackendUrl = (): string => process.env.STAGING_BACKEND_URL || 
 const getApiUrl = (): string => getBackendUrl() + 'api/';
 
 const getMagicAuthUrl = (): string => {
-  // @ts-ignore
-  const endpoint = window.juxwebGlobal?.magicLinkAuthEndpoint || 'auth-magic';
+  const endpoint = window.juxWebGlobal?.magicLinkAuthEndpoint || 'auth-magic';
   return getBackendUrl() + endpoint + '?token=';
 }
 
 const getMagicAuthReqUrl = (): string => {
-  // @ts-ignore
-  const endpoint = window.juxwebGlobal?.magicLinkRequestEndpoint || 'magic-link-request';
+  const endpoint = window.juxWebGlobal?.magicLinkRequestEndpoint || 'magic-link-request';
   return getBackendUrl() + endpoint + '?email=';
 }
 
@@ -142,9 +134,9 @@ const uploadRequest = (
   const xhr = new XMLHttpRequest();
   xhr.open('POST', url);
 
-  if (window.juxwebGlobal?.backendToken) {
-    xhr.setRequestHeader('auth', window.juxwebGlobal?.backendToken);
-  }
+  const backendToken  = window.juxWebGlobal?.getBackendToken();
+  if (backendToken)
+    xhr.setRequestHeader('auth', backendToken);
 
   xhr.upload.onprogress = (e: ProgressEvent) => {
     if (e.lengthComputable && extras?.onProgress) {
@@ -200,11 +192,10 @@ const backendRequest = async (
     return;
   };
 
-  // @ts-ignore
   const headers = new Headers(options.headers);
-  if (window.juxwebGlobal?.backendToken) {
-    headers.set('auth', window.juxwebGlobal.backendToken);
-  }
+  const backendToken  = window.juxWebGlobal?.getBackendToken();
+  if (backendToken)
+    headers.set('auth', backendToken);
 
   let response;
   requestRunning = true;

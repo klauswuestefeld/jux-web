@@ -6,22 +6,21 @@ import { enableSignInLayout, disableSignInLayout } from './utils/layout-changes'
 import { magicLinkRequestedPage } from './magic-link-requested-page';
 import { unauthorizedMagicLinkRequestPage } from './unauthorized-magic-link-request-page';
 import { getTranslation } from '../jux/language';
+import { CurrentUser, JuxWebGlobal } from '../jux/jux-web-global';
+import { resetJuxWebGlobal } from '../jux/jux-web-global/utils';
 import { extractTokenFromWindowLocation } from './utils/token';
 import { loginPage } from './login-page';
 import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem, setUrlPrefix } from '../local-storage/utils';
 
 export const setBackendToken = (token: string): void => {
-  // @ts-ignore
-  window.juxwebGlobal.backendToken = token;
-  if (token) {
+  window.juxWebGlobal?.setBackendToken(token);
+  if (token)
     setLocalStorageItem('token', token);
-  }
 }
 
 const getBackendToken = (): string => {
   const token = getLocalStorageItem('token') ?? '';
-  // @ts-ignore
-  window.juxwebGlobal.backendToken = token;
+  window.juxWebGlobal?.setBackendToken(token);
 
   return token;
 }
@@ -34,8 +33,7 @@ export const onTokenAcquired = (token: string, onUserLogin: any) => {
 
 export const clearSession = () => {
   removeLocalStorageItem('token');
-  // @ts-ignore
-  window.juxwebGlobal = {};
+  resetJuxWebGlobal();
 }
 
 const onAuthenticationFailure = (msg: string) => {
@@ -49,8 +47,7 @@ const onAuthentication = (onUserLogin: any, user: any, type: string) => {
     clearSession();
   }
 
-  // @ts-ignore
-  window.juxwebGlobal.currentUser = user;
+  window.juxWebGlobal?.setCurrentUser(user);
 
   if (type === 'Token Authentication') {
     user.token = getLocalStorageItem('token');
@@ -101,8 +98,8 @@ interface InitSessionParams {
   onLoginError: any;
   backgroundImage: string;
   fetchUserBackendUrl: any;
-  magicLinkRequestEndpoint: string | null;
-  magicLinkAuthEndpoint: string | null;
+  magicLinkRequestEndpoint?: string;
+  magicLinkAuthEndpoint?: string;
   urlPrefix: string;
 }
 
@@ -124,17 +121,12 @@ export const initSession = (
   //   return;
   // }
 
-  // @ts-ignore
-  if (!window.juxwebGlobal) {
-    // @ts-ignore
-    window.juxwebGlobal = {};
-  }
-  // @ts-ignore
-  window.juxwebGlobal.fetchUserBackendUrl = fetchUserBackendUrl;
-  // @ts-ignore
-  window.juxwebGlobal.magicLinkRequestEndpoint = magicLinkRequestEndpoint;
-  // @ts-ignore
-  window.juxwebGlobal.magicLinkAuthEndpoint = magicLinkAuthEndpoint;
+  if (!window.juxWebGlobal)
+    window.juxWebGlobal = new JuxWebGlobal();
+
+  window.juxWebGlobal.fetchUserBackendUrl = fetchUserBackendUrl;
+  window.juxWebGlobal.magicLinkRequestEndpoint = magicLinkRequestEndpoint;
+  window.juxWebGlobal.magicLinkAuthEndpoint = magicLinkAuthEndpoint;
 
   if (urlPrefix)
     setUrlPrefix(urlPrefix);
@@ -150,8 +142,7 @@ export const initSession = (
     }
     const host = extractTokenFromWindowLocation('host');
     if (host) {
-      // @ts-ignore
-      window.juxwebGlobal.fetchUserBackendUrl({ host }, (backendUrl) => {
+      window.juxWebGlobal.fetchUserBackendUrl({ host }, (backendUrl: string) => {
         setBackendUrl(backendUrl);
         onOpenMagicLink();
       });
@@ -217,10 +208,11 @@ export const onMicrosoftSignIn = async (onUserLogin: any) => {
   try {
     const loginResponse = await msalInstance.loginPopup(loginRequest);
     const { accessToken } = loginResponse;
-    const onSuccess = (res: any) => {
+    const onSuccess = (res: CurrentUser) => {
       const { token } = res;
-      // @ts-ignore
-      window.juxwebGlobal.currentUser = res;
+
+      window.juxWebGlobal?.setCurrentUser(res);
+
       onTokenAcquired(token, onUserLogin);
       disableSignInLayout();
     }
@@ -254,10 +246,11 @@ export const onAuthPasswordLogin = (credentials: any, onUserLogin: any, onLoginE
   const { email } = credentials;
   enableSignInLayout();
 
-  const onSuccess = (res: any) => {
+  const onSuccess = (res: CurrentUser) => {
     const { token } = res;
-    // @ts-ignore
-    window.juxwebGlobal.currentUser = res;
+
+    window.juxWebGlobal?.setCurrentUser(res);
+
     onTokenAcquired(token, onUserLogin);
     disableSignInLayout();
   }
@@ -303,10 +296,8 @@ export const handleMagicLinkRequest = (token: string | null, onReturn: any, back
     requestMagicLink(payload, onSuccess, onUnauthorized);
   }
 
-  // @ts-ignore
-  if (window.juxwebGlobal.fetchUserBackendUrl) {
-    // @ts-ignore
-    window.juxwebGlobal.fetchUserBackendUrl({ email }, (backendUrl) => {
+  if (window.juxWebGlobal?.fetchUserBackendUrl) {
+    window.juxWebGlobal.fetchUserBackendUrl({ email }, (backendUrl: string) => {
       setBackendUrl(backendUrl);
       onRequestMagicLink();
     });

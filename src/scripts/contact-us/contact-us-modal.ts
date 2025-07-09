@@ -41,10 +41,10 @@ const sendInquiry = (
 
 export const contactUsModal = (subject: string): HTMLElement => {
   const result = document.createElement('contact-us-modal');
-  // @ts-ignore
-  const currentName = window.juxwebGlobal.currentUser ? window.juxwebGlobal.currentUser.name : '';
-  // @ts-ignore
-  const currentEmail = window.juxwebGlobal.currentUser ? window.juxwebGlobal.currentUser.email : document.querySelector('#magic-link-email')?.textContent;
+
+  const currentUser = window.juxWebGlobal?.getCurrentUser();
+  const currentName = currentUser ? currentUser.name : '';
+  const currentEmail = currentUser ? currentUser.email : document.querySelector('#magic-link-email')?.textContent;
 
   const modalBody = document.createElement('modal-body');
 
@@ -80,8 +80,7 @@ export const contactUsModal = (subject: string): HTMLElement => {
 
   const captcha = googleCaptcha();
   if (subject !== 'email-not-sent') {
-    // @ts-ignore
-    const admin = window.juxwebGlobal?.selectedTeam?.admin || window.juxwebGlobal.currentUser.email;
+    const admin = window.juxWebGlobal?.selectedTeam?.admin || window.juxWebGlobal?.getCurrentUser()?.email;
     backendGet(
       'credits-balance-for',
       { admin },
