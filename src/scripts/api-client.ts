@@ -295,7 +295,16 @@ const backendRequest = async (
   }
 
   try {
-    const jsonResponse = await response.json();
+    let jsonResponse = {}
+
+    try{
+      jsonResponse = await response.json();
+    } catch(e) {
+      jsonResponse = { error: 'Unexpected response', expected: false }
+
+      console.error('Unexpected response', e, response);
+    }
+
     if (response.ok) {
       onSuccess?.(jsonResponse);
       return;
