@@ -135,7 +135,7 @@ const uploadRequest = (
   const xhr = new XMLHttpRequest();
   xhr.open('POST', url);
 
-  const backendToken  = window.juxWebGlobal?.getBackendToken();
+  const backendToken = window.juxWebGlobal?.getBackendToken();
   if (backendToken)
     xhr.setRequestHeader('auth', backendToken);
 
@@ -194,7 +194,7 @@ const backendRequest = async (
   };
 
   const headers = new Headers(options.headers);
-  const backendToken  = window.juxWebGlobal?.getBackendToken();
+  const backendToken = window.juxWebGlobal?.getBackendToken();
   if (backendToken)
     headers.set('auth', backendToken);
 
@@ -223,6 +223,7 @@ const backendRequest = async (
 
   if (onRedirect) requestInit.redirect = 'manual'; // Treat redirects manually instead of following them automatically.
 
+  try {
   if (requestType === 'upload') {
     uploadRequest(
       url,
@@ -234,7 +235,6 @@ const backendRequest = async (
     return;
   }
 
-  try {
     response = await fetch(url, requestInit);
   } catch (err) {
     if (requestType === 'command') {
@@ -328,9 +328,9 @@ if (response.status === 429) {
   try {
     let jsonResponse = {}
 
-    try{
+    try {
       jsonResponse = await response.json();
-    } catch(e) {
+    } catch (e) {
       jsonResponse = { error: 'Unexpected response', expected: false }
 
       console.error('Unexpected response', e, response);
