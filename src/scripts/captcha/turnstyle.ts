@@ -24,11 +24,13 @@ const reenableBela = (disableBackground: DisableBackgroundEl): void => {
   disableBackground.remove();
 };
 
-const ensureTurnstileScript = (): Promise<void> => new Promise((resolve) => {
+const ensureTurnstileScript = (): Promise<void> => new Promise((resolve, reject) => {
   const existing = document.querySelector<HTMLScriptElement>('script[data-turnstile-script]');
+  const onReady = () => (typeof window.turnstile !== 'undefined') ? resolve() : reject(new Error('Turnstile not available'));
   if (existing) {
-    if (typeof window.turnstile !== 'undefined') resolve();
-    else existing.addEventListener('load', () => resolve(), { once: true });
+    if (typeof window.turnstile !== 'undefined') return resolve();
+    existing.addEventListener('load', onReady, { once: true });
+    existing.addEventListener('error', () => reject(new Error('Failed to load Turnstile')), { once: true });
     return;
   }
   const script = document.createElement('script');
@@ -36,8 +38,11 @@ const ensureTurnstileScript = (): Promise<void> => new Promise((resolve) => {
   script.async = true;
   script.defer = true;
   script.dataset.turnstileScript = 'true';
-  script.addEventListener('load', () => resolve(), { once: true });
+  script.addEventListener('load', onReady, { once: true });
+  script.addEventListener('error', () => reject(new Error('Failed to load Turnstile')), { once: true });
   document.head.appendChild(script);
+
+  setTimeout(() => reject(new Error('Turnstile load timeout')), 15000);
 });
 
 let challengeInFlight: Promise<string> | null = null;
