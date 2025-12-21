@@ -100,7 +100,7 @@ const applyWrapperStyle = (wrapper: HTMLElement) => {
   wrapper.style.maxHeight = '88%';
   wrapper.style.maxWidth = '40%';
   wrapper.style.minWidth = '20%';
-  wrapper.style.padding = '1.33rem';
+  wrapper.style.padding = '2.8rem';
   wrapper.style.position = 'relative';
 }
 
@@ -137,6 +137,7 @@ const applyJuxModalContentStyle = (el: HTMLElement) => {
   el.style.width = '100%';
   el.style.flexFlow = 'column';
   el.style.marginTop = '1.33rem';
+  el.style.fontSize = '14px';
   el.style.rowGap = '8px';
 }
 
@@ -175,6 +176,7 @@ export const juxModal = (
     }
     const h3 = document.createElement('h3');
     h3.textContent = title;
+    h3.style.margin = '0'
     header.appendChild(h3);
   } else {
   }

@@ -81,6 +81,8 @@ const produceSSORedirectURI = (): string => {
 const getSSORedirectURI = (): string =>  produceSSORedirectURI() + 'callback';
 
 const handleSSOLogin = () => {
+  return console.log('salve');
+  
   const onSuccess = (authEndpoint: any) => {
     const authUrl = authEndpoint + `&redirect_uri=${getSSORedirectURI()}`;
     window.location.replace(authUrl);
@@ -188,13 +190,7 @@ export const initSession = (
     return;
   }
 
-  if (supportedLoginTypes.includes('SSO')) {
-    handleSSOLogin();
-
-    return;
-  }
-
-  displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, onLoginError, supportedLoginTypes));
+  displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, onLoginError, supportedLoginTypes, handleSSOLogin));
 
   // validateThirdPartyCookies(initGapi, () => displayPage(Page.LOGIN));
   // checkMixpanel(() => mixpanel.track('View Login Page'));
