@@ -156,24 +156,20 @@ const applyModalButtonStyle = (btn: HTMLButtonElement) => {
   btn.style.alignItems = 'center';
   btn.style.justifyContent = 'center';
 
-  // size – smaller than main button
   btn.style.height = '36px';
   btn.style.minWidth = '88px';
   btn.style.padding = '0 16px';
 
-  // visual similarity (but lighter)
   btn.style.background = 'rgb(255, 255, 255)';
   btn.style.border = '1px solid rgb(160, 160, 160)';
   btn.style.borderRadius = '4px';
   btn.style.boxShadow = '0 1px 2px rgba(0,0,0,0.15)';
   btn.style.color = 'rgb(68, 68, 68)';
 
-  // typography
   btn.style.fontSize = '14px';
   btn.style.fontWeight = '500';
   btn.style.whiteSpace = 'nowrap';
 
-  // interaction
   btn.style.cursor = 'pointer';
 }
 
