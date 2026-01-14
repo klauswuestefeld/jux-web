@@ -223,16 +223,16 @@ const backendRequest = async (
   if (onRedirect) requestInit.redirect = 'manual'; // Treat redirects manually instead of following them automatically.
 
   try {
-  if (requestType === 'upload') {
-    uploadRequest(
-      url,
-      options.file!,
-      onSuccess,
-      onError,
-      extras
-    );
-    return;
-  }
+    if (requestType === 'upload') {
+      uploadRequest(
+        url,
+        options.file!,
+        onSuccess,
+        onError,
+        extras
+      );
+      return;
+    }
 
     response = await fetch(url, requestInit);
   } catch (err) {

@@ -188,13 +188,7 @@ export const initSession = (
     return;
   }
 
-  if (supportedLoginTypes.includes('SSO')) {
-    handleSSOLogin();
-
-    return;
-  }
-
-  displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, onLoginError, supportedLoginTypes));
+  displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, onLoginError, supportedLoginTypes, handleSSOLogin));
 
   // validateThirdPartyCookies(initGapi, () => displayPage(Page.LOGIN));
   // checkMixpanel(() => mixpanel.track('View Login Page'));
