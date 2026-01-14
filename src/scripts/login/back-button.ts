@@ -51,7 +51,6 @@ export const backButton = (type: string, fn: any): HTMLElement => {
   }
 
   const label = document.createElement('login-label');
-  console.log(window.innerWidth <= THRESHOLD_WIDTH, type);
   
   label.textContent = window.innerWidth <= THRESHOLD_WIDTH ? type : getTranslation(`${loweredCasedType}-label`);
   applyLabelStyle(label);

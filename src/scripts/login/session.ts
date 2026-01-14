@@ -81,8 +81,6 @@ const produceSSORedirectURI = (): string => {
 const getSSORedirectURI = (): string =>  produceSSORedirectURI() + 'callback';
 
 const handleSSOLogin = () => {
-  return console.log('salve');
-  
   const onSuccess = (authEndpoint: any) => {
     const authUrl = authEndpoint + `&redirect_uri=${getSSORedirectURI()}`;
     window.location.replace(authUrl);
