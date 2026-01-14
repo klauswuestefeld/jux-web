@@ -237,7 +237,7 @@ export const juxModal = (
     cancelText.textContent = cancelTxt;
 
     const cancelSpinner = document.createElement('loading-spinner');
-    if (!busy) cancelSpinner.style.display = 'none'; // ✅ minimal change
+    if (!busy) cancelSpinner.style.display = 'none';
 
     cancelBtn.append(cancelText, cancelSpinner);
     footer.appendChild(cancelBtn);
@@ -252,7 +252,7 @@ export const juxModal = (
     okText.textContent = okTxt;
 
     const okSpinner = document.createElement('loading-spinner');
-    if (!busy) okSpinner.style.display = 'none'; // ✅ minimal change
+    if (!busy) okSpinner.style.display = 'none';
 
     okBtn.append(okText, okSpinner);
     footer.appendChild(okBtn);
