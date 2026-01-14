@@ -141,12 +141,48 @@ const applyJuxModalContentStyle = (el: HTMLElement) => {
   el.style.rowGap = '8px';
 }
 
+const applyFooterStyle = (footer: HTMLElement) => {
+  footer.style.display = 'flex';
+  footer.style.width = '100%';
+  footer.style.justifyContent = 'flex-end';
+  footer.style.alignItems = 'center';
+  footer.style.gap = '0.75rem';
+  footer.style.marginTop = '1.5rem';
+  footer.style.paddingTop = '1rem';
+}
+
+const applyModalButtonStyle = (btn: HTMLButtonElement) => {
+  btn.style.display = 'inline-flex';
+  btn.style.alignItems = 'center';
+  btn.style.justifyContent = 'center';
+
+  // size – smaller than main button
+  btn.style.height = '36px';
+  btn.style.minWidth = '88px';
+  btn.style.padding = '0 16px';
+
+  // visual similarity (but lighter)
+  btn.style.background = 'rgb(255, 255, 255)';
+  btn.style.border = '1px solid rgb(160, 160, 160)';
+  btn.style.borderRadius = '4px';
+  btn.style.boxShadow = '0 1px 2px rgba(0,0,0,0.15)';
+  btn.style.color = 'rgb(68, 68, 68)';
+
+  // typography
+  btn.style.fontSize = '14px';
+  btn.style.fontWeight = '500';
+  btn.style.whiteSpace = 'nowrap';
+
+  // interaction
+  btn.style.cursor = 'pointer';
+}
+
 export const juxModal = (
   title: string,
   btns: string[] = ['ok', 'cancel'],
   content: string = '',
   persistent: boolean = false,
-  _busy: boolean = false,
+  busy: boolean = false,
   body?: HTMLElement | null,
   okTxt: string = getTranslation('alert-ok-btn-txt'),
   cancelTxt: string | null = getTranslation('alert-cancel-btn-txt'),
@@ -176,9 +212,8 @@ export const juxModal = (
     }
     const h3 = document.createElement('h3');
     h3.textContent = title;
-    h3.style.margin = '0'
+    h3.style.margin = '0';
     header.appendChild(h3);
-  } else {
   }
   // END header
 
@@ -195,13 +230,18 @@ export const juxModal = (
 
   // START footer
   const footer = document.createElement('modal-footer');
+  applyFooterStyle(footer);
 
   if (btns.includes('cancel')) {
     const cancelBtn = document.createElement('button');
     cancelBtn.classList.add('secondary-button', 'modal-button', 'action', 'cancel-btn', 'cancel');
+    applyModalButtonStyle(cancelBtn);
+
     const cancelText = document.createElement('button-text');
     cancelText.textContent = cancelTxt;
+
     const cancelSpinner = document.createElement('loading-spinner');
+    if (!busy) cancelSpinner.style.display = 'none'; // ✅ minimal change
 
     cancelBtn.append(cancelText, cancelSpinner);
     footer.appendChild(cancelBtn);
@@ -210,9 +250,13 @@ export const juxModal = (
   if (btns.includes('ok')) {
     const okBtn = document.createElement('button');
     okBtn.classList.add('primary-button', 'modal-button', 'action', 'ok');
+    applyModalButtonStyle(okBtn);
+
     const okText = document.createElement('button-text');
     okText.textContent = okTxt;
+
     const okSpinner = document.createElement('loading-spinner');
+    if (!busy) okSpinner.style.display = 'none'; // ✅ minimal change
 
     okBtn.append(okText, okSpinner);
     footer.appendChild(okBtn);
@@ -238,4 +282,5 @@ export const juxModal = (
   attachEventHandlers(result, persistent, onClose);
 
   return result;
-}
+};
+

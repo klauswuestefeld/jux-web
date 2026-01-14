@@ -32,13 +32,13 @@ const authPasswordRow = (type: string, autoCompleteValue: AutoFill): { result: H
 const openForgotModal = () => {
     const modal = juxModal(
         getTranslation('forgot-modal'),
-        ['ok'],
+        ['cancel'],
         'Get in touch with the BELA administrator in your organization, to generate a new password for you.',
         false,
         false,
         null,
-        'Ok',
         '',
+        'OK',
         null
     );
     modal.id = 'contact-us-modal';
@@ -49,12 +49,12 @@ const openForgotModal = () => {
 const linkButton = (type: string): HTMLElement => {
     const loweredCasedType = type.toLowerCase();
     const result = document.createElement('login-button');
-    //   applyComponentStyle(result, isSeparete, isSentralized);
     result.tabIndex = 0;
     result.setAttribute('data-cy', `${loweredCasedType}-button`);
     result.style.fontSize = '18px';
     result.style.padding = '4px 16px';
     result.style.marginTop = '-8px';
+    result.style.cursor = 'pointer';
 
     result.textContent = getTranslation(`${loweredCasedType}-label`);
 
