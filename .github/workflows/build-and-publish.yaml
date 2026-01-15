@@ -30,10 +30,6 @@ jobs:
         run: npm run build
 
       - name: Publish to npm (OIDC)
-        uses: JS-DevTools/npm-publish@v3
-        with:
-          access: public
-          provenance: true
         env:
           NODE_AUTH_TOKEN: ""
-
+        run: npm publish --access public --provenance --registry=https://registry.npmjs.org/
