@@ -11,7 +11,7 @@
   "homepage": "https://github.com/klauswuestefeld/jux-web#readme",
   "bugs": {
     "url": "https://github.com/klauswuestefeld/jux-web/issues"
-  },
+  }, 
   "dependencies": {
     "@azure/msal-browser": "2.21.0"
   },
