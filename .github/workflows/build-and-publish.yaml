@@ -30,6 +30,10 @@ jobs:
         run: npm run build
 
       - name: Publish to npm (OIDC)
-        uses: npm/action-publish@v1
+        uses: JS-DevTools/npm-publish@v3
         with:
           access: public
+          provenance: true
+        env:
+          NODE_AUTH_TOKEN: ""
+
