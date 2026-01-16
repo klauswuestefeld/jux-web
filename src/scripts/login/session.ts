@@ -171,7 +171,11 @@ export const initSession = (
     return;
   }
 
-  displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, onLoginError, supportedLoginTypes, handleSSOLogin, { onAuthPasswordLogin, onGoogleSignIn, onMicrosoftSignIn, handleMagicLinkRequest }));
+  const supportedLoginTypesArray = Array.isArray(supportedLoginTypes)
+  ? supportedLoginTypes
+  : [supportedLoginTypes]
+
+  displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, onLoginError, supportedLoginTypesArray, handleSSOLogin, { onAuthPasswordLogin, onGoogleSignIn, onMicrosoftSignIn, handleMagicLinkRequest }));
 
   // validateThirdPartyCookies(initGapi, () => displayPage(Page.LOGIN));
   // checkMixpanel(() => mixpanel.track('View Login Page'));
