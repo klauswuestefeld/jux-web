@@ -7,33 +7,16 @@ import { magicLinkRequestedPage } from './magic-link-requested-page';
 import { unauthorizedMagicLinkRequestPage } from './unauthorized-magic-link-request-page';
 import { getTranslation } from '../jux/language';
 import { CurrentUser, JuxWebGlobal } from '../jux/jux-web-global';
-import { resetJuxWebGlobal } from '../jux/jux-web-global/utils';
 import { extractTokenFromWindowLocation } from './utils/token';
 import { loginPage } from './login-page';
-import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem, setUrlPrefix } from '../local-storage/utils';
-
-export const setBackendToken = (token: string): void => {
-  window.juxWebGlobal?.setBackendToken(token);
-  if (token)
-    setLocalStorageItem('token', token);
-}
+import { getLocalStorageItem, removeLocalStorageItem, setUrlPrefix } from '../local-storage/utils';
+import { onTokenAcquired, clearSession } from './session-actions';
 
 const getBackendToken = (): string => {
   const token = getLocalStorageItem('token') ?? '';
   window.juxWebGlobal?.setBackendToken(token);
 
   return token;
-}
-
-export const onTokenAcquired = (token: string, onUserLogin: any) => {
-  setBackendToken(token);
-  // setSuperToken();
-  onUserLogin();
-}
-
-export const clearSession = () => {
-  removeLocalStorageItem('token');
-  resetJuxWebGlobal();
 }
 
 const onAuthenticationFailure = (msg: string) => {
@@ -66,7 +49,7 @@ const displayPage = (clientApp: HTMLElement, page: HTMLElement) => {
 const getBaseElementHref = (): string | null => {
   const baseElement = document.getElementsByTagName('base')[0];
   if (!baseElement) return null;
-  
+
   return baseElement.href || null;
 }
 
@@ -78,7 +61,7 @@ const produceSSORedirectURI = (): string => {
   return protocol + '//' + host + '/';
 }
 
-const getSSORedirectURI = (): string =>  produceSSORedirectURI() + 'callback';
+const getSSORedirectURI = (): string => produceSSORedirectURI() + 'callback';
 
 const handleSSOLogin = () => {
   const onSuccess = (authEndpoint: any) => {
@@ -114,7 +97,7 @@ export const initSession = (
     magicLinkRequestEndpoint,
     magicLinkAuthEndpoint,
     urlPrefix
-  } : InitSessionParams) => {
+  }: InitSessionParams) => {
   // if (startNewDemo()) {
   //   initDemo(setBackendToken, onAuthentication);
 
@@ -188,7 +171,7 @@ export const initSession = (
     return;
   }
 
-  displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, onLoginError, supportedLoginTypes, handleSSOLogin));
+  displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, onLoginError, supportedLoginTypes, handleSSOLogin, { onAuthPasswordLogin, onGoogleSignIn, onMicrosoftSignIn, handleMagicLinkRequest }));
 
   // validateThirdPartyCookies(initGapi, () => displayPage(Page.LOGIN));
   // checkMixpanel(() => mixpanel.track('View Login Page'));

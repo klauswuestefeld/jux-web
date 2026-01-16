@@ -1,6 +1,6 @@
 import { googleLogin } from '../api-client';
 import { disableSignInLayout } from './utils/layout-changes';
-import { onTokenAcquired, setBackendToken } from './session';
+import { onTokenAcquired, setBackendToken } from './session-actions';
 import { CurrentUser } from '../jux/jux-web-global';
 
 // TODO: find a better way to import external scripts

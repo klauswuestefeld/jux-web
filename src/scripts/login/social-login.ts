@@ -1,9 +1,8 @@
 import { getTranslation } from '../jux/language';
 import { juxModal } from '../jux-modal';
 import { loginButton } from './login-button';
-import { handleMagicLinkRequest, onGoogleSignIn, onMicrosoftSignIn } from './session';
 
-export const socialLoginModal = (userEmail: string, mailExchanger: string, token: any, onUserLogin: any, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, closeMagicLinkModal: any): HTMLElement => {
+export const socialLoginModal = (userEmail: string, mailExchanger: string, token: any, onUserLogin: any, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, closeMagicLinkModal: any, handlers: { onGoogleSignIn: any; onMicrosoftSignIn: any; handleMagicLinkRequest: any; }): HTMLElement => {
   const result = document.createElement('social-login-modal');
 
   const email = document.createElement('p');
@@ -14,13 +13,13 @@ export const socialLoginModal = (userEmail: string, mailExchanger: string, token
 
   const body = document.createElement('social-login-body');
   const socialLoginBtn = mailExchanger === 'Microsoft' ?
-    loginButton('Microsoft', () => onMicrosoftSignIn(onUserLogin)) :
-    loginButton('Google', () => onGoogleSignIn(onUserLogin));
+    loginButton('Microsoft', () => handlers.onMicrosoftSignIn(onUserLogin)) :
+    loginButton('Google', () => handlers.onGoogleSignIn(onUserLogin));
 
   const proceedMagicLinkRequest = document.createElement('a');
   proceedMagicLinkRequest.textContent = getTranslation('proceed-magic-link-request');
   proceedMagicLinkRequest.addEventListener('click', () => {
-    handleMagicLinkRequest(token, onReturn, backgroundImage, currentPage, clientBody, userEmail);
+    handlers.handleMagicLinkRequest(token, onReturn, backgroundImage, currentPage, clientBody, userEmail);
     closeMagicLinkModal();
     result.remove();
   });

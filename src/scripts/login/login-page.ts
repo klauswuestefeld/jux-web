@@ -1,4 +1,3 @@
-import { onAuthPasswordLogin, onGoogleSignIn, onMicrosoftSignIn } from './session';
 import { loginButton } from './login-button';
 import { backButton } from './back-button';
 import { getTranslation } from '../jux/language';
@@ -58,13 +57,25 @@ const linkButton = (type: string): HTMLElement => {
 
     result.textContent = getTranslation(`${loweredCasedType}-label`);
 
-      result.addEventListener('click', openForgotModal);
+    result.addEventListener('click', openForgotModal);
 
     return result;
 };
 
 
-const authPasswordForm = (clientApp: HTMLElement, loginPage: HTMLElement, onUserLogin: any, onLoginError: any, backgroundImg: string): HTMLFormElement => {
+const authPasswordForm = (
+    clientApp: HTMLElement,
+    loginPage: HTMLElement,
+    onUserLogin: any,
+    onLoginError: any,
+    backgroundImg: string,
+    handlers: {
+        onAuthPasswordLogin: any;
+        onGoogleSignIn: any;
+        onMicrosoftSignIn: any;
+        handleMagicLinkRequest: any;
+    }
+): HTMLFormElement => {
     const result = document.createElement('form');
 
     const { result: emailRow, input: emailInput } = authPasswordRow('email', 'username');
@@ -78,9 +89,18 @@ const authPasswordForm = (clientApp: HTMLElement, loginPage: HTMLElement, onUser
     });
     passwordRow.appendChild(togglePasswordDisplayBtn);
 
-    const handlePasswordLogin = () => onAuthPasswordLogin({ email: emailInput.value, password: passwordInput.value || null }, onUserLogin, onLoginError, onReturn, clientApp, backgroundImg);
-
     const onReturn = () => clientApp.appendChild(loginPage);
+
+    const handlePasswordLogin = () =>
+        handlers.onAuthPasswordLogin(
+            { email: emailInput.value, password: passwordInput.value || null },
+            onUserLogin,
+            onLoginError,
+            onReturn,
+            clientApp,
+            backgroundImg
+        );
+
     const button = loginButton('Login', handlePasswordLogin, false, true);
     button.classList.add('auth-password');
     button.setAttribute('type', 'submit');
@@ -100,18 +120,34 @@ const authPasswordForm = (clientApp: HTMLElement, loginPage: HTMLElement, onUser
     return result;
 }
 
-const onEmailLoginRequest = (clientApp: HTMLElement, loginPage: HTMLElement, onUserLogin: any, backgroundImage: string, loginTypes: string[]): void => {
+const onEmailLoginRequest = (clientApp: HTMLElement, loginPage: HTMLElement, onUserLogin: any, backgroundImage: string, loginTypes: string[], handlers: { handleMagicLinkRequest: any; }): void => {
     const onReturn = () => clientApp.appendChild(loginPage);
-    loginPage.appendChild(magicLinkModal(onUserLogin, onReturn, backgroundImage, loginPage, clientApp, loginTypes));
+    loginPage.appendChild(magicLinkModal(onUserLogin, onReturn, backgroundImage, loginPage, clientApp, loginTypes, handlers));
 }
 
-const appendLoginTypes = (loginPage: HTMLElement, btnsContainer: HTMLElement, clientApp: HTMLElement, onUserLogin: any, onLoginError: any, loginTypes: string[], backgroundImg: string, explanation?: any, handleSSOLogin?: any) => {
+const appendLoginTypes = (
+    loginPage: HTMLElement,
+    btnsContainer: HTMLElement,
+    clientApp: HTMLElement,
+    onUserLogin: any,
+    onLoginError: any,
+    loginTypes: string[],
+    backgroundImg: string,
+    explanation: HTMLElement,
+    handleSSOLogin: any,
+    handlers: {
+        onAuthPasswordLogin: any;
+        onGoogleSignIn: any;
+        onMicrosoftSignIn: any;
+        handleMagicLinkRequest: any;
+    }
+) => {
     const onlyAuth = loginTypes.every(type => type === 'auth-password')
     explanation.textContent = getTranslation('sign-in-explanation')
 
     if (loginTypes.includes('auth-password2') || onlyAuth) {
         btnsContainer.replaceChildren();
-        btnsContainer.appendChild(authPasswordForm(clientApp, loginPage, onUserLogin, onLoginError, backgroundImg));
+        btnsContainer.appendChild(authPasswordForm(clientApp, loginPage, onUserLogin, onLoginError, backgroundImg, handlers));
         loginTypes.pop()
 
         explanation.textContent = getTranslation('sign-in-email')
@@ -119,7 +155,7 @@ const appendLoginTypes = (loginPage: HTMLElement, btnsContainer: HTMLElement, cl
             btnsContainer.appendChild(backButton('Back', () => {
                 btnsContainer.replaceChildren();
 
-                appendLoginTypes(loginPage, btnsContainer, clientApp, onUserLogin, onLoginError, loginTypes, backgroundImg, explanation, handleSSOLogin)
+                appendLoginTypes(loginPage, btnsContainer, clientApp, onUserLogin, onLoginError, loginTypes, backgroundImg, explanation, handleSSOLogin, handlers);
             }));
         }
         return
@@ -132,27 +168,45 @@ const appendLoginTypes = (loginPage: HTMLElement, btnsContainer: HTMLElement, cl
     }
 
     if (loginTypes.includes('Google')) {
-        btnsContainer.appendChild(loginButton('Google', () => onGoogleSignIn(onUserLogin)));
+        btnsContainer.appendChild(loginButton('Google', () => handlers.onGoogleSignIn(onUserLogin)));
     }
     if (loginTypes.includes('Microsoft')) {
-        btnsContainer.appendChild(loginButton('Microsoft', () => onMicrosoftSignIn(onUserLogin)));
+        btnsContainer.appendChild(loginButton('Microsoft', () => handlers.onMicrosoftSignIn(onUserLogin)));
     }
     if (loginTypes.includes('Linkedin')) {
         btnsContainer.appendChild(loginButton('LinkedIn', () => console.log('login with Linkedin')));
     }
     if (loginTypes.includes('Email')) {
-        btnsContainer.appendChild(loginButton('Email', () => onEmailLoginRequest(clientApp, loginPage, onUserLogin, backgroundImg, loginTypes)));
+        btnsContainer.appendChild(loginButton('Email', () => onEmailLoginRequest(clientApp, loginPage, onUserLogin, backgroundImg, loginTypes, handlers)));
     }
     if (loginTypes.includes('auth-password')) {
         loginTypes.push('auth-password2')
-        btnsContainer.appendChild(loginButton('email-password', () => appendLoginTypes(loginPage, btnsContainer, clientApp, onUserLogin, onLoginError, loginTypes, backgroundImg, explanation, handleSSOLogin)));
+        btnsContainer.appendChild(
+            loginButton(
+                'email-password',
+                () => appendLoginTypes(loginPage, btnsContainer, clientApp, onUserLogin, onLoginError, loginTypes, backgroundImg, explanation, handleSSOLogin, handlers)
+            )
+        );
     }
     if (loginTypes.includes('anonymous')) {
         btnsContainer.appendChild(loginButton('guest', () => onUserLogin('anonymous')));
     }
 }
 
-export const loginPage = (clientApp: HTMLElement, backgroundImg: string, onUserLogin: any, onLoginError: any, loginTypes: string[], handleSSOLogin: any): HTMLElement => {
+export const loginPage = (
+    clientApp: HTMLElement,
+    backgroundImg: string,
+    onUserLogin: any,
+    onLoginError: any,
+    loginTypes: string[],
+    handleSSOLogin: any,
+    handlers: {
+        onAuthPasswordLogin: any;
+        onGoogleSignIn: any;
+        onMicrosoftSignIn: any;
+        handleMagicLinkRequest: any;
+    }
+): HTMLElement => {
     const content = [];
 
     const salutation = document.createElement('sign-in-salutation');
@@ -168,7 +222,7 @@ export const loginPage = (clientApp: HTMLElement, backgroundImg: string, onUserL
     const result = basePage('login-page', backgroundImg, content);
     const btnsContainer = result.querySelector('btns-container') as HTMLElement;
 
-    appendLoginTypes(result, btnsContainer, clientApp, onUserLogin, onLoginError, loginTypes, backgroundImg, explanation, handleSSOLogin);
+    appendLoginTypes(result, btnsContainer, clientApp, onUserLogin, onLoginError, loginTypes, backgroundImg, explanation, handleSSOLogin, handlers);
 
     return result;
 }
