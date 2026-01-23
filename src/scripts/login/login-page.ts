@@ -142,54 +142,55 @@ const appendLoginTypes = (
         handleMagicLinkRequest: any;
     }
 ) => {
-    const onlyAuth = loginTypes.every(type => type === 'auth-password')
+    const upperLoginTypes = loginTypes.map(str => str.toUpperCase());
+    const onlyAuth = upperLoginTypes.every(type => type === 'AUTH-PASSWORD')
     explanation.textContent = getTranslation('sign-in-explanation')
 
-    if (loginTypes.includes('auth-password2') || onlyAuth) {
+    if (upperLoginTypes.includes('AUTH-PASSWORD2') || onlyAuth) {
         btnsContainer.replaceChildren();
         btnsContainer.appendChild(authPasswordForm(clientApp, loginPage, onUserLogin, onLoginError, backgroundImg, handlers));
-        loginTypes.pop()
+        upperLoginTypes.pop()
 
         explanation.textContent = getTranslation('sign-in-email')
         if (!onlyAuth) {
             btnsContainer.appendChild(backButton('Back', () => {
                 btnsContainer.replaceChildren();
 
-                appendLoginTypes(loginPage, btnsContainer, clientApp, onUserLogin, onLoginError, loginTypes, backgroundImg, explanation, handleSSOLogin, handlers);
+                appendLoginTypes(loginPage, btnsContainer, clientApp, onUserLogin, onLoginError, upperLoginTypes, backgroundImg, explanation, handleSSOLogin, handlers);
             }));
         }
         return
     }
 
-    if (loginTypes.includes('SSO')) {
+    if (upperLoginTypes.includes('SSO')) {
         btnsContainer.appendChild(loginButton('SSO', () => {
             handleSSOLogin()
         }));
     }
 
-    if (loginTypes.includes('Google')) {
-        btnsContainer.appendChild(loginButton('Google', () => handlers.onGoogleSignIn(onUserLogin)));
+    if (upperLoginTypes.includes('GOOGLE')) {
+        btnsContainer.appendChild(loginButton('GOOGLE', () => handlers.onGoogleSignIn(onUserLogin)));
     }
-    if (loginTypes.includes('Microsoft')) {
-        btnsContainer.appendChild(loginButton('Microsoft', () => handlers.onMicrosoftSignIn(onUserLogin)));
+    if (upperLoginTypes.includes('MICROSOFT')) {
+        btnsContainer.appendChild(loginButton('MICROSOFT', () => handlers.onMicrosoftSignIn(onUserLogin)));
     }
-    if (loginTypes.includes('Linkedin')) {
-        btnsContainer.appendChild(loginButton('LinkedIn', () => console.log('login with Linkedin')));
+    if (upperLoginTypes.includes('LINKEDIN')) {
+        btnsContainer.appendChild(loginButton('LINKEDIN', () => console.log('login with Linkedin')));
     }
-    if (loginTypes.includes('Email')) {
-        btnsContainer.appendChild(loginButton('Email', () => onEmailLoginRequest(clientApp, loginPage, onUserLogin, backgroundImg, loginTypes, handlers)));
+    if (upperLoginTypes.includes('EMAIL')) {
+        btnsContainer.appendChild(loginButton('EMAIL', () => onEmailLoginRequest(clientApp, loginPage, onUserLogin, backgroundImg, upperLoginTypes, handlers)));
     }
-    if (loginTypes.includes('auth-password')) {
-        loginTypes.push('auth-password2')
+    if (upperLoginTypes.includes('AUTH-PASSWORD')) {
+        upperLoginTypes.push('AUTH-PASSWORD2')
         btnsContainer.appendChild(
             loginButton(
-                'email-password',
-                () => appendLoginTypes(loginPage, btnsContainer, clientApp, onUserLogin, onLoginError, loginTypes, backgroundImg, explanation, handleSSOLogin, handlers)
+                'EMAIL-PASSWORD',
+                () => appendLoginTypes(loginPage, btnsContainer, clientApp, onUserLogin, onLoginError, upperLoginTypes, backgroundImg, explanation, handleSSOLogin, handlers)
             )
         );
     }
-    if (loginTypes.includes('anonymous')) {
-        btnsContainer.appendChild(loginButton('guest', () => onUserLogin('anonymous')));
+    if (upperLoginTypes.includes('ANONYMOUS')) {
+        btnsContainer.appendChild(loginButton('guest', () => onUserLogin('ANONYMOUS')));
     }
 }
 
