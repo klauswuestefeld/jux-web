@@ -153,7 +153,7 @@ const appendLoginTypes = (
 
         explanation.textContent = getTranslation('sign-in-email')
         if (!onlyAuth) {
-            btnsContainer.appendChild(backButton('BACK', () => {
+            btnsContainer.appendChild(backButton('Back', () => {
                 btnsContainer.replaceChildren();
 
                 appendLoginTypes(loginPage, btnsContainer, clientApp, onUserLogin, onLoginError, upperLoginTypes, backgroundImg, explanation, handleSSOLogin, handlers);
