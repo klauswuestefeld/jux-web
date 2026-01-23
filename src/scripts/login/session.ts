@@ -173,8 +173,8 @@ export const initSession = (
 
   const supportedLoginTypesArray = Array.isArray(supportedLoginTypes)
   ? supportedLoginTypes
-  : [supportedLoginTypes]
-
+    : [supportedLoginTypes]
+  
   displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, onLoginError, supportedLoginTypesArray, handleSSOLogin, { onAuthPasswordLogin, onGoogleSignIn, onMicrosoftSignIn, handleMagicLinkRequest }));
 
   // validateThirdPartyCookies(initGapi, () => displayPage(Page.LOGIN));
