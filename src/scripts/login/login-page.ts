@@ -143,7 +143,9 @@ const appendLoginTypes = (
     }
 ) => {
     const upperLoginTypes = loginTypes.map(str => str.toUpperCase());
-    const onlyAuth = upperLoginTypes.every(type => type === 'AUTH-PASSWORD')
+    const onlyAuth =
+        upperLoginTypes.length > 0 &&
+        upperLoginTypes.every(type => type === 'AUTH-PASSWORD');
     explanation.textContent = getTranslation('sign-in-explanation')
 
     if (upperLoginTypes.includes('AUTH-PASSWORD2') || onlyAuth) {
