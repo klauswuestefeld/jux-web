@@ -192,7 +192,7 @@ const appendLoginTypes = (
         );
     }
     if (upperLoginTypes.includes('ANONYMOUS')) {
-        btnsContainer.appendChild(loginButton('guest', () => onUserLogin('ANONYMOUS')));
+        btnsContainer.appendChild(loginButton('guest', () => onUserLogin('anonymous')));
     }
 }
 
