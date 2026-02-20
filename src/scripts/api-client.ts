@@ -113,7 +113,7 @@ const apiRequest = async (
   retrial: boolean = false,
   retrialNum: number = 0,
   extras?: any
-) => {
+): Promise<void> => {
   url = getApiUrl() + url;
   backendRequest(url, options, onSuccess, onError, onRedirect, requestType, handleUnauthorized, retrial, retrialNum, extras);
 }
@@ -183,7 +183,7 @@ const backendRequest = async (
   retrial: boolean = false,
   retrialNum: number = 0,
   extras?: any
-) => {
+): Promise<void> => {
   if (requestRunning && !retrial) { // only allow one request at a time
     setTimeout(() => backendRequest(
       url, options, onSuccess, onError, onRedirect,

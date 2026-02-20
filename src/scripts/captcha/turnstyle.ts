@@ -48,6 +48,7 @@ const ensureTurnstileScript = (): Promise<void> => new Promise((resolve, reject)
 let challengeInFlight: Promise<string> | null = null;
 
 export const captchaChallenge = (): Promise<string> => {
+  console.log('challange');
   if (challengeInFlight) return challengeInFlight;
 
   challengeInFlight = new Promise<string>(async (resolve, reject) => {
@@ -55,8 +56,8 @@ export const captchaChallenge = (): Promise<string> => {
     let overlay: CaptchaOverlayEl | null = null;
 
     const cleanup = () => {
-      try { overlay?.remove(); } catch {}
-      try { reenableBela(disableBackground); } catch {}
+      try { overlay?.remove(); } catch { }
+      try { reenableBela(disableBackground); } catch { }
       challengeInFlight = null;
     };
 
@@ -68,17 +69,24 @@ export const captchaChallenge = (): Promise<string> => {
       container.id = 'cf-turnstile-container';
       overlay.appendChild(container);
       document.body.appendChild(overlay);
+      overlay.style.zIndex = '100'
+      overlay.style.width = '100%'
+      overlay.style.display = 'flex'
+      overlay.style.alignItems = 'center'
+      overlay.style.justifyContent = 'center'
 
       window.turnstile.render(container, {
         sitekey: '0x4AAAAAAB1GW9W6TaEdd7vi',
         callback: (token: string) => {
+          console.log("turnstile token", token);
           backendGet(
             'validate-turnstile',
             { 'turnstile-token': token },
             (res: Record<string, unknown>) => {
+              console.log(res);
               const sessionToken = (res as any)?.['session-token'];
               if (sessionToken) {
-                try { localStorage.setItem('session-token', String(sessionToken)); } catch {}
+                try { localStorage.setItem('session-token', String(sessionToken)); } catch { }
               }
               cleanup();
               resolve(token);
@@ -88,11 +96,13 @@ export const captchaChallenge = (): Promise<string> => {
               reject(err);
             }
           );
+          console.log("backendGet called");
         }
       });
     } catch (e) {
       cleanup();
       reject(e);
+      console.error("backendGet threw", e);
     }
   });
 
