@@ -15,6 +15,12 @@ const applyContainerStyles = (container: HTMLElement) => {
   container.style.paddingTop = '0';
 }
 
+const applyBtnsContainerStyles = (container: HTMLElement) => {
+  container.style.display = 'flex';
+  container.style.flexDirection = 'column';
+  container.style.alignItems = 'center';
+}
+
 const applyPageStyles = (page: HTMLElement, backgroundImg: string) => {
   page.style.backgroundImage = `url(${backgroundImg})`;
   page.style.backgroundPosition = '50%';
@@ -23,7 +29,7 @@ const applyPageStyles = (page: HTMLElement, backgroundImg: string) => {
   page.style.height = '100%';
 }
 
-export const basePage = (pageName: string, backgroundImg: string, content: HTMLElement []): HTMLElement => {
+export const basePage = (pageName: string, backgroundImg: string, content: HTMLElement[]): HTMLElement => {
   const result = document.createElement(pageName);
   result.className = 'base-login-page';
   applyPageStyles(result, backgroundImg);
@@ -31,7 +37,11 @@ export const basePage = (pageName: string, backgroundImg: string, content: HTMLE
   const section = document.createElement('section');
   applyContainerStyles(section);
 
+  const btnsContainer = document.createElement('btns-container');
+  applyBtnsContainerStyles(btnsContainer);
+
   content.forEach(element => section.appendChild(element));
+  section.appendChild(btnsContainer);
 
   result.appendChild(section);
 

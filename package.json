@@ -1,6 +1,6 @@
 {
   "name": "@klauswuestefeld/jux-web",
-  "version": "2025.9.26",
+  "version": "2026.2.2",
   "author": "Jux.House",
   "license": "Copyrighted",
   "description": "",
@@ -11,7 +11,7 @@
   "homepage": "https://github.com/klauswuestefeld/jux-web#readme",
   "bugs": {
     "url": "https://github.com/klauswuestefeld/jux-web/issues"
-  },
+  }, 
   "dependencies": {
     "@azure/msal-browser": "2.21.0"
   },
