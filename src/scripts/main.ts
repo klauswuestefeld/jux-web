@@ -7,6 +7,7 @@ export { magicLinkModal } from './login/magic-link-modal';
 export { clearSession } from './login/session-actions'
 export { command, query } from './jux/jux-event';
 export { getCurrentUser, resetJuxWebGlobal } from './jux/jux-web-global/utils'
+export { setLocalStoragePrefix } from './local-storage/utils'
 
 declare global {
   interface Window {

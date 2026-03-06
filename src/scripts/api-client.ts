@@ -2,6 +2,7 @@ import { getTranslation } from './jux/language';
 import { JuxEvent } from './jux/jux-event';
 import { extractTokenFromWindowLocation } from './login/utils/token';
 import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from './local-storage/utils';
+import { captchaChallenge } from './captcha/turnstyle';
 
 export const setBackendUrl = (backendUrl: string) => setLocalStorageItem('backend-url', backendUrl);
 //@ts-ignore
@@ -112,7 +113,7 @@ const apiRequest = async (
   retrial: boolean = false,
   retrialNum: number = 0,
   extras?: any
-) => {
+): Promise<void> => {
   url = getApiUrl() + url;
   backendRequest(url, options, onSuccess, onError, onRedirect, requestType, handleUnauthorized, retrial, retrialNum, extras);
 }
@@ -182,7 +183,7 @@ const backendRequest = async (
   retrial: boolean = false,
   retrialNum: number = 0,
   extras?: any
-) => {
+): Promise<void> => {
   if (requestRunning && !retrial) { // only allow one request at a time
     setTimeout(() => backendRequest(
       url, options, onSuccess, onError, onRedirect,
@@ -293,6 +294,36 @@ const backendRequest = async (
 
     return;
   }
+
+  if (response.status === 429) {
+    try {
+      const token = await captchaChallenge(); // shows overlay, disables background, validates, cleans up
+      return backendRequest(
+        url,
+        {
+          ...options,
+          headers: {
+            ...options.headers,
+            'cf-turnstile-token': token,
+            'cf-session-token': localStorage.getItem('session-token') ?? '',
+          },
+        },
+        onSuccess,
+        onError,
+        onRedirect,
+        requestType,
+        handleUnauthorized,
+        true,
+        retrialNum,
+        extras
+      );
+    } catch (e) {
+      onError?.({ error: 'Captcha challenge failed', detail: e });
+      requestRunning = false;
+      return;
+    }
+  }
+
 
   try {
     let jsonResponse = {}
