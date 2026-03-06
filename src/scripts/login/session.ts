@@ -9,7 +9,7 @@ import { getTranslation } from '../jux/language';
 import { CurrentUser, JuxWebGlobal } from '../jux/jux-web-global';
 import { extractTokenFromWindowLocation } from './utils/token';
 import { loginPage } from './login-page';
-import { getLocalStorageItem, removeLocalStorageItem, setUrlPrefix } from '../local-storage/utils';
+import { getLocalStorageItem, removeLocalStorageItem } from '../local-storage/utils';
 import { onTokenAcquired, clearSession } from './session-actions';
 
 const getBackendToken = (): string => {
@@ -83,7 +83,6 @@ interface InitSessionParams {
   fetchUserBackendUrl: any;
   magicLinkRequestEndpoint?: string;
   magicLinkAuthEndpoint?: string;
-  urlPrefix: string;
 }
 
 export const initSession = (
@@ -96,7 +95,6 @@ export const initSession = (
     fetchUserBackendUrl,
     magicLinkRequestEndpoint,
     magicLinkAuthEndpoint,
-    urlPrefix
   }: InitSessionParams) => {
   // if (startNewDemo()) {
   //   initDemo(setBackendToken, onAuthentication);
@@ -111,8 +109,9 @@ export const initSession = (
   window.juxWebGlobal.magicLinkRequestEndpoint = magicLinkRequestEndpoint;
   window.juxWebGlobal.magicLinkAuthEndpoint = magicLinkAuthEndpoint;
 
-  if (urlPrefix)
-    setUrlPrefix(urlPrefix);
+  const supportedLoginTypesArray = Array.isArray(supportedLoginTypes)
+    ? supportedLoginTypes
+    : [supportedLoginTypes]
 
   const signInToken = extractTokenFromWindowLocation('sign-in') || extractTokenFromWindowLocation('magic-link');
   if (signInToken) {
@@ -170,11 +169,6 @@ export const initSession = (
 
     return;
   }
-
-  const supportedLoginTypesArray = Array.isArray(supportedLoginTypes)
-  ? supportedLoginTypes
-    : [supportedLoginTypes]
-  
   displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, onLoginError, supportedLoginTypesArray, handleSSOLogin, { onAuthPasswordLogin, onGoogleSignIn, onMicrosoftSignIn, handleMagicLinkRequest }));
 
   // validateThirdPartyCookies(initGapi, () => displayPage(Page.LOGIN));

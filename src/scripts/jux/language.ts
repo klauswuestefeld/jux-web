@@ -13,7 +13,7 @@ const getBrowserLanguage = () => {
 const OVERRIDE_KEY = 'jux.language.override';
 let translations = {};
 
-export const chosenLanguage = getLocalStorageItem(OVERRIDE_KEY) || getBrowserLanguage();
+export let chosenLanguage = getBrowserLanguage();
 export const reloadWithLanguageOverride = (lang: string) => {
   setLocalStorageItem(OVERRIDE_KEY, lang)
   location.reload();
@@ -22,6 +22,7 @@ export const reloadWithLanguageOverride = (lang: string) => {
 export const getTranslation = (k: string): string => translations[k] || k;
 
 export const initLanguage = (translations_: any, defaultLanguage: string = 'en') => {
+  chosenLanguage = getLocalStorageItem(OVERRIDE_KEY) || getBrowserLanguage();
   translations = translations_[chosenLanguage] || translations_[defaultLanguage];
   document.title = getTranslation('title');
   document.documentElement.lang = translations_[chosenLanguage] ? chosenLanguage : defaultLanguage;

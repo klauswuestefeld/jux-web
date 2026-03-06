@@ -295,34 +295,34 @@ const backendRequest = async (
     return;
   }
 
-if (response.status === 429) {
-  try {
-    const token = await captchaChallenge(); // shows overlay, disables background, validates, cleans up
-    return backendRequest(
-      url,
-      {
-        ...options,
-        headers: {
-          ...options.headers,
-          'cf-turnstile-token': token,
-          'cf-session-token': localStorage.getItem('session-token') ?? '',
+  if (response.status === 429) {
+    try {
+      const token = await captchaChallenge(); // shows overlay, disables background, validates, cleans up
+      return backendRequest(
+        url,
+        {
+          ...options,
+          headers: {
+            ...options.headers,
+            'cf-turnstile-token': token,
+            'cf-session-token': localStorage.getItem('session-token') ?? '',
+          },
         },
-      },
-      onSuccess,
-      onError,
-      onRedirect,
-      requestType,
-      handleUnauthorized,
-      true,
-      retrialNum,
-      extras
-    );
-  } catch (e) {
-    onError?.({ error: 'Captcha challenge failed', detail: e });
-    requestRunning = false;
-    return;
+        onSuccess,
+        onError,
+        onRedirect,
+        requestType,
+        handleUnauthorized,
+        true,
+        retrialNum,
+        extras
+      );
+    } catch (e) {
+      onError?.({ error: 'Captcha challenge failed', detail: e });
+      requestRunning = false;
+      return;
+    }
   }
-}
 
 
   try {
