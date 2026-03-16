@@ -13,6 +13,8 @@ const applyContainerStyles = (container: HTMLElement) => {
   container.style.justifyContent = 'center';
   container.style.margin = '0 auto';
   container.style.paddingTop = '0';
+  container.style.paddingInline = '36px';
+  container.style.boxSizing = 'border-box';
 }
 
 const applyBtnsContainerStyles = (container: HTMLElement) => {

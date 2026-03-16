@@ -1,6 +1,6 @@
 import { loginButton } from './login-button';
 import { backButton } from './back-button';
-import { getTranslation } from '../jux/language';
+import { applyFormattedTranslation, getTranslation } from '../jux/language';
 import { magicLinkModal } from './magic-link-modal';
 import { basePage } from './base-page';
 import { juxModal } from '../jux-modal';
@@ -143,17 +143,23 @@ const appendLoginTypes = (
     }
 ) => {
     const upperLoginTypes = loginTypes.map(str => str.toUpperCase());
+  if (upperLoginTypes.length === 0) {
+        applyFormattedTranslation(explanation, 'sign-in-no-login-type');
+        btnsContainer.replaceChildren();
+        return;
+    }
+
     const onlyAuth =
         upperLoginTypes.length > 0 &&
         upperLoginTypes.every(type => type === 'AUTH-PASSWORD');
-    explanation.textContent = getTranslation('sign-in-explanation')
+    applyFormattedTranslation(explanation, 'sign-in-explanation');
 
     if (upperLoginTypes.includes('AUTH-PASSWORD2') || onlyAuth) {
         btnsContainer.replaceChildren();
         btnsContainer.appendChild(authPasswordForm(clientApp, loginPage, onUserLogin, onLoginError, backgroundImg, handlers));
         upperLoginTypes.pop()
 
-        explanation.textContent = getTranslation('sign-in-email')
+        applyFormattedTranslation(explanation, 'sign-in-email');
         if (!onlyAuth) {
             btnsContainer.appendChild(backButton('Back', () => {
                 btnsContainer.replaceChildren();
@@ -216,7 +222,7 @@ export const loginPage = (
     salutation.textContent = getTranslation('sign-in-salutation');
 
     const explanation = document.createElement('sign-in-explanation');
-    explanation.textContent = getTranslation('sign-in-explanation');
+    applyFormattedTranslation(explanation, 'sign-in-explanation');
 
     const msg = document.createElement('sign-in-msg');
     msg.textContent = getTranslation('sign-in-msg-general');

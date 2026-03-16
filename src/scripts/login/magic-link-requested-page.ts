@@ -1,5 +1,5 @@
 import { contactUsModal } from '../contact-us/contact-us-modal';
-import { getTranslation } from '../jux/language';
+import { applyFormattedTranslation, getTranslation } from '../jux/language';
 import { basePage } from './base-page';
 
 const applyBtnStyles = (btn: HTMLButtonElement) => {
@@ -31,7 +31,7 @@ export const magicLinkRequestedPage = (backgroundImg: string, onReturn: any): HT
 
   const howTo = document.createElement('p');
   howTo.id = 'magic-link-how-to';
-  howTo.innerHTML = getTranslation(howTo.id);
+  applyFormattedTranslation(howTo, howTo.id);
   howTo.style.padding = '0 30px';
   howTo.style.textAlign = 'center';
 
