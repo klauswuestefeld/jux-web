@@ -4,7 +4,7 @@ export const setLocalStoragePrefix = (s: string) => {
   if (prefix !== undefined) {
     throw 'prefix was already set to ' + prefix;
   }
-  if (!s) {
+  if (!s && s !== '') {
     throw 'prefix argument is ' + s + ', use empty string if you want no prefix.';
   }
   prefix = s
