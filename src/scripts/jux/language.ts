@@ -22,9 +22,10 @@ export const reloadWithLanguageOverride = (lang: string) => {
 export const getTranslation = (k: string): string => translations[k] || k;
 
 const appendFormattedNodes = (container: HTMLElement, text: string) => {
-  // Split the text on bold markers (**...**), <br>, and markdown-style links [text](url).
+  // Split the text on bold markers (**...**), <br>, markdown-style links [text](url),
+  // and semantic color tags like {warning|text}.
   // The regex uses a capture group to include the delimiters in the results.
-  const parts = text.split(/(\*\*.*?\*\*|<br>|\[.*?\]\(https?:\/\/.*?\))/g);
+  const parts = text.split(/(\*\*.*?\*\*|<br>|\[.*?\]\(https?:\/\/.*?\)|\{[a-z0-9-]+\|.*?\})/gi);
 
   parts.forEach(part => {
     if (!part) return;
@@ -57,8 +58,29 @@ const appendFormattedNodes = (container: HTMLElement, text: string) => {
       }
     }
 
+    if (part.startsWith('{') && part.includes('|') && part.endsWith('}')) {
+      const match = part.match(/\{([a-z0-9-]+)\|(.*?)\}/i);
+
+      if (match) {
+        const [, className, text] = match;
+        const coloredText = document.createElement('span');
+        coloredText.className = `${className.toLowerCase()}`;
+        appendFormattedNodes(coloredText, text);
+        container.appendChild(coloredText);
+
+        return;
+      }
+    }
+
     container.appendChild(document.createTextNode(part));
   });
+};
+
+export const createFormattedParagraph = (text: string): HTMLParagraphElement => {
+  const paragraph = document.createElement('p');
+  appendFormattedNodes(paragraph, text);
+
+  return paragraph;
 };
 
 export const applyFormattedTranslation = (element: HTMLElement, key: string) => {
