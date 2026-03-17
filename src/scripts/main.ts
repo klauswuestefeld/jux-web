@@ -1,4 +1,4 @@
-export { chosenLanguage, reloadWithLanguageOverride, initLanguage, getTranslation } from './jux/language';
+export { chosenLanguage, reloadWithLanguageOverride, initLanguage, getTranslation, formatTextToMarkdown, createFormattedParagraph } from './jux/language';
 export { loginButton } from './login/login-button';
 export { loginPage } from './login/login-page';
 export { handleMagicLinkRequest, initSession, onMicrosoftSignIn } from './login/session';

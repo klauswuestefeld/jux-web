@@ -109,9 +109,11 @@ export const initSession = (
   window.juxWebGlobal.magicLinkRequestEndpoint = magicLinkRequestEndpoint;
   window.juxWebGlobal.magicLinkAuthEndpoint = magicLinkAuthEndpoint;
 
-  const supportedLoginTypesArray = Array.isArray(supportedLoginTypes)
-    ? supportedLoginTypes
-    : [supportedLoginTypes]
+  const supportedLoginTypesArray = (
+    Array.isArray(supportedLoginTypes)
+      ? supportedLoginTypes
+      : [supportedLoginTypes]
+  ).filter((loginType): loginType is string => typeof loginType === 'string' && loginType.trim().length > 0);
 
   const signInToken = extractTokenFromWindowLocation('sign-in') || extractTokenFromWindowLocation('magic-link');
   if (signInToken) {
