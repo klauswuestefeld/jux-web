@@ -21,7 +21,7 @@ export const reloadWithLanguageOverride = (lang: string) => {
 // @ts-ignore
 export const getTranslation = (k: string): string => translations[k] || k;
 
-const appendFormattedNodes = (container: HTMLElement, text: string) => {
+export const formatTextToMarkdown = (container: HTMLElement, text: string) => {
   // Split the text on bold markers (**...**), <br>, markdown-style links [text](url),
   // and semantic color tags like {warning|text}.
   // The regex uses a capture group to include the delimiters in the results.
@@ -65,7 +65,7 @@ const appendFormattedNodes = (container: HTMLElement, text: string) => {
         const [, className, text] = match;
         const coloredText = document.createElement('span');
         coloredText.className = `${className.toLowerCase()}`;
-        appendFormattedNodes(coloredText, text);
+        formatTextToMarkdown(coloredText, text);
         container.appendChild(coloredText);
 
         return;
@@ -78,14 +78,14 @@ const appendFormattedNodes = (container: HTMLElement, text: string) => {
 
 export const createFormattedParagraph = (text: string): HTMLParagraphElement => {
   const paragraph = document.createElement('p');
-  appendFormattedNodes(paragraph, text);
+  formatTextToMarkdown(paragraph, text);
 
   return paragraph;
 };
 
 export const applyFormattedTranslation = (element: HTMLElement, key: string) => {
   const wrapper = document.createElement('span');
-  appendFormattedNodes(wrapper, getTranslation(key));
+  formatTextToMarkdown(wrapper, getTranslation(key));
   element.replaceChildren(...Array.from(wrapper.childNodes));
 };
 
