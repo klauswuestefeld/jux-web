@@ -21,7 +21,7 @@
       "esModuleInterop": true,
       "allowSyntheticDefaultImports": true,
       "experimentalDecorators": true,
-      "lib": ["es2015", "DOM"]
+      "lib": ["es2015", "es2016.array.include", "DOM"]
   },
   "include": [
       "src/scripts/*",
