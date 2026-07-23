@@ -1,7 +1,9 @@
 import { getMXData } from '../api-client';
 import { googleCaptcha } from '../captcha/google-captcha';
 import { getTranslation } from '../jux/language';
-import { juxDimmedDarkGrey, juxLightGreen, juxWhite } from '../style-constants';
+import { juxModal } from '../jux-modal';
+import { juxDarkGrey, juxLightGreen, juxWhite } from '../style-constants';
+import { applyLoginFieldStyle } from './login-field-style';
 import { socialLoginModal } from './social-login';
 import { isValidEmail } from './utils/string';
 
@@ -65,28 +67,12 @@ export const onMagicLinkRequest = async (token: any, input: HTMLInputElement, on
 }
 
 const applyMagicEmailFieldStyle = (el: HTMLElement) => {
+  el.style.alignItems = 'center';
   el.style.display = 'flex';
-  el.style.flexFlow = 'column';
+  el.style.flexFlow = 'row';
+  el.style.gap = '8px';
   el.style.marginTop = '8px';
-  el.style.rowGap = '8px';
   el.style.width = '100%';
-}
-
-const applyInputStyle = (input: HTMLInputElement) => {
-  input.style.border = '1px solid #ccc';
-  input.style.borderRadius = '8px';
-  input.style.boxShadow = `inset 0 2px 3px ${juxDimmedDarkGrey}`;
-  input.style.boxSizing = 'border-box';
-  input.style.color = '#444';
-  input.style.fontFamily = 'Helvetica, Arial, sans-serif';
-  input.style.fontSize = '16px';
-  input.style.height = '40px';
-  input.style.lineHeight = '38px';
-  input.style.maxWidth = '390px';
-  input.style.padding = '0 12px';
-  input.style.width = '100%';
-  input.style.backgroundColor = juxWhite;
-  input.style.whiteSpace = 'pre-line';
 }
 
 const applyCaptchaStyle = (captcha: HTMLElement) => {
@@ -116,7 +102,6 @@ const applyCaptchaStyle = (captcha: HTMLElement) => {
 }
 
 const applyBtnStyle = (btn: HTMLButtonElement) => {
-  btn.style.alignSelf = 'flex-end';
   btn.style.backgroundColor = juxLightGreen;
   btn.style.border = `2px solid ${juxLightGreen}`;
   btn.style.borderRadius = '8px';
@@ -128,9 +113,47 @@ const applyBtnStyle = (btn: HTMLButtonElement) => {
   btn.style.fontWeight = '700';
   btn.style.height = '40px';
   btn.style.lineHeight = '1';
-  btn.style.marginLeft = '10px';
   btn.style.padding = '10px 16px';
   btn.style.position = 'relative';
+}
+
+const captchaModal = (onVerified: (token: string) => void, onClose: () => void): HTMLElement => {
+  const body = document.createElement('captcha-modal-body');
+  body.style.width = '356px';
+
+  const modal = juxModal(
+    'Security check',
+    [],
+    '',
+    false,
+    false,
+    body,
+    '',
+    '',
+    onClose
+  );
+  modal.id = 'magic-email-captcha-modal';
+
+  const wrapper = modal.querySelector('modal-wrapper') as HTMLElement;
+  wrapper.style.maxWidth = '356px';
+  wrapper.style.minWidth = '356px';
+  wrapper.style.width = '356px';
+  (modal.querySelector('modal-header h3') as HTMLElement).style.color = juxDarkGrey;
+
+  document.body.appendChild(modal);
+
+  const captcha = googleCaptcha();
+  applyCaptchaStyle(captcha);
+  captcha.addEventListener('captcha-change', () => {
+    const token = captcha.getAttribute('token');
+    if (!token) return;
+
+    modal.remove();
+    onVerified(token);
+  });
+  body.appendChild(captcha);
+
+  return modal;
 }
 
 export const magicEmailField = (
@@ -149,37 +172,50 @@ export const magicEmailField = (
   const result = document.createElement('magic-email-field');
   applyMagicEmailFieldStyle(result);
 
-  const captcha = googleCaptcha();
-  applyCaptchaStyle(captcha);
-
   const input = document.createElement('input');
   input.id = 'mail-magic';
   input.type = 'text';
-  input.className = 'textfield';
-  input.placeholder = 'e-mail';
-  applyInputStyle(input);
+  input.placeholder = 'Email';
+  applyLoginFieldStyle(input);
+  input.style.flex = '1';
+  input.style.minWidth = '0';
 
   const btn = document.createElement('button');
   applyBtnStyle(btn);
   btn.id = 'send-magic';
   btn.className = 'primary-button';
-  btn.addEventListener('click', () => onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal, loginTypes, handlers));
   btn.textContent = getTranslation('send-magic');
 
+  let openCaptchaModal: HTMLElement | null = null;
+  const requestMagicLink = (token: string | null) => onMagicLinkRequest(token, input, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal, loginTypes, handlers);
+  btn.addEventListener('click', () => {
+    if (input.value.includes('-test@')) {
+      requestMagicLink(null);
+      return;
+    }
+    if (openCaptchaModal?.isConnected) return;
+
+    openCaptchaModal = captchaModal(
+      (token) => {
+        openCaptchaModal = null;
+        requestMagicLink(token);
+      },
+      () => openCaptchaModal = null
+    );
+  });
+
   const updateButtonState = () => {
-    const hasCaptcha = captcha.hasAttribute('token') || input.value.includes('-test@');
-    btn.disabled = !isValidEmail(input.value) || !hasCaptcha;
+    btn.disabled = !isValidEmail(input.value);
     btn.style.cursor = btn.disabled ? 'not-allowed' : 'pointer';
     btn.style.opacity = btn.disabled ? '0.5' : '1';
   };
   input.addEventListener('input', updateButtonState);
-  captcha.addEventListener('captcha-change', updateButtonState);
   input.addEventListener('keydown', (ev) => {
     if (ev.key === 'Enter' && !btn.disabled) btn.click();
   });
   updateButtonState();
 
-  result.append(input, captcha, btn);
+  result.append(input, btn);
 
   return result;
 }

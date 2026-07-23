@@ -163,17 +163,10 @@ const appendLoginTypes = (
         const subtitle = document.createElement('magic-link-request-subtitle');
         subtitle.style.fontSize = '14px';
         subtitle.style.lineHeight = '20px';
+        subtitle.style.marginLeft = '2px';
         subtitle.style.marginTop = '12px';
-        subtitle.style.width = '356px';
+        subtitle.style.width = 'calc(100% - 2px)';
         subtitle.textContent = getTranslation('magic-link-request-subtitle');
-
-        const divider = document.createElement('email-login-divider');
-        divider.setAttribute('aria-hidden', 'true');
-        divider.style.background = '#d8d8d8';
-        divider.style.display = 'block';
-        divider.style.height = '1px';
-        divider.style.margin = '24px 0';
-        divider.style.width = '100%';
 
         const onReturn = () => {
             showLoginTypes();
@@ -184,11 +177,12 @@ const appendLoginTypes = (
         content.style.display = 'flex';
         content.style.flexDirection = 'column';
         content.style.width = '356px';
+        const tokenInput = loginTokenTextarea(onUserLogin, onLoginError);
+        tokenInput.style.marginTop = '24px';
         content.append(
             subtitle,
             magicEmailField(onUserLogin, onReturn, backgroundImg, loginPage, clientApp, () => {}, upperLoginTypes, handlers),
-            divider,
-            loginTokenTextarea(onUserLogin, onLoginError)
+            tokenInput
         );
 
         btnsContainer.appendChild(content);
