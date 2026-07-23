@@ -1,9 +1,9 @@
 import { backendGet } from '../api-client';
-import { applyLoginFieldStyle } from './login-field-style';
+import { applyTextFieldStyle } from './login-field-style';
 import { onTokenAcquired } from './session-actions';
 
 const applyLoginTokenStyle = (textarea: HTMLTextAreaElement): void => {
-  applyLoginFieldStyle(textarea);
+  applyTextFieldStyle(textarea);
   textarea.style.resize = 'none';
   textarea.style.setProperty('-webkit-text-security', 'disc');
 };

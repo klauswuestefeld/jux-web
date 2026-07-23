@@ -18,7 +18,7 @@ const addLoginFieldStyles = (): void => {
   document.head.appendChild(style);
 };
 
-export const applyLoginFieldStyle = (field: HTMLInputElement | HTMLTextAreaElement): void => {
+export const applyTextFieldStyle = (field: HTMLInputElement | HTMLTextAreaElement): void => {
   addLoginFieldStyles();
   field.classList.add(loginFieldClass);
   field.style.backgroundColor = '#fff';

@@ -3,7 +3,7 @@ import { googleCaptcha } from '../captcha/google-captcha';
 import { getTranslation } from '../jux/language';
 import { juxModal } from '../jux-modal';
 import { juxDarkGrey, juxLightGreen, juxWhite } from '../style-constants';
-import { applyLoginFieldStyle } from './login-field-style';
+import { applyTextFieldStyle } from './login-field-style';
 import { socialLoginModal } from './social-login';
 import { isValidEmail } from './utils/string';
 
@@ -176,7 +176,7 @@ export const magicEmailField = (
   input.id = 'mail-magic';
   input.type = 'text';
   input.placeholder = 'Email';
-  applyLoginFieldStyle(input);
+  applyTextFieldStyle(input);
   input.style.flex = '1';
   input.style.minWidth = '0';
 
