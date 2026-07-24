@@ -1,7 +1,9 @@
 import { getMXData } from '../api-client';
 import { googleCaptcha } from '../captcha/google-captcha';
 import { getTranslation } from '../jux/language';
-import { juxDarkGrey, juxDimmedDarkGrey, juxLightGreen, juxWhite } from '../style-constants';
+import { juxModal } from '../jux-modal';
+import { juxDarkGrey, juxLightGreen, juxWhite } from '../style-constants';
+import { applyTextFieldStyle } from './login-field-style';
 import { socialLoginModal } from './social-login';
 import { isValidEmail } from './utils/string';
 
@@ -65,40 +67,93 @@ export const onMagicLinkRequest = async (token: any, input: HTMLInputElement, on
 }
 
 const applyMagicEmailFieldStyle = (el: HTMLElement) => {
+  el.style.alignItems = 'center';
   el.style.display = 'flex';
-  el.style.flexFlow = 'column';
+  el.style.flexFlow = 'row';
+  el.style.gap = '8px';
   el.style.marginTop = '8px';
-  el.style.rowGap = '8px';
   el.style.width = '100%';
 }
 
-const applyInputStyle = (input: HTMLInputElement) => {
-  input.style.border = `1px solid ${juxDarkGrey}`;
-  input.style.maxWidth = '390px';
-  input.style.padding = '10px';
-  input.style.width = '100%';
-  input.style.backgroundColor = juxWhite;
-  input.style.borderRadius = '8px';
-  input.style.boxShadow = `inset 0 2px 3px ${juxDimmedDarkGrey}`;
-  input.style.height = '40px';
-  input.style.whiteSpace = 'pre-line';
-  input.style.boxSizing = 'border-box';
+const applyCaptchaStyle = (captcha: HTMLElement) => {
+  const captchaFrameWidth = 304;
+  const captchaHeight = 78;
+  const contentWidth = 356;
+  const horizontalInset = 1;
+  const scale = (contentWidth - horizontalInset * 2) / captchaFrameWidth;
+
+  captcha.style.height = `${captchaHeight * scale}px`;
+  captcha.style.overflow = 'visible';
+  captcha.style.width = '100%';
+
+  const applyWidgetStyle = () => {
+    const widget = captcha.firstElementChild as HTMLElement;
+    widget.style.marginLeft = `${horizontalInset}px`;
+    widget.style.width = `${captchaFrameWidth}px`;
+    widget.style.transform = `scale(${scale})`;
+    widget.style.transformOrigin = 'top left';
+  };
+
+  if (captcha.firstElementChild) {
+    applyWidgetStyle();
+  } else {
+    captcha.addEventListener('captcha-rendered', applyWidgetStyle, { once: true });
+  }
 }
 
 const applyBtnStyle = (btn: HTMLButtonElement) => {
-  btn.style.alignSelf = 'flex-end';
   btn.style.backgroundColor = juxLightGreen;
   btn.style.border = `2px solid ${juxLightGreen}`;
   btn.style.borderRadius = '8px';
+  btn.style.boxSizing = 'border-box';
   btn.style.color = juxWhite;
   btn.style.cursor = 'pointer';
   btn.style.display = 'inline-block';
+  btn.style.fontSize = '16px';
   btn.style.fontWeight = '700';
   btn.style.height = '40px';
   btn.style.lineHeight = '1';
-  btn.style.marginLeft = '10px';
   btn.style.padding = '10px 16px';
   btn.style.position = 'relative';
+}
+
+const captchaModal = (onVerified: (token: string) => void, onClose: () => void): HTMLElement => {
+  const body = document.createElement('captcha-modal-body');
+  body.style.width = '356px';
+
+  const modal = juxModal(
+    'Security check',
+    [],
+    '',
+    false,
+    false,
+    body,
+    '',
+    '',
+    onClose
+  );
+  modal.id = 'magic-email-captcha-modal';
+
+  const wrapper = modal.querySelector('modal-wrapper') as HTMLElement;
+  wrapper.style.maxWidth = '356px';
+  wrapper.style.minWidth = '356px';
+  wrapper.style.width = '356px';
+  (modal.querySelector('modal-header h3') as HTMLElement).style.color = juxDarkGrey;
+
+  document.body.appendChild(modal);
+
+  const captcha = googleCaptcha();
+  applyCaptchaStyle(captcha);
+  captcha.addEventListener('captcha-change', () => {
+    const token = captcha.getAttribute('token');
+    if (!token) return;
+
+    modal.remove();
+    onVerified(token);
+  });
+  body.appendChild(captcha);
+
+  return modal;
 }
 
 export const magicEmailField = (
@@ -117,29 +172,50 @@ export const magicEmailField = (
   const result = document.createElement('magic-email-field');
   applyMagicEmailFieldStyle(result);
 
-  const captcha = googleCaptcha();
-
   const input = document.createElement('input');
   input.id = 'mail-magic';
   input.type = 'text';
-  input.className = 'textfield';
-  input.placeholder = 'e-mail';
-  applyInputStyle(input);
-
-  input.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Enter') {
-      onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal, loginTypes, handlers);
-    }
-  });
+  input.placeholder = 'Email';
+  applyTextFieldStyle(input);
+  input.style.flex = '1';
+  input.style.minWidth = '0';
 
   const btn = document.createElement('button');
   applyBtnStyle(btn);
   btn.id = 'send-magic';
   btn.className = 'primary-button';
-  btn.addEventListener('click', (_ev) => onMagicLinkRequest(captcha.getAttribute('token'), input, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal, loginTypes, handlers));
   btn.textContent = getTranslation('send-magic');
 
-  result.append(input, captcha, btn);
+  let openCaptchaModal: HTMLElement | null = null;
+  const requestMagicLink = (token: string | null) => onMagicLinkRequest(token, input, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal, loginTypes, handlers);
+  btn.addEventListener('click', () => {
+    if (input.value.includes('-test@')) {
+      requestMagicLink(null);
+      return;
+    }
+    if (openCaptchaModal?.isConnected) return;
+
+    openCaptchaModal = captchaModal(
+      (token) => {
+        openCaptchaModal = null;
+        requestMagicLink(token);
+      },
+      () => openCaptchaModal = null
+    );
+  });
+
+  const updateButtonState = () => {
+    btn.disabled = !isValidEmail(input.value);
+    btn.style.cursor = btn.disabled ? 'not-allowed' : 'pointer';
+    btn.style.opacity = btn.disabled ? '0.5' : '1';
+  };
+  input.addEventListener('input', updateButtonState);
+  input.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter' && !btn.disabled) btn.click();
+  });
+  updateButtonState();
+
+  result.append(input, btn);
 
   return result;
 }

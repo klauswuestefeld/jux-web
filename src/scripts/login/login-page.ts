@@ -1,9 +1,10 @@
 import { loginButton } from './login-button';
 import { backButton } from './back-button';
 import { applyFormattedTranslation, getTranslation } from '../jux/language';
-import { magicLinkModal } from './magic-link-modal';
+import { magicEmailField } from './magic-email-field';
 import { basePage } from './base-page';
 import { juxModal } from '../jux-modal';
+import { loginTokenTextarea } from './login-token-textarea';
 
 const authPasswordRow = (type: string, autoCompleteValue: AutoFill): { result: HTMLElement; input: HTMLInputElement } => {
     const result = document.createElement(`${type}-row`);
@@ -120,11 +121,6 @@ const authPasswordForm = (
     return result;
 }
 
-const onEmailLoginRequest = (clientApp: HTMLElement, loginPage: HTMLElement, onUserLogin: any, backgroundImage: string, loginTypes: string[], handlers: { handleMagicLinkRequest: any; }): void => {
-    const onReturn = () => clientApp.appendChild(loginPage);
-    loginPage.appendChild(magicLinkModal(onUserLogin, onReturn, backgroundImage, loginPage, clientApp, loginTypes, handlers));
-}
-
 const appendLoginTypes = (
     loginPage: HTMLElement,
     btnsContainer: HTMLElement,
@@ -143,7 +139,7 @@ const appendLoginTypes = (
     }
 ) => {
     const upperLoginTypes = loginTypes.map(str => str.toUpperCase());
-  if (upperLoginTypes.length === 0) {
+    if (upperLoginTypes.length === 0) {
         applyFormattedTranslation(explanation, 'sign-in-no-login-type');
         btnsContainer.replaceChildren();
         return;
@@ -152,7 +148,51 @@ const appendLoginTypes = (
     const onlyAuth =
         upperLoginTypes.length > 0 &&
         upperLoginTypes.every(type => type === 'AUTH-PASSWORD');
+    const onlyEmail = upperLoginTypes.every(type => type === 'EMAIL');
     applyFormattedTranslation(explanation, 'sign-in-explanation');
+
+    const showLoginTypes = () => {
+        btnsContainer.replaceChildren();
+        appendLoginTypes(loginPage, btnsContainer, clientApp, onUserLogin, onLoginError, loginTypes, backgroundImg, explanation, handleSSOLogin, handlers);
+    };
+
+    const showEmailLogin = () => {
+        btnsContainer.replaceChildren();
+        applyFormattedTranslation(explanation, 'magic-link-request-title');
+
+        const subtitle = document.createElement('magic-link-request-subtitle');
+        subtitle.style.fontSize = '14px';
+        subtitle.style.lineHeight = '20px';
+        subtitle.style.marginLeft = '2px';
+        subtitle.style.marginTop = '12px';
+        subtitle.style.width = 'calc(100% - 2px)';
+        subtitle.textContent = getTranslation('magic-link-request-subtitle');
+
+        const onReturn = () => {
+            showLoginTypes();
+            clientApp.appendChild(loginPage);
+        };
+        const content = document.createElement('email-login-content');
+        content.style.alignItems = 'center';
+        content.style.display = 'flex';
+        content.style.flexDirection = 'column';
+        content.style.width = '356px';
+        const tokenInput = loginTokenTextarea(onUserLogin, onLoginError);
+        tokenInput.style.marginTop = '24px';
+        content.append(
+            subtitle,
+            magicEmailField(onUserLogin, onReturn, backgroundImg, loginPage, clientApp, () => {}, upperLoginTypes, handlers),
+            tokenInput
+        );
+
+        btnsContainer.appendChild(content);
+        if (!onlyEmail) btnsContainer.appendChild(backButton('Back', showLoginTypes));
+    };
+
+    if (onlyEmail) {
+        showEmailLogin();
+        return;
+    }
 
     if (upperLoginTypes.includes('AUTH-PASSWORD2') || onlyAuth) {
         btnsContainer.replaceChildren();
@@ -186,7 +226,7 @@ const appendLoginTypes = (
         btnsContainer.appendChild(loginButton('LINKEDIN', () => console.log('login with Linkedin')));
     }
     if (upperLoginTypes.includes('EMAIL')) {
-        btnsContainer.appendChild(loginButton('EMAIL', () => onEmailLoginRequest(clientApp, loginPage, onUserLogin, backgroundImg, upperLoginTypes, handlers)));
+        btnsContainer.appendChild(loginButton('EMAIL', showEmailLogin));
     }
     if (upperLoginTypes.includes('AUTH-PASSWORD')) {
         upperLoginTypes.push('AUTH-PASSWORD2')
@@ -197,6 +237,7 @@ const appendLoginTypes = (
             )
         );
     }
+
     if (upperLoginTypes.includes('ANONYMOUS')) {
         btnsContainer.appendChild(loginButton('guest', () => onUserLogin('anonymous')));
     }
