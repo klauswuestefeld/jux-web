@@ -70,7 +70,7 @@ const applyMagicEmailFieldStyle = (el: HTMLElement) => {
   el.style.alignItems = 'center';
   el.style.display = 'flex';
   el.style.flexFlow = 'row';
-  el.style.gap = '8px';
+  el.style.gap = '0';
   el.style.marginTop = '8px';
   el.style.width = '100%';
 }
@@ -177,6 +177,7 @@ export const magicEmailField = (
   input.type = 'text';
   input.placeholder = 'Email';
   applyTextFieldStyle(input);
+  input.style.borderRadius = '8px 0 0 8px';
   input.style.flex = '1';
   input.style.minWidth = '0';
 
@@ -185,6 +186,8 @@ export const magicEmailField = (
   btn.id = 'send-magic';
   btn.className = 'primary-button';
   btn.textContent = getTranslation('send-magic');
+  btn.style.borderRadius = '0 8px 8px 0';
+  btn.style.margin = '0';
 
   let openCaptchaModal: HTMLElement | null = null;
   const requestMagicLink = (token: string | null) => onMagicLinkRequest(token, input, onUserLogin, onReturn, backgroundImage, currentPage, clientBody, closeMagicLinkModal, loginTypes, handlers);
