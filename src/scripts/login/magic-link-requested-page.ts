@@ -37,14 +37,6 @@ export const magicLinkRequestedPage = (backgroundImg: string, onReturn: any, onU
     result.remove();
     onReturn();
   });
-  const backIcon = back.querySelector('login-icon') as HTMLElement;
-  backIcon.style.marginLeft = '0';
-  backIcon.style.padding = '0';
-  backIcon.style.width = '16px';
-  backIcon.style.display = 'flex';
-  backIcon.style.alignItems = 'center';
-  const backArrow = backIcon.querySelector('svg') as SVGElement;
-  backArrow.style.display = 'block';
 
   const content = [title, sent, email, howTo, tokenInput, help];
   content.forEach(element => {
