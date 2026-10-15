@@ -40,13 +40,16 @@ export const backButton = (type: string, fn: any): HTMLElement => {
     const icon = document.createElement('login-icon');
     icon.style.gridColumnStart = '2';
   
-    icon.style.width = '28px';
-    icon.style.padding = '6px';
-    icon.style.marginLeft = '4px';
+    icon.style.width = '16px';
+    icon.style.padding = '0';
+    icon.style.marginLeft = '0';
+    icon.style.display = 'flex';
+    icon.style.alignItems = 'center';
     icon.style.boxSizing = 'border-box';
     icon.className = 'ico';
 
     icon.innerHTML = iconHTML;
+    (icon.querySelector('svg') as SVGElement).style.display = 'block';
     result.appendChild(icon);
   }
 

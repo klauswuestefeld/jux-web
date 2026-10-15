@@ -171,7 +171,9 @@ export const initSession = (
 
     return;
   }
-  displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, onLoginError, supportedLoginTypesArray, handleSSOLogin, { onAuthPasswordLogin, onGoogleSignIn, onMicrosoftSignIn, handleMagicLinkRequest }));
+  const requestSignInLink = (token: string | null, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, email: string = '') =>
+    handleMagicLinkRequest(token, onReturn, backgroundImage, currentPage, clientBody, email, onUserLogin, onLoginError);
+  displayPage(clientApp, loginPage(clientApp, backgroundImage, onUserLogin, onLoginError, supportedLoginTypesArray, handleSSOLogin, { onAuthPasswordLogin, onGoogleSignIn, onMicrosoftSignIn, handleMagicLinkRequest: requestSignInLink }));
 
   // validateThirdPartyCookies(initGapi, () => displayPage(Page.LOGIN));
   // checkMixpanel(() => mixpanel.track('View Login Page'));
@@ -250,7 +252,7 @@ export const onAuthPasswordLogin = (credentials: any, onUserLogin: any, onLoginE
   authPasswordLogin(credentials, onSuccess, onError, onUnauthorized);
 }
 
-export const handleMagicLinkRequest = (token: string | null, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, email: string = '') => {
+export const handleMagicLinkRequest = (token: string | null, onReturn: any, backgroundImage: string, currentPage: HTMLElement, clientBody: HTMLElement, email: string, onUserLogin: any, onLoginError: any) => {
   if (!email) {
     const mailMagic = document.querySelector('#mail-magic') as HTMLInputElement;
     email = mailMagic.value;
@@ -267,7 +269,7 @@ export const handleMagicLinkRequest = (token: string | null, onReturn: any, back
       magicLinkEmail.textContent = email;
     }
 
-    const onSuccess = () => onResponse(magicLinkRequestedPage(backgroundImage, onReturn));
+    const onSuccess = () => onResponse(magicLinkRequestedPage(backgroundImage, onReturn, onUserLogin, onLoginError));
     const onUnauthorized = () => onResponse(unauthorizedMagicLinkRequestPage(backgroundImage, onReturn));
 
     requestMagicLink(payload, onSuccess, onUnauthorized);

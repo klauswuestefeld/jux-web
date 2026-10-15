@@ -1,59 +1,61 @@
-import { contactUsModal } from '../contact-us/contact-us-modal';
 import { applyFormattedTranslation, getTranslation } from '../jux/language';
 import { basePage } from './base-page';
+import { loginTokenTextarea } from './login-token-textarea';
+import { backButton } from './back-button';
 
-const applyBtnStyles = (btn: HTMLButtonElement) => {
-  btn.style.cursor = 'pointer';
-  btn.style.textDecoration = 'underline';
-  btn.style.border = 'none';
-  btn.style.backgroundColor = '';
-  btn.style.background = 'none';
-  btn.style.boxSizing = 'border-box';
-  btn.style.margin = '0';
-  btn.style.outline = 'none';
-  btn.style.padding = '0';
-  btn.style.whiteSpace = 'normal';
-  btn.style.font = 'inherit';
-}
-
-export const magicLinkRequestedPage = (backgroundImg: string, onReturn: any): HTMLElement => {
-  const content = [];
+export const magicLinkRequestedPage = (backgroundImg: string, onReturn: any, onUserLogin: any, onLoginError: any): HTMLElement => {
+  const title = document.createElement('h2');
+  title.textContent = getTranslation('magic-link-confirmation-title');
+  title.style.fontSize = '24px';
+  title.style.lineHeight = '1.25';
+  title.style.margin = '0 0 12px';
 
   const sent = document.createElement('p');
   sent.id = 'magic-link-sent';
   sent.textContent = getTranslation(sent.id);
-  sent.style.marginBottom = '10px';
+  sent.style.margin = '0';
 
   const email = document.createElement('p');
   email.id = 'magic-link-email';
   email.style.fontWeight = '700';
-  email.style.marginBottom = '10px';
+  email.style.margin = '4px 0 0';
+  email.style.overflowWrap = 'anywhere';
 
   const howTo = document.createElement('p');
   howTo.id = 'magic-link-how-to';
   applyFormattedTranslation(howTo, howTo.id);
-  howTo.style.padding = '0 30px';
-  howTo.style.textAlign = 'center';
+  howTo.style.margin = '28px 0 12px';
 
-  const btn = document.createElement('button');
-  btn.id = 'email-not-received-btn';
-  btn.addEventListener('click', () => document.body.appendChild(contactUsModal('email-not-sent')));
-  btn.textContent = getTranslation('magic-link-let-us-know');
-  applyBtnStyles(btn);
+  const tokenInput = loginTokenTextarea(onUserLogin, onLoginError);
+  tokenInput.style.textAlign = 'left';
 
-  const returnLink = document.createElement('a');
-  returnLink.textContent = getTranslation('return-link');
-  returnLink.onclick = () => {
+  const help = document.createElement('p');
+  applyFormattedTranslation(help, 'magic-link-check-spam');
+  help.style.margin = '20px 0 0';
+
+  const back = backButton('Back', () => {
     result.remove();
     onReturn();
-  };
-  returnLink.style.marginTop = '32px';
-  returnLink.style.cursor = 'pointer';
-  returnLink.style.fontWeight = '700';
-  returnLink.style.textDecoration = 'underline';
+  });
 
-  content.push(sent, email, howTo, btn, returnLink);
+  const content = [title, sent, email, howTo, tokenInput, help];
+  content.forEach(element => {
+    element.style.width = '356px';
+    element.style.maxWidth = '100%';
+  });
   const result = basePage('magic-link-requested-page', backgroundImg, content);
+  result.style.overflowY = 'auto';
+  result.style.scrollbarGutter = 'stable both-edges';
+
+  const section = result.querySelector('section') as HTMLElement;
+  section.style.maxWidth = 'calc(100% - 48px)';
+  section.style.lineHeight = '1.5';
+  section.style.textAlign = 'center';
+
+  const buttons = result.querySelector('btns-container') as HTMLElement;
+  buttons.style.width = '356px';
+  buttons.style.maxWidth = '100%';
+  buttons.appendChild(back);
 
   return result;
 }
