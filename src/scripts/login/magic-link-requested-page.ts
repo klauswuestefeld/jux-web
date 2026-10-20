@@ -8,7 +8,7 @@ export const magicLinkRequestedPage = (backgroundImg: string, onReturn: any, onU
   title.textContent = getTranslation('magic-link-confirmation-title');
   title.style.fontSize = '24px';
   title.style.lineHeight = '1.25';
-  title.style.margin = '0 0 12px';
+  title.style.margin = '0 0 16px';
 
   const sent = document.createElement('p');
   sent.id = 'magic-link-sent';
@@ -21,24 +21,21 @@ export const magicLinkRequestedPage = (backgroundImg: string, onReturn: any, onU
   email.style.margin = '4px 0 0';
   email.style.overflowWrap = 'anywhere';
 
-  const howTo = document.createElement('p');
-  howTo.id = 'magic-link-how-to';
-  applyFormattedTranslation(howTo, howTo.id);
-  howTo.style.margin = '28px 0 12px';
-
   const tokenInput = loginTokenTextarea(onUserLogin, onLoginError);
   tokenInput.style.textAlign = 'left';
+  tokenInput.style.marginTop = '24px';
 
   const help = document.createElement('p');
   applyFormattedTranslation(help, 'magic-link-check-spam');
-  help.style.margin = '20px 0 0';
+  help.style.margin = '24px 0 0';
 
   const back = backButton('Back', () => {
     result.remove();
     onReturn();
   });
+  back.style.marginTop = '24px';
 
-  const content = [title, sent, email, howTo, tokenInput, help];
+  const content = [title, sent, email, tokenInput, help];
   content.forEach(element => {
     element.style.width = '356px';
     element.style.maxWidth = '100%';
