@@ -4,7 +4,6 @@ import { applyFormattedTranslation, getTranslation } from '../jux/language';
 import { magicEmailField } from './magic-email-field';
 import { basePage } from './base-page';
 import { juxModal } from '../jux-modal';
-import { loginTokenTextarea } from './login-token-textarea';
 
 const authPasswordRow = (type: string, autoCompleteValue: AutoFill): { result: HTMLElement; input: HTMLInputElement } => {
     const result = document.createElement(`${type}-row`);
@@ -177,12 +176,9 @@ const appendLoginTypes = (
         content.style.display = 'flex';
         content.style.flexDirection = 'column';
         content.style.width = '356px';
-        const tokenInput = loginTokenTextarea(onUserLogin, onLoginError);
-        tokenInput.style.marginTop = '24px';
         content.append(
             subtitle,
-            magicEmailField(onUserLogin, onReturn, backgroundImg, loginPage, clientApp, () => {}, upperLoginTypes, handlers),
-            tokenInput
+            magicEmailField(onUserLogin, onReturn, backgroundImg, loginPage, clientApp, () => {}, upperLoginTypes, handlers)
         );
 
         btnsContainer.appendChild(content);
